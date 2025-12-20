@@ -1,17 +1,8 @@
 -- Payload CMS 3.x with Drizzle - Full Schema
-
--- Drop existing tables if they have wrong structure
-DROP TABLE IF EXISTS "payload_locked_documents_rels" CASCADE;
-DROP TABLE IF EXISTS "payload_locked_documents" CASCADE;
-DROP TABLE IF EXISTS "payload_preferences_rels" CASCADE;
-DROP TABLE IF EXISTS "payload_preferences" CASCADE;
-DROP TABLE IF EXISTS "media" CASCADE;
-DROP TABLE IF EXISTS "users_sessions" CASCADE;
-DROP TABLE IF EXISTS "users" CASCADE;
-DROP TABLE IF EXISTS "payload_migrations" CASCADE;
+-- Create tables if they don't exist (safe for repeated runs)
 
 -- Users table with all auth fields
-CREATE TABLE "users" (
+CREATE TABLE IF NOT EXISTS "users" (
     "id" serial PRIMARY KEY,
     "email" varchar(255) NOT NULL UNIQUE,
     "hash" varchar(255),
@@ -25,7 +16,7 @@ CREATE TABLE "users" (
 );
 
 -- Users sessions table (required for auth)
-CREATE TABLE "users_sessions" (
+CREATE TABLE IF NOT EXISTS "users_sessions" (
     "id" serial PRIMARY KEY,
     "user_id" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
     "session_token" varchar(255) NOT NULL,
@@ -34,10 +25,10 @@ CREATE TABLE "users_sessions" (
     "created_at" timestamptz DEFAULT now() NOT NULL
 );
 
-CREATE INDEX "users_sessions_user_idx" ON "users_sessions"("user_id");
+CREATE INDEX IF NOT EXISTS "users_sessions_user_idx" ON "users_sessions"("user_id");
 
 -- Media table
-CREATE TABLE "media" (
+CREATE TABLE IF NOT EXISTS "media" (
     "id" serial PRIMARY KEY,
     "alt" varchar(255) NOT NULL,
     "filename" varchar(255),
@@ -54,7 +45,7 @@ CREATE TABLE "media" (
 );
 
 -- Payload preferences
-CREATE TABLE "payload_preferences" (
+CREATE TABLE IF NOT EXISTS "payload_preferences" (
     "id" serial PRIMARY KEY,
     "key" varchar(255) NOT NULL,
     "value" jsonb,
@@ -62,7 +53,7 @@ CREATE TABLE "payload_preferences" (
     "created_at" timestamptz DEFAULT now() NOT NULL
 );
 
-CREATE TABLE "payload_preferences_rels" (
+CREATE TABLE IF NOT EXISTS "payload_preferences_rels" (
     "id" serial PRIMARY KEY,
     "order" integer,
     "parent_id" integer NOT NULL REFERENCES "payload_preferences"("id") ON DELETE CASCADE,
@@ -70,19 +61,19 @@ CREATE TABLE "payload_preferences_rels" (
     "users_id" integer REFERENCES "users"("id") ON DELETE CASCADE
 );
 
-CREATE INDEX "payload_preferences_rels_order_idx" ON "payload_preferences_rels"("order");
-CREATE INDEX "payload_preferences_rels_parent_idx" ON "payload_preferences_rels"("parent_id");
-CREATE INDEX "payload_preferences_rels_path_idx" ON "payload_preferences_rels"("path");
+CREATE INDEX IF NOT EXISTS "payload_preferences_rels_order_idx" ON "payload_preferences_rels"("order");
+CREATE INDEX IF NOT EXISTS "payload_preferences_rels_parent_idx" ON "payload_preferences_rels"("parent_id");
+CREATE INDEX IF NOT EXISTS "payload_preferences_rels_path_idx" ON "payload_preferences_rels"("path");
 
 -- Payload locked documents
-CREATE TABLE "payload_locked_documents" (
+CREATE TABLE IF NOT EXISTS "payload_locked_documents" (
     "id" serial PRIMARY KEY,
     "global_slug" varchar(255),
     "updated_at" timestamptz DEFAULT now() NOT NULL,
     "created_at" timestamptz DEFAULT now() NOT NULL
 );
 
-CREATE TABLE "payload_locked_documents_rels" (
+CREATE TABLE IF NOT EXISTS "payload_locked_documents_rels" (
     "id" serial PRIMARY KEY,
     "order" integer,
     "parent_id" integer NOT NULL REFERENCES "payload_locked_documents"("id") ON DELETE CASCADE,
@@ -91,12 +82,12 @@ CREATE TABLE "payload_locked_documents_rels" (
     "media_id" integer REFERENCES "media"("id") ON DELETE CASCADE
 );
 
-CREATE INDEX "payload_locked_documents_rels_order_idx" ON "payload_locked_documents_rels"("order");
-CREATE INDEX "payload_locked_documents_rels_parent_idx" ON "payload_locked_documents_rels"("parent_id");
-CREATE INDEX "payload_locked_documents_rels_path_idx" ON "payload_locked_documents_rels"("path");
+CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_order_idx" ON "payload_locked_documents_rels"("order");
+CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_parent_idx" ON "payload_locked_documents_rels"("parent_id");
+CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_path_idx" ON "payload_locked_documents_rels"("path");
 
 -- Payload migrations tracker
-CREATE TABLE "payload_migrations" (
+CREATE TABLE IF NOT EXISTS "payload_migrations" (
     "id" serial PRIMARY KEY,
     "name" varchar(255),
     "batch" integer,
