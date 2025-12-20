@@ -2,7 +2,7 @@ import { withPayload } from '@payloadcms/next/withPayload'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  // Removed standalone - using regular build for Payload compatibility
   serverExternalPackages: ['sharp', 'graphql'],
   images: {
     remotePatterns: [
