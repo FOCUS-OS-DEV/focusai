@@ -1,8 +1,8 @@
 #!/bin/sh
 set -e
 
-echo "==> Running Payload migrations..."
-npx payload migrate || echo "Migrations done"
+echo "==> Initializing database..."
+node init-db.cjs
 
 echo "==> Starting Next.js..."
 exec npm start
