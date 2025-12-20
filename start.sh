@@ -1,8 +1,6 @@
 #!/bin/sh
 set -e
 
-echo "==> Running Payload CMS migrations..."
-npx payload migrate || echo "Migration completed (or already up to date)"
-
-echo "==> Starting Next.js server..."
+echo "==> Starting Payload CMS server..."
+echo "==> Tables will be auto-created with push: true"
 exec node server.js
