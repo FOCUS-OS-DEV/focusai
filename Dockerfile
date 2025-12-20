@@ -31,7 +31,12 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY --from=builder /app/next.config.mjs ./next.config.mjs
-COPY --from=builder /app/eslint.config.mjs ./eslint.config.mjs
+
+# DB init files
+COPY --chown=nextjs:nodejs init-db.sql ./init-db.sql
+COPY --chown=nextjs:nodejs init-db.cjs ./init-db.cjs
+COPY --chown=nextjs:nodejs start.sh ./start.sh
+RUN sed -i 's/\r$//' ./start.sh && chmod +x ./start.sh
 
 USER nextjs
 
@@ -39,5 +44,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Use node directly to run next
-CMD ["node", "node_modules/next/dist/bin/next", "start"]
+CMD ["./start.sh"]

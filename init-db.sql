@@ -1,5 +1,7 @@
 -- Payload CMS 3.x with Drizzle - Full Schema
--- Create tables if they don't exist (safe for repeated runs)
+
+-- Drop and recreate users_sessions with correct structure
+DROP TABLE IF EXISTS "users_sessions" CASCADE;
 
 -- Users table with all auth fields
 CREATE TABLE IF NOT EXISTS "users" (
@@ -15,17 +17,17 @@ CREATE TABLE IF NOT EXISTS "users" (
     "created_at" timestamptz DEFAULT now() NOT NULL
 );
 
--- Users sessions table (required for auth)
-CREATE TABLE IF NOT EXISTS "users_sessions" (
+-- Users sessions table (Drizzle/Payload format with _parent_id and _order)
+CREATE TABLE "users_sessions" (
     "id" serial PRIMARY KEY,
-    "user_id" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
-    "session_token" varchar(255) NOT NULL,
-    "expires_at" timestamptz NOT NULL,
-    "updated_at" timestamptz DEFAULT now() NOT NULL,
+    "_order" integer NOT NULL,
+    "_parent_id" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+    "expires_at" timestamptz,
     "created_at" timestamptz DEFAULT now() NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS "users_sessions_user_idx" ON "users_sessions"("user_id");
+CREATE INDEX "users_sessions_order_idx" ON "users_sessions"("_order");
+CREATE INDEX "users_sessions_parent_id_idx" ON "users_sessions"("_parent_id");
 
 -- Media table
 CREATE TABLE IF NOT EXISTS "media" (
