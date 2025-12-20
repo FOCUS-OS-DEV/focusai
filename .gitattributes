@@ -1,0 +1,12 @@
+# Handle line endings automatically for files detected as text
+* text=auto
+
+# Shell scripts must use LF
+*.sh text eol=lf
+
+# SQL files use LF
+*.sql text eol=lf
+
+# Node.js scripts use LF
+*.cjs text eol=lf
+*.mjs text eol=lf

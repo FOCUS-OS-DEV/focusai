@@ -30,11 +30,11 @@ COPY --from=builder /app/src ./src
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY --from=builder /app/next.config.mjs ./next.config.mjs
 
-# DB init files
+# DB init files - convert CRLF to LF for Linux compatibility
 COPY --chown=nextjs:nodejs init-db.sql ./init-db.sql
 COPY --chown=nextjs:nodejs init-db.cjs ./init-db.cjs
 COPY --chown=nextjs:nodejs start.sh ./start.sh
-RUN chmod +x ./start.sh
+RUN sed -i 's/\r$//' ./start.sh && chmod +x ./start.sh
 
 USER nextjs
 
