@@ -1,8 +1,10 @@
 FROM node:22-alpine AS base
 
+# Install dependencies for sharp and native modules
+RUN apk add --no-cache libc6-compat vips-dev
+
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies
