@@ -28,7 +28,7 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || process.env.DATABASE_URL || '',
     },
-    push: true,
+    // push: true - REMOVED! Dangerous for production. Use migrations instead.
   }),
   sharp,
   plugins: [],
