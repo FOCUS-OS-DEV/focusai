@@ -128,20 +128,7 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
-  firstName?: string | null;
-  lastName?: string | null;
-  phone?: string | null;
-  avatar?: (number | null) | Media;
-  role: 'admin' | 'instructor' | 'student';
-  /**
-   * Biography for instructors
-   */
-  bio?: string | null;
-  preferences?: {
-    language?: ('he' | 'en') | null;
-    theme?: ('system' | 'light' | 'dark') | null;
-    emailNotifications?: boolean | null;
-  };
+  role?: ('admin' | 'instructor' | 'student') | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -391,19 +378,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  firstName?: T;
-  lastName?: T;
-  phone?: T;
-  avatar?: T;
   role?: T;
-  bio?: T;
-  preferences?:
-    | T
-    | {
-        language?: T;
-        theme?: T;
-        emailNotifications?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
   email?: T;
