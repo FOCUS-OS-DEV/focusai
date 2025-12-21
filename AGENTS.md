@@ -1253,6 +1253,1172 @@ CREATE TABLE IF NOT EXISTS "users" (...);
 
 **זכור: בproduction, הדאטא שייך ללקוחות. מחיקה = אובדן אמון.**
 
+---
+
+## 🏗️ ארכיטקטורת אתר מורכב
+
+### שכבות המערכת:
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Frontend (Next.js)                    │
+├─────────────────────────────────────────────────────────┤
+│  Public Pages  │  Protected Pages  │  Admin Dashboard   │
+│  (כולם)        │  (משתמשים רשומים) │  (אדמינים בלבד)    │
+├─────────────────────────────────────────────────────────┤
+│                    API Layer                             │
+│  REST API  │  GraphQL  │  Server Actions                │
+├─────────────────────────────────────────────────────────┤
+│                  Payload CMS                             │
+│  Collections  │  Globals  │  Access Control             │
+├─────────────────────────────────────────────────────────┤
+│                  PostgreSQL                              │
+└─────────────────────────────────────────────────────────┘
+```
+
+### מבנה תיקיות מורחב:
+```
+src/
+├── app/
+│   ├── (frontend)/
+│   │   ├── (public)/           # דפים ציבוריים
+│   │   │   ├── page.tsx        # דף הבית
+│   │   │   ├── about/
+│   │   │   ├── services/
+│   │   │   ├── blog/
+│   │   │   └── contact/
+│   │   ├── (auth)/             # דפי התחברות
+│   │   │   ├── login/
+│   │   │   ├── register/
+│   │   │   ├── forgot-password/
+│   │   │   └── reset-password/
+│   │   ├── (protected)/        # דפים למשתמשים מחוברים
+│   │   │   ├── dashboard/
+│   │   │   ├── profile/
+│   │   │   ├── settings/
+│   │   │   └── my-courses/
+│   │   ├── (admin)/            # אזור אדמין מותאם
+│   │   │   ├── layout.tsx      # עם בדיקת הרשאות
+│   │   │   ├── page.tsx        # Dashboard
+│   │   │   ├── users/
+│   │   │   ├── content/
+│   │   │   └── analytics/
+│   │   └── layout.tsx          # Layout ראשי
+│   ├── (payload)/              # 🚫 Payload Admin - לא לגעת
+│   └── api/
+│       ├── auth/               # Authentication endpoints
+│       ├── upload/             # העלאת קבצים
+│       └── webhooks/           # Webhooks חיצוניים
+├── collections/
+│   ├── Users.ts                # משתמשים עם roles
+│   ├── Media.ts                # מדיה מורחב
+│   ├── Pages.ts
+│   ├── Posts.ts
+│   ├── Services.ts
+│   ├── Courses.ts
+│   ├── Contacts.ts
+│   └── Settings.ts             # הגדרות גלובליות
+├── globals/
+│   ├── SiteSettings.ts         # הגדרות אתר
+│   ├── Navigation.ts           # תפריטים
+│   └── Footer.ts               # פוטר
+├── components/
+│   ├── layout/
+│   ├── ui/
+│   ├── forms/
+│   ├── sections/
+│   └── providers/              # Context providers
+├── hooks/                      # Custom React hooks
+├── lib/
+│   ├── auth.ts                 # פונקציות auth
+│   ├── utils.ts
+│   └── constants.ts
+├── contexts/                   # React contexts
+│   ├── AuthContext.tsx
+│   ├── ThemeContext.tsx
+│   └── LanguageContext.tsx
+├── i18n/                       # תרגומים
+│   ├── he.json
+│   ├── en.json
+│   └── config.ts
+└── styles/
+    └── globals.css
+```
+
+---
+
+## 👤 ניהול משתמשים ו-Roles
+
+### Users Collection מורחב:
+```typescript
+// src/collections/Users.ts
+import type { CollectionConfig } from 'payload'
+
+export const Users: CollectionConfig = {
+  slug: 'users',
+  auth: {
+    tokenExpiration: 7200, // 2 שעות
+    maxLoginAttempts: 5,
+    lockTime: 600000, // 10 דקות
+    useAPIKey: true,
+    cookies: {
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    },
+  },
+  admin: {
+    useAsTitle: 'email',
+    defaultColumns: ['email', 'firstName', 'role', 'createdAt'],
+  },
+  access: {
+    // כולם יכולים ליצור חשבון
+    create: () => true,
+    // קריאה: עצמי או אדמין
+    read: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return { id: { equals: user.id } }
+    },
+    // עדכון: עצמי או אדמין
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return { id: { equals: user.id } }
+    },
+    // מחיקה: אדמין בלבד
+    delete: ({ req: { user } }) => user?.role === 'admin',
+  },
+  fields: [
+    {
+      name: 'firstName',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'lastName',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'role',
+      type: 'select',
+      required: true,
+      defaultValue: 'user',
+      options: [
+        { label: 'משתמש', value: 'user' },
+        { label: 'עורך', value: 'editor' },
+        { label: 'מנהל', value: 'admin' },
+      ],
+      access: {
+        // רק אדמין יכול לשנות role
+        update: ({ req: { user } }) => user?.role === 'admin',
+      },
+    },
+    {
+      name: 'avatar',
+      type: 'upload',
+      relationTo: 'media',
+    },
+    {
+      name: 'phone',
+      type: 'text',
+    },
+    {
+      name: 'preferences',
+      type: 'group',
+      fields: [
+        {
+          name: 'language',
+          type: 'select',
+          defaultValue: 'he',
+          options: [
+            { label: 'עברית', value: 'he' },
+            { label: 'English', value: 'en' },
+          ],
+        },
+        {
+          name: 'theme',
+          type: 'select',
+          defaultValue: 'system',
+          options: [
+            { label: 'מערכת', value: 'system' },
+            { label: 'בהיר', value: 'light' },
+            { label: 'כהה', value: 'dark' },
+          ],
+        },
+        {
+          name: 'emailNotifications',
+          type: 'checkbox',
+          defaultValue: true,
+        },
+      ],
+    },
+  ],
+}
+```
+
+### בדיקת הרשאות בדפים:
+```typescript
+// src/app/(frontend)/(protected)/layout.tsx
+import { redirect } from 'next/navigation'
+import { getPayload } from 'payload'
+import config from '@payload-config'
+import { headers, cookies } from 'next/headers'
+
+export default async function ProtectedLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const payload = await getPayload({ config })
+
+  try {
+    const { user } = await payload.auth({ headers: await headers(), cookies: await cookies() })
+
+    if (!user) {
+      redirect('/login?redirect=' + encodeURIComponent(/* current path */))
+    }
+
+    return <>{children}</>
+  } catch {
+    redirect('/login')
+  }
+}
+
+// src/app/(frontend)/(admin)/layout.tsx
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const payload = await getPayload({ config })
+
+  try {
+    const { user } = await payload.auth({ headers: await headers(), cookies: await cookies() })
+
+    if (!user) {
+      redirect('/login')
+    }
+
+    if (user.role !== 'admin') {
+      redirect('/dashboard') // לא מורשה
+    }
+
+    return <>{children}</>
+  } catch {
+    redirect('/login')
+  }
+}
+```
+
+---
+
+## 🌍 רב-לשוניות (i18n) - עברית/אנגלית
+
+### קבצי תרגום:
+```json
+// src/i18n/he.json
+{
+  "common": {
+    "home": "בית",
+    "about": "אודות",
+    "services": "שירותים",
+    "contact": "צור קשר",
+    "login": "התחברות",
+    "logout": "התנתקות",
+    "register": "הרשמה",
+    "submit": "שלח",
+    "cancel": "ביטול",
+    "save": "שמור",
+    "delete": "מחק",
+    "edit": "ערוך",
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה"
+  },
+  "auth": {
+    "email": "אימייל",
+    "password": "סיסמה",
+    "confirmPassword": "אשר סיסמה",
+    "forgotPassword": "שכחת סיסמה?",
+    "rememberMe": "זכור אותי",
+    "noAccount": "אין לך חשבון?",
+    "hasAccount": "יש לך חשבון?",
+    "loginTitle": "התחברות לחשבון",
+    "registerTitle": "יצירת חשבון חדש"
+  },
+  "errors": {
+    "required": "שדה חובה",
+    "invalidEmail": "אימייל לא תקין",
+    "passwordMismatch": "הסיסמאות לא תואמות",
+    "loginFailed": "התחברות נכשלה",
+    "serverError": "שגיאת שרת, נסה שוב"
+  }
+}
+
+// src/i18n/en.json
+{
+  "common": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "contact": "Contact",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot password?",
+    "rememberMe": "Remember me",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginTitle": "Login to your account",
+    "registerTitle": "Create new account"
+  },
+  "errors": {
+    "required": "Required field",
+    "invalidEmail": "Invalid email",
+    "passwordMismatch": "Passwords don't match",
+    "loginFailed": "Login failed",
+    "serverError": "Server error, try again"
+  }
+}
+```
+
+### Language Context:
+```typescript
+// src/contexts/LanguageContext.tsx
+'use client'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import he from '@/i18n/he.json'
+import en from '@/i18n/en.json'
+
+type Language = 'he' | 'en'
+type Translations = typeof he
+
+interface LanguageContextType {
+  language: Language
+  setLanguage: (lang: Language) => void
+  t: (key: string) => string
+  dir: 'rtl' | 'ltr'
+}
+
+const translations: Record<Language, Translations> = { he, en }
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
+
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const [language, setLanguage] = useState<Language>('he')
+
+  useEffect(() => {
+    // טען מ-localStorage או מהעדפות משתמש
+    const saved = localStorage.getItem('language') as Language
+    if (saved && (saved === 'he' || saved === 'en')) {
+      setLanguage(saved)
+    }
+  }, [])
+
+  useEffect(() => {
+    // שמור ועדכן את כיוון הדף
+    localStorage.setItem('language', language)
+    document.documentElement.lang = language
+    document.documentElement.dir = language === 'he' ? 'rtl' : 'ltr'
+  }, [language])
+
+  const t = (key: string): string => {
+    const keys = key.split('.')
+    let value: any = translations[language]
+
+    for (const k of keys) {
+      value = value?.[k]
+    }
+
+    return value || key
+  }
+
+  return (
+    <LanguageContext.Provider
+      value={{
+        language,
+        setLanguage,
+        t,
+        dir: language === 'he' ? 'rtl' : 'ltr'
+      }}
+    >
+      {children}
+    </LanguageContext.Provider>
+  )
+}
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext)
+  if (!context) throw new Error('useLanguage must be used within LanguageProvider')
+  return context
+}
+```
+
+### כפתור החלפת שפה:
+```typescript
+// src/components/ui/LanguageSwitch.tsx
+'use client'
+import { useLanguage } from '@/contexts/LanguageContext'
+
+export function LanguageSwitch() {
+  const { language, setLanguage } = useLanguage()
+
+  return (
+    <button
+      onClick={() => setLanguage(language === 'he' ? 'en' : 'he')}
+      className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition"
+      aria-label="Switch language"
+    >
+      {language === 'he' ? 'EN' : 'עב'}
+    </button>
+  )
+}
+```
+
+### שימוש בתרגומים:
+```typescript
+'use client'
+import { useLanguage } from '@/contexts/LanguageContext'
+
+export function LoginForm() {
+  const { t, dir } = useLanguage()
+
+  return (
+    <form dir={dir}>
+      <h1>{t('auth.loginTitle')}</h1>
+      <input placeholder={t('auth.email')} />
+      <input placeholder={t('auth.password')} type="password" />
+      <button type="submit">{t('common.login')}</button>
+    </form>
+  )
+}
+```
+
+---
+
+## 🌓 Dark Mode / Light Mode
+
+### Theme Context:
+```typescript
+// src/contexts/ThemeContext.tsx
+'use client'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+
+type Theme = 'light' | 'dark' | 'system'
+
+interface ThemeContextType {
+  theme: Theme
+  setTheme: (theme: Theme) => void
+  resolvedTheme: 'light' | 'dark'
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<Theme>('system')
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark')
+
+  useEffect(() => {
+    const saved = localStorage.getItem('theme') as Theme
+    if (saved) setTheme(saved)
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('theme', theme)
+
+    const updateTheme = () => {
+      let resolved: 'light' | 'dark'
+
+      if (theme === 'system') {
+        resolved = window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light'
+      } else {
+        resolved = theme
+      }
+
+      setResolvedTheme(resolved)
+      document.documentElement.classList.remove('light', 'dark')
+      document.documentElement.classList.add(resolved)
+    }
+
+    updateTheme()
+
+    // האזן לשינויים בהעדפות מערכת
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    mediaQuery.addEventListener('change', updateTheme)
+
+    return () => mediaQuery.removeEventListener('change', updateTheme)
+  }, [theme])
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  )
+}
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext)
+  if (!context) throw new Error('useTheme must be used within ThemeProvider')
+  return context
+}
+```
+
+### כפתור החלפת תמה:
+```typescript
+// src/components/ui/ThemeSwitch.tsx
+'use client'
+import { useTheme } from '@/contexts/ThemeContext'
+import { Sun, Moon, Monitor } from 'lucide-react'
+
+export function ThemeSwitch() {
+  const { theme, setTheme } = useTheme()
+
+  const options = [
+    { value: 'light', icon: Sun, label: 'בהיר' },
+    { value: 'dark', icon: Moon, label: 'כהה' },
+    { value: 'system', icon: Monitor, label: 'מערכת' },
+  ] as const
+
+  return (
+    <div className="flex gap-1 p-1 rounded-full bg-white/10">
+      {options.map(({ value, icon: Icon, label }) => (
+        <button
+          key={value}
+          onClick={() => setTheme(value)}
+          className={`p-2 rounded-full transition ${
+            theme === value
+              ? 'bg-white/20 text-white'
+              : 'text-white/60 hover:text-white'
+          }`}
+          aria-label={label}
+        >
+          <Icon size={18} />
+        </button>
+      ))}
+    </div>
+  )
+}
+```
+
+### Tailwind config לתמיכה ב-dark mode:
+```javascript
+// tailwind.config.js
+module.exports = {
+  darkMode: 'class', // שימוש ב-class ולא media
+  theme: {
+    extend: {
+      colors: {
+        // צבעים מותאמים לשני המצבים
+        background: {
+          light: '#ffffff',
+          dark: '#0F0F23',
+        },
+        foreground: {
+          light: '#1a1a2e',
+          dark: '#ffffff',
+        },
+      },
+    },
+  },
+}
+```
+
+### שימוש ב-CSS:
+```css
+/* globals.css */
+:root {
+  --background: #ffffff;
+  --foreground: #1a1a2e;
+  --primary: #8B5CF6;
+  --secondary: #EC4899;
+}
+
+.dark {
+  --background: #0F0F23;
+  --foreground: #ffffff;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+```
+
+### Tailwind classes לתמיכה בשני המצבים:
+```tsx
+// ✅ נכון - מגדיר לשני המצבים
+<div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+
+// ✅ נכון - שימוש במשתנים
+<div className="bg-[var(--background)] text-[var(--foreground)]">
+```
+
+---
+
+## 🖼️ ניהול מדיה מתקדם
+
+### Media Collection מורחב:
+```typescript
+// src/collections/Media.ts
+import type { CollectionConfig } from 'payload'
+
+export const Media: CollectionConfig = {
+  slug: 'media',
+  admin: {
+    useAsTitle: 'filename',
+    defaultColumns: ['filename', 'mimeType', 'filesize', 'createdAt'],
+  },
+  access: {
+    read: () => true,
+    create: ({ req: { user } }) => Boolean(user),
+    update: ({ req: { user } }) => user?.role === 'admin' || user?.role === 'editor',
+    delete: ({ req: { user } }) => user?.role === 'admin',
+  },
+  upload: {
+    staticDir: 'media',
+    imageSizes: [
+      {
+        name: 'thumbnail',
+        width: 150,
+        height: 150,
+        position: 'centre',
+      },
+      {
+        name: 'card',
+        width: 400,
+        height: 300,
+        position: 'centre',
+      },
+      {
+        name: 'hero',
+        width: 1920,
+        height: 1080,
+        position: 'centre',
+      },
+    ],
+    mimeTypes: ['image/*', 'application/pdf', 'video/*'],
+    // הגבלת גודל
+    filesizeLimit: 10 * 1024 * 1024, // 10MB
+  },
+  fields: [
+    {
+      name: 'alt',
+      type: 'text',
+      required: true,
+      localized: true,
+    },
+    {
+      name: 'caption',
+      type: 'textarea',
+      localized: true,
+    },
+    {
+      name: 'category',
+      type: 'select',
+      options: [
+        { label: 'תמונות', value: 'images' },
+        { label: 'מסמכים', value: 'documents' },
+        { label: 'וידאו', value: 'videos' },
+        { label: 'אחר', value: 'other' },
+      ],
+    },
+    {
+      name: 'tags',
+      type: 'array',
+      fields: [
+        { name: 'tag', type: 'text' },
+      ],
+    },
+  ],
+}
+```
+
+### Component לתצוגת תמונות:
+```typescript
+// src/components/ui/PayloadImage.tsx
+import Image from 'next/image'
+import type { Media } from '@/payload-types'
+
+interface PayloadImageProps {
+  media: Media | string | null | undefined
+  size?: 'thumbnail' | 'card' | 'hero' | 'full'
+  className?: string
+  priority?: boolean
+}
+
+export function PayloadImage({
+  media,
+  size = 'card',
+  className = '',
+  priority = false
+}: PayloadImageProps) {
+  if (!media || typeof media === 'string') {
+    return <div className={`bg-gray-200 dark:bg-gray-800 ${className}`} />
+  }
+
+  const imageSize = media.sizes?.[size]
+  const src = imageSize?.url || media.url
+  const width = imageSize?.width || media.width || 800
+  const height = imageSize?.height || media.height || 600
+
+  if (!src) return null
+
+  return (
+    <Image
+      src={src}
+      alt={media.alt || ''}
+      width={width}
+      height={height}
+      className={className}
+      priority={priority}
+    />
+  )
+}
+```
+
+---
+
+## 📱 Responsive Design
+
+### Breakpoints סטנדרטיים:
+```tsx
+// Tailwind breakpoints:
+// sm: 640px
+// md: 768px
+// lg: 1024px
+// xl: 1280px
+// 2xl: 1536px
+
+// דוגמה לשימוש:
+<div className="
+  grid
+  grid-cols-1      // מובייל: עמודה אחת
+  sm:grid-cols-2   // טאבלט קטן: 2 עמודות
+  lg:grid-cols-3   // דסקטופ: 3 עמודות
+  xl:grid-cols-4   // מסך גדול: 4 עמודות
+  gap-4
+  md:gap-6
+  lg:gap-8
+">
+
+// ניווט responsive:
+<nav className="
+  fixed bottom-0 left-0 right-0  // מובייל: למטה
+  md:static md:top-0             // דסקטופ: למעלה
+">
+```
+
+### Mobile-first approach:
+```tsx
+// ✅ נכון - מתחילים ממובייל
+<div className="text-sm md:text-base lg:text-lg">
+
+// ❌ לא מומלץ - מתחילים מדסקטופ
+<div className="text-lg md:text-base sm:text-sm">
+```
+
+---
+
+## 🔔 התראות ו-Toasts
+
+### Toast Context:
+```typescript
+// src/contexts/ToastContext.tsx
+'use client'
+import { createContext, useContext, useState, ReactNode } from 'react'
+
+type ToastType = 'success' | 'error' | 'warning' | 'info'
+
+interface Toast {
+  id: string
+  message: string
+  type: ToastType
+}
+
+interface ToastContextType {
+  toasts: Toast[]
+  addToast: (message: string, type?: ToastType) => void
+  removeToast: (id: string) => void
+}
+
+const ToastContext = createContext<ToastContextType | undefined>(undefined)
+
+export function ToastProvider({ children }: { children: ReactNode }) {
+  const [toasts, setToasts] = useState<Toast[]>([])
+
+  const addToast = (message: string, type: ToastType = 'info') => {
+    const id = Date.now().toString()
+    setToasts(prev => [...prev, { id, message, type }])
+
+    // הסר אוטומטית אחרי 5 שניות
+    setTimeout(() => removeToast(id), 5000)
+  }
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id))
+  }
+
+  return (
+    <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
+      {children}
+      <ToastContainer />
+    </ToastContext.Provider>
+  )
+}
+
+function ToastContainer() {
+  const { toasts, removeToast } = useToast()
+
+  return (
+    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50 flex flex-col gap-2">
+      {toasts.map(toast => (
+        <div
+          key={toast.id}
+          className={`p-4 rounded-lg shadow-lg ${
+            toast.type === 'success' ? 'bg-green-500' :
+            toast.type === 'error' ? 'bg-red-500' :
+            toast.type === 'warning' ? 'bg-yellow-500' :
+            'bg-blue-500'
+          } text-white`}
+        >
+          <div className="flex justify-between items-center">
+            <span>{toast.message}</span>
+            <button onClick={() => removeToast(toast.id)}>✕</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export const useToast = () => {
+  const context = useContext(ToastContext)
+  if (!context) throw new Error('useToast must be used within ToastProvider')
+  return context
+}
+```
+
+### שימוש:
+```typescript
+'use client'
+import { useToast } from '@/contexts/ToastContext'
+
+export function ContactForm() {
+  const { addToast } = useToast()
+
+  const handleSubmit = async (data) => {
+    try {
+      await submitForm(data)
+      addToast('הטופס נשלח בהצלחה!', 'success')
+    } catch (error) {
+      addToast('שגיאה בשליחת הטופס', 'error')
+    }
+  }
+}
+```
+
+---
+
+## 🔐 אבטחה
+
+### כללי אבטחה:
+```typescript
+// 1. לעולם לא לחשוף סודות בצד לקוח
+// ❌ שגיאה
+const apiKey = process.env.SECRET_API_KEY // זמין גם בclient!
+
+// ✅ נכון - רק בצד שרת
+const apiKey = process.env.SECRET_API_KEY // רק בserver components/API
+
+// 2. וולידציה בצד שרת - תמיד!
+// ❌ לא מספיק
+const isValid = formData.email.includes('@') // רק client
+
+// ✅ נכון - וולידציה בשרת
+// בAPI route או Server Action
+import { z } from 'zod'
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+})
+
+// 3. Sanitize input
+// השתמש בספריות כמו DOMPurify לתוכן HTML
+
+// 4. CSRF Protection - Payload מטפל בזה אוטומטית
+
+// 5. Rate Limiting - הוסף לAPI routes רגישים
+```
+
+### Access Control Patterns:
+```typescript
+// src/access/index.ts
+import type { Access } from 'payload'
+
+// כולם
+export const anyone: Access = () => true
+
+// רק מחוברים
+export const authenticated: Access = ({ req: { user } }) => Boolean(user)
+
+// רק אדמינים
+export const admins: Access = ({ req: { user } }) => user?.role === 'admin'
+
+// אדמינים או עורכים
+export const adminsOrEditors: Access = ({ req: { user } }) =>
+  user?.role === 'admin' || user?.role === 'editor'
+
+// עצמי או אדמין
+export const selfOrAdmin: Access = ({ req: { user } }) => {
+  if (!user) return false
+  if (user.role === 'admin') return true
+  return { id: { equals: user.id } }
+}
+
+// יוצר התוכן או אדמין
+export const ownerOrAdmin: Access = ({ req: { user } }) => {
+  if (!user) return false
+  if (user.role === 'admin') return true
+  return { createdBy: { equals: user.id } }
+}
+```
+
+---
+
+## ⚙️ Globals להגדרות אתר
+
+### Site Settings Global:
+```typescript
+// src/globals/SiteSettings.ts
+import type { GlobalConfig } from 'payload'
+
+export const SiteSettings: GlobalConfig = {
+  slug: 'site-settings',
+  access: {
+    read: () => true,
+    update: ({ req: { user } }) => user?.role === 'admin',
+  },
+  fields: [
+    {
+      name: 'siteName',
+      type: 'text',
+      required: true,
+      localized: true,
+    },
+    {
+      name: 'siteDescription',
+      type: 'textarea',
+      localized: true,
+    },
+    {
+      name: 'logo',
+      type: 'upload',
+      relationTo: 'media',
+    },
+    {
+      name: 'favicon',
+      type: 'upload',
+      relationTo: 'media',
+    },
+    {
+      name: 'socialLinks',
+      type: 'group',
+      fields: [
+        { name: 'facebook', type: 'text' },
+        { name: 'instagram', type: 'text' },
+        { name: 'linkedin', type: 'text' },
+        { name: 'twitter', type: 'text' },
+        { name: 'youtube', type: 'text' },
+        { name: 'whatsapp', type: 'text' },
+      ],
+    },
+    {
+      name: 'contactInfo',
+      type: 'group',
+      fields: [
+        { name: 'email', type: 'email' },
+        { name: 'phone', type: 'text' },
+        { name: 'address', type: 'textarea', localized: true },
+      ],
+    },
+    {
+      name: 'seo',
+      type: 'group',
+      fields: [
+        { name: 'defaultTitle', type: 'text', localized: true },
+        { name: 'titleSuffix', type: 'text' },
+        { name: 'defaultDescription', type: 'textarea', localized: true },
+        { name: 'defaultImage', type: 'upload', relationTo: 'media' },
+      ],
+    },
+  ],
+}
+```
+
+### Navigation Global:
+```typescript
+// src/globals/Navigation.ts
+import type { GlobalConfig } from 'payload'
+
+export const Navigation: GlobalConfig = {
+  slug: 'navigation',
+  access: {
+    read: () => true,
+    update: ({ req: { user } }) => user?.role === 'admin',
+  },
+  fields: [
+    {
+      name: 'mainMenu',
+      type: 'array',
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+          required: true,
+          localized: true,
+        },
+        {
+          name: 'link',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'newTab',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+        {
+          name: 'children',
+          type: 'array',
+          fields: [
+            { name: 'label', type: 'text', required: true, localized: true },
+            { name: 'link', type: 'text', required: true },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'footerMenu',
+      type: 'array',
+      fields: [
+        { name: 'label', type: 'text', required: true, localized: true },
+        { name: 'link', type: 'text', required: true },
+      ],
+    },
+  ],
+}
+```
+
+---
+
+## 🧩 Providers Setup
+
+### שילוב כל ה-Providers:
+```typescript
+// src/components/providers/Providers.tsx
+'use client'
+import { ReactNode } from 'react'
+import { ThemeProvider } from '@/contexts/ThemeContext'
+import { LanguageProvider } from '@/contexts/LanguageContext'
+import { ToastProvider } from '@/contexts/ToastContext'
+import { AuthProvider } from '@/contexts/AuthContext'
+
+export function Providers({ children }: { children: ReactNode }) {
+  return (
+    <ThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
+  )
+}
+```
+
+### שימוש ב-Layout:
+```typescript
+// src/app/(frontend)/layout.tsx
+import { Providers } from '@/components/providers/Providers'
+import { Heebo } from 'next/font/google'
+import '@/styles/globals.css'
+
+const heebo = Heebo({ subsets: ['hebrew', 'latin'] })
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="he" dir="rtl" suppressHydrationWarning>
+      <body className={heebo.className}>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
+    </html>
+  )
+}
+```
+
+---
+
+## ✅ צ'קליסט לפני פרודקשן
+
+### פונקציונליות:
+- [ ] כל הדפים עובדים
+- [ ] התחברות/הרשמה עובדים
+- [ ] שחזור סיסמה עובד
+- [ ] הרשאות משתמשים תקינות
+- [ ] טפסים שולחים בהצלחה
+- [ ] החלפת שפה עובדת
+- [ ] Dark/Light mode עובד
+- [ ] תמונות נטענות
+
+### אבטחה:
+- [ ] אין סודות בצד לקוח
+- [ ] Access control מוגדר נכון
+- [ ] וולידציה בצד שרת
+- [ ] HTTPS מופעל
+
+### ביצועים:
+- [ ] תמונות אופטימיזציה (next/image)
+- [ ] Lazy loading לתוכן כבד
+- [ ] אין console.log בפרודקשן
+
+### SEO:
+- [ ] Meta tags בכל דף
+- [ ] Alt text לכל תמונה
+- [ ] sitemap.xml
+- [ ] robots.txt
+
+### נגישות:
+- [ ] ניווט במקלדת
+- [ ] Aria labels
+- [ ] קונטרסט צבעים
+
+---
+
+**זכור: אתר מורכב = יותר נקודות כשל. בדוק הכל לפני deploy!**
+
 ## Resources
 
 - Docs: https://payloadcms.com/docs
