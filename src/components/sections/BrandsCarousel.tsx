@@ -38,10 +38,8 @@ const LogoSet = () => (
 const BrandsCarousel = () => {
   return (
     <section
-      className="w-screen relative py-12 md:py-16 overflow-hidden"
+      className="w-full relative py-12 md:py-16 overflow-hidden"
       style={{
-        marginLeft: 'calc(-50vw + 50%)',
-        marginRight: 'calc(-50vw + 50%)',
         background: 'rgba(250, 248, 255, 0.85)',
       }}
     >
