@@ -3,9 +3,22 @@ import { getPayload } from 'payload'
 import config from '../payload.config'
 
 async function seed() {
-  console.log('🌱 Starting seed...')
+  console.log('🌱 Checking if seed is needed...')
 
   const payload = await getPayload({ config })
+
+  // Check if courses already exist
+  const existingCourses = await payload.find({
+    collection: 'courses',
+    limit: 1,
+  })
+
+  if (existingCourses.docs.length > 0) {
+    console.log('✅ Database already has content, skipping seed.')
+    process.exit(0)
+  }
+
+  console.log('📦 Database is empty, running seed...')
 
   // 1. Create or find an instructor user for courses
   let instructorId: number
