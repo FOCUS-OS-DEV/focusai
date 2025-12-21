@@ -1,26 +1,23 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: 250 250 255;
-    --foreground: 26 26 46;
-  }
+:root {
+  --background: 250 250 255;
+  --foreground: 26 26 46;
 }
 
-@layer utilities {
-  .gradient-text {
-    @apply bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent;
-  }
+.gradient-text {
+  background: linear-gradient(to right, #a855f7, #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-  .gradient-bg {
-    background: linear-gradient(135deg, #a855f7, #ec4899);
-  }
+.gradient-bg {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+}
 
-  .gradient-border {
-    background: linear-gradient(135deg, rgba(168,85,247,0.5), rgba(236,72,153,0.3), transparent);
-  }
+.gradient-border {
+  background: linear-gradient(135deg, rgba(168,85,247,0.5), rgba(236,72,153,0.3), transparent);
 }
 
 * {
