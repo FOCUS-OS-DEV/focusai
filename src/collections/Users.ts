@@ -29,13 +29,11 @@ export const Users: CollectionConfig = {
     {
       name: 'firstName',
       type: 'text',
-      required: true,
       label: 'First Name',
     },
     {
       name: 'lastName',
       type: 'text',
-      required: true,
       label: 'Last Name',
     },
     {

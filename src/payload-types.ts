@@ -128,8 +128,8 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
-  firstName: string;
-  lastName: string;
+  firstName?: string | null;
+  lastName?: string | null;
   phone?: string | null;
   avatar?: (number | null) | Media;
   role: 'admin' | 'instructor' | 'student';
