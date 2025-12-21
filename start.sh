@@ -7,8 +7,6 @@ node init-db.cjs
 echo "==> Running Payload migrations..."
 npx payload migrate
 
-echo "==> Running seed (if needed)..."
-npm run seed
-
 echo "==> Starting Next.js..."
+# Seed runs automatically via onInit hook after Payload is ready
 exec npm start

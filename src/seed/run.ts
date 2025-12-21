@@ -1,11 +1,7 @@
-import 'dotenv/config'
-import { getPayload } from 'payload'
-import config from '../payload.config'
+import type { Payload } from 'payload'
 
-async function seed() {
+export async function runSeed(payload: Payload) {
   console.log('🌱 Checking if seed is needed...')
-
-  const payload = await getPayload({ config })
 
   // Check if courses already exist
   try {
@@ -16,13 +12,11 @@ async function seed() {
 
     if (existingCourses.docs.length > 0) {
       console.log('✅ Database already has content, skipping seed.')
-      process.exit(0)
+      return
     }
   } catch {
-    // Table doesn't exist yet - migrations haven't run
-    // Exit gracefully, seed will run on next deploy after migrations
-    console.log('⏳ Tables not ready yet. Seed will run after migrations on next deploy.')
-    process.exit(0)
+    console.log('⚠️ Could not check courses, skipping seed.')
+    return
   }
 
   console.log('📦 Database is empty, running seed...')
@@ -42,7 +36,6 @@ async function seed() {
     instructorId = existingInstructor.docs[0].id as number
     console.log('✅ Found existing instructor:', existingInstructor.docs[0].email)
   } else {
-    // Create instructor
     const instructor = await payload.create({
       collection: 'users',
       data: {
@@ -150,38 +143,12 @@ async function seed() {
   ]
 
   for (const courseData of coursesData) {
-    // Check if course already exists
-    const existing = await payload.find({
+    await payload.create({
       collection: 'courses',
-      where: {
-        slug: { equals: courseData.slug },
-      },
-      limit: 1,
+      data: courseData,
     })
-
-    if (existing.docs.length > 0) {
-      // Update existing course
-      await payload.update({
-        collection: 'courses',
-        id: existing.docs[0].id,
-        data: courseData,
-      })
-      console.log(`  ✅ Updated course: ${courseData.title}`)
-    } else {
-      // Create new course
-      await payload.create({
-        collection: 'courses',
-        data: courseData,
-      })
-      console.log(`  ✅ Created course: ${courseData.title}`)
-    }
+    console.log(`  ✅ Created course: ${courseData.title}`)
   }
 
-  console.log('\n🎉 Seed completed successfully!')
-  process.exit(0)
+  console.log('🎉 Seed completed successfully!')
 }
-
-seed().catch((err) => {
-  console.error('❌ Seed failed:', err)
-  process.exit(1)
-})
