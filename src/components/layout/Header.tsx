@@ -70,7 +70,7 @@ const Header = () => {
               <img
                 src="https://res.cloudinary.com/dfudxxzlj/image/upload/v1765367021/FOCUSAI_LOGO-02_3_keeam5.png"
                 alt="Focus AI Academy"
-                className="h-9"
+                style={{ height: '36px', width: 'auto' }}
               />
             </button>
 
