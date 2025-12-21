@@ -25,7 +25,7 @@ export async function GET() {
 
     console.log('📦 Running seed...')
 
-    // 1. Create instructor
+    // 1. Find or create instructor
     let instructorId: number
 
     const existingInstructor = await payload.find({
@@ -38,61 +38,31 @@ export async function GET() {
       instructorId = existingInstructor.docs[0].id as number
       console.log('✅ Found instructor:', existingInstructor.docs[0].email)
     } else {
-      const instructor = await payload.create({
+      // Try to find any user to use as instructor
+      const anyUser = await payload.find({
         collection: 'users',
-        data: {
-          email: 'instructor@focusai.co.il',
-          password: 'instructor123!',
-          role: 'instructor',
-        },
+        limit: 1,
       })
-      instructorId = instructor.id as number
-      console.log('✅ Created instructor:', instructor.email)
+
+      if (anyUser.docs.length > 0) {
+        instructorId = anyUser.docs[0].id as number
+        console.log('✅ Using existing user as instructor:', anyUser.docs[0].email)
+      } else {
+        // Create instructor user
+        const instructor = await payload.create({
+          collection: 'users',
+          data: {
+            email: 'instructor@focusai.co.il',
+            password: 'instructor123!',
+            role: 'instructor',
+          },
+        })
+        instructorId = instructor.id as number
+        console.log('✅ Created instructor:', instructor.email)
+      }
     }
 
-    // 2. Update SiteSettings
-    console.log('📝 Updating SiteSettings...')
-    await payload.updateGlobal({
-      slug: 'site-settings',
-      data: {
-        siteName: 'Focus AI Academy',
-        contact: {
-          email: 'office@focusai.co.il',
-          phone: '054-3456789',
-          whatsapp: '972543456789',
-        },
-        social: {
-          facebook: 'https://facebook.com/focusai',
-          instagram: 'https://instagram.com/focusai',
-          linkedin: 'https://linkedin.com/company/focusai',
-        },
-        seo: {
-          defaultTitle: 'Focus AI Academy - מרכז ההכשרות המוביל בישראל',
-          titleSuffix: ' | Focus AI',
-        },
-      },
-    })
-
-    // 3. Update Navigation
-    console.log('📝 Updating Navigation...')
-    await payload.updateGlobal({
-      slug: 'navigation',
-      data: {
-        mainMenu: [
-          { label: 'המסלולים', url: '#programs' },
-          { label: 'לוח הכשרות', url: '#schedule' },
-          { label: 'מי אנחנו', url: '#about' },
-          { label: 'הצוות', url: '#team' },
-        ],
-        ctaButton: {
-          text: 'צרו קשר',
-          url: '#contact',
-          isVisible: true,
-        },
-      },
-    })
-
-    // 4. Create Courses
+    // 2. Create Courses (skip globals for now)
     console.log('📝 Creating courses...')
     const courses = [
       {
@@ -155,9 +125,7 @@ export async function GET() {
       success: true,
       message: 'Seed completed successfully',
       created: {
-        instructor: 1,
         courses: courses.length,
-        globals: ['site-settings', 'navigation'],
       },
     })
   } catch (error) {
