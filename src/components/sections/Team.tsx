@@ -1,3 +1,8 @@
+'use client'
+
+import { motion } from 'framer-motion'
+import { useInView } from 'react-intersection-observer'
+
 const teamMembers = [
   {
     name: 'אוניל סחר',
@@ -22,7 +27,9 @@ const teamMembers = [
   },
 ]
 
-export default function Team() {
+const Team = () => {
+  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 })
+
   return (
     <section
       id="team"
@@ -33,24 +40,33 @@ export default function Team() {
     >
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
+        <motion.div
+          ref={ref}
+          className="text-center max-w-2xl mx-auto mb-10 sm:mb-14"
+          initial={{ opacity: 0, y: 30 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+        >
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
             צוות המרצים
           </h2>
           <p className="text-gray-600">
             המומחים שילוו אתכם לאורך ההכשרה
           </p>
-        </div>
+        </motion.div>
 
         {/* Team Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
           {teamMembers.map((member, index) => (
-            <div
+            <motion.div
               key={index}
               className="text-center p-5 sm:p-6 rounded-2xl bg-white border border-purple-100 hover:border-purple-200 hover:shadow-xl hover:shadow-purple-100/50 transition-all duration-300"
+              initial={{ opacity: 0, y: 30 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: index * 0.15 }}
             >
               {/* Image */}
-              <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6 rounded-full overflow-hidden border-[3px] border-purple-200 shadow-lg">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6 rounded-full overflow-hidden border-3 border-purple-200 shadow-lg">
                 <img
                   src={member.image}
                   alt={member.name}
@@ -65,10 +81,12 @@ export default function Team() {
               </span>
               <p className="text-gray-600 text-sm leading-relaxed mb-3">{member.bio}</p>
               <p className="text-purple-500 text-xs font-medium">{member.highlight}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
     </section>
   )
 }
+
+export default Team

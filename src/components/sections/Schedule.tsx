@@ -1,3 +1,8 @@
+'use client'
+
+import { motion } from 'framer-motion'
+import { useInView } from 'react-intersection-observer'
+
 const trainings = [
   {
     id: 1,
@@ -43,15 +48,38 @@ const trainings = [
   },
 ]
 
-function ScheduleCard({ training }: { training: typeof trainings[0] }) {
+interface Training {
+  id: number
+  title: string
+  subtitle: string
+  image: string
+  startDate: string
+  endDate: string
+  sessions: number
+  day: string
+  hours: string
+  link: string
+  badge: string | null
+  accentColor: string
+}
+
+const ScheduleCard = ({ training, index }: { training: Training; index: number }) => {
+  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 })
+
   return (
-    <a
+    <motion.a
+      ref={ref}
       href={training.link}
       target="_blank"
       rel="noopener noreferrer"
       className="group block"
+      initial={{ opacity: 0, y: 30 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
     >
-      <div className="relative rounded-2xl overflow-hidden bg-white border border-purple-100 hover:border-purple-300 transition-all duration-300 hover:shadow-xl hover:shadow-purple-200/30 hover:-translate-y-1">
+      <div
+        className="relative rounded-2xl overflow-hidden bg-white border border-purple-100 hover:border-purple-300 transition-all duration-300 hover:shadow-xl hover:shadow-purple-200/30 hover:-translate-y-1"
+      >
         {/* Image */}
         <div className="relative h-40 overflow-hidden">
           <img
@@ -108,7 +136,9 @@ function ScheduleCard({ training }: { training: typeof trainings[0] }) {
 
           {/* CTA */}
           <div className="mt-5 pt-4 border-t border-purple-100">
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white bg-gradient-to-r ${training.accentColor} transition-all duration-300 group-hover:shadow-lg`}>
+            <div
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white bg-gradient-to-r ${training.accentColor} transition-all duration-300 group-hover:shadow-lg`}
+            >
               <span>למידע נוסף והרשמה</span>
               <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -117,11 +147,13 @@ function ScheduleCard({ training }: { training: typeof trainings[0] }) {
           </div>
         </div>
       </div>
-    </a>
+    </motion.a>
   )
 }
 
-export default function Schedule() {
+const Schedule = () => {
+  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 })
+
   return (
     <section
       id="schedule"
@@ -132,24 +164,35 @@ export default function Schedule() {
     >
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
+        <motion.div
+          ref={ref}
+          className="text-center max-w-3xl mx-auto mb-14"
+          initial={{ opacity: 0, y: 30 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+        >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
             לוח <span className="gradient-text">הכשרות</span>
           </h2>
           <p className="text-gray-600 text-lg">
             המחזורים הקרובים שנפתחים להרשמה
           </p>
-        </div>
+        </motion.div>
 
         {/* Cards Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {trainings.map((training) => (
-            <ScheduleCard key={training.id} training={training} />
+          {trainings.map((training, index) => (
+            <ScheduleCard key={training.id} training={training} index={index} />
           ))}
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-12 text-center">
+        <motion.div
+          className="mt-12 text-center"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ delay: 0.5 }}
+        >
           <p className="text-gray-500 mb-3">לא מצאתם מועד שמתאים לכם?</p>
           <a
             href="#contact"
@@ -160,8 +203,10 @@ export default function Schedule() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </a>
-        </div>
+        </motion.div>
       </div>
     </section>
   )
 }
+
+export default Schedule

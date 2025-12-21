@@ -1,18 +1,19 @@
+'use client'
 
-const socialLinks = [
-  { href: 'https://www.instagram.com/focus.creative.ai', icon: 'instagram', label: 'Instagram' },
-  { href: 'https://www.facebook.com/people/Focus-AI', icon: 'facebook', label: 'Facebook' },
-  { href: 'https://www.tiktok.com/@focus.creative.ai', icon: 'tiktok', label: 'TikTok' },
-  { href: 'https://did.li/Focus-community', icon: 'whatsapp', label: 'קהילה' },
-]
+const Footer = () => {
+  const socialLinks = [
+    { href: 'https://www.instagram.com/focus.creative.ai?igsh=MTNocXhlZ2wxNzVocQ==', icon: 'instagram', label: 'Instagram' },
+    { href: 'https://www.facebook.com/people/Focus-AI-%D7%9E%D7%97%D7%91%D7%A8%D7%99%D7%9D-%D7%90%D7%A0%D7%A9%D7%99%D7%9D-%D7%95%D7%98%D7%9B%D7%95%D7%A0%D7%95%D7%9C%D7%95%D7%92%D7%99%D7%94/61577639435714/', icon: 'facebook', label: 'Facebook' },
+    { href: 'https://www.tiktok.com/@focus.creative.ai?_r=1&_t=ZS-91pOOO3WDdh', icon: 'tiktok', label: 'TikTok' },
+    { href: 'https://did.li/Focus-community', icon: 'whatsapp', label: 'קהילה' },
+  ]
 
-const legalLinks = [
-  { href: 'https://focusai.co.il/תנאי-שימוש/', label: 'תנאי שימוש' },
-  { href: 'https://focusai.co.il/privacy-policy/', label: 'מדיניות פרטיות' },
-  { href: 'https://focusai.co.il/מדיניות-קוקיז/', label: 'מדיניות עוגיות' },
-]
+  const legalLinks = [
+    { href: 'https://focusai.co.il/%D7%AA%D7%A0%D7%90%D7%99%20%D7%A9%D7%99%D7%9E%D7%95%D7%A9/', label: 'תנאי שימוש' },
+    { href: 'https://focusai.co.il/privacy-policy/', label: 'מדיניות פרטיות' },
+    { href: 'https://focusai.co.il/%D7%9E%D7%93%D7%99%D7%A0%D7%99%D7%95%D7%AA-%D7%A7%D7%95%D7%A7%D7%99%D7%96/', label: 'מדיניות עוגיות' },
+  ]
 
-export default function Footer() {
   return (
     <footer className="py-12 border-t border-white/5" style={{ background: '#0a0716' }}>
       <div className="container mx-auto px-4 max-w-6xl">
@@ -24,7 +25,7 @@ export default function Footer() {
               <img
                 src="https://res.cloudinary.com/dfudxxzlj/image/upload/v1765367021/FOCUSAI_LOGO-02_3_keeam5.png"
                 alt="Focus AI"
-                className="h-8 w-auto"
+                className="h-8"
               />
             </a>
             <a href="mailto:office@focusai.co.il" className="text-white/50 hover:text-white/80 text-sm transition-colors">
@@ -94,3 +95,5 @@ export default function Footer() {
     </footer>
   )
 }
+
+export default Footer
