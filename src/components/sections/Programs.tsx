@@ -10,6 +10,7 @@ const programs = [
     link: 'https://focusai.co.il/bot-camp/',
     highlight: 'המסלול הפופולרי',
     accentColor: 'from-purple-500 to-pink-500',
+    glowColor: 'rgba(168, 85, 247, 0.4)',
   },
   {
     id: 2,
@@ -21,6 +22,7 @@ const programs = [
     link: 'https://focusai.co.il/ai-ready/',
     highlight: 'המחזור הקרוב נפתח',
     accentColor: 'from-blue-500 to-cyan-400',
+    glowColor: 'rgba(59, 130, 246, 0.4)',
   },
   {
     id: 3,
@@ -33,6 +35,7 @@ const programs = [
     linkText: 'לתיאום שיחה',
     highlight: null,
     accentColor: 'from-green-500 to-emerald-400',
+    glowColor: 'rgba(34, 197, 94, 0.4)',
   },
   {
     id: 4,
@@ -45,6 +48,7 @@ const programs = [
     linkText: 'שיחת אפיון',
     highlight: null,
     accentColor: 'from-orange-500 to-amber-400',
+    glowColor: 'rgba(249, 115, 22, 0.4)',
   },
 ]
 
@@ -56,51 +60,65 @@ function ProgramCard({ program }: { program: typeof programs[0] }) {
       href={program.link}
       target={isExternal ? '_blank' : undefined}
       rel={isExternal ? 'noopener noreferrer' : undefined}
-      className="block group h-full"
+      className="block group h-full transition-transform duration-300 hover:-translate-y-2"
     >
-      <div className="relative rounded-2xl overflow-hidden h-full bg-white border border-purple-100 hover:border-purple-200 transition-all duration-300 hover:shadow-xl hover:shadow-purple-100/50 hover:-translate-y-2">
-        {/* Image */}
-        <div className="relative h-48 overflow-hidden">
-          <img
-            src={program.image}
-            alt={program.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/30 to-transparent" />
+      {/* Gradient Border Wrapper */}
+      <div
+        className="relative p-[2px] rounded-2xl h-full transition-all duration-500"
+        style={{
+          background: `linear-gradient(135deg, ${program.glowColor}, transparent 50%)`,
+        }}
+      >
+        {/* Glow Effect on Hover */}
+        <div
+          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+          style={{ background: program.glowColor }}
+        />
 
-          {program.highlight && (
-            <div className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${program.accentColor} shadow-lg`}>
-              {program.highlight}
-            </div>
-          )}
-        </div>
+        <div className="relative rounded-2xl overflow-hidden h-full bg-white border border-purple-100">
+          {/* Image */}
+          <div className="relative h-48 overflow-hidden">
+            <img
+              src={program.image}
+              alt={program.title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-white via-white/30 to-transparent" />
 
-        {/* Content */}
-        <div className="p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">{program.title}</h3>
-          <p className={`text-sm mb-3 bg-gradient-to-r ${program.accentColor} bg-clip-text text-transparent font-medium`}>
-            {program.subtitle}
-          </p>
-          <p className="text-gray-600 text-sm mb-5 leading-relaxed">{program.description}</p>
-
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-5">
-            {program.tags.map((tag, i) => (
-              <span
-                key={i}
-                className="px-3 py-1 rounded-full text-xs text-gray-600 bg-purple-50 border border-purple-100"
-              >
-                {tag}
-              </span>
-            ))}
+            {program.highlight && (
+              <div className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${program.accentColor} shadow-lg`}>
+                {program.highlight}
+              </div>
+            )}
           </div>
 
-          {/* CTA Button */}
-          <div className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-gradient-to-r ${program.accentColor} transition-all duration-300 group-hover:shadow-lg shadow-md`}>
-            <span>{program.linkText || 'למידע נוסף'}</span>
-            <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+          {/* Content */}
+          <div className="p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{program.title}</h3>
+            <p className={`text-sm mb-3 bg-gradient-to-r ${program.accentColor} bg-clip-text text-transparent font-medium`}>
+              {program.subtitle}
+            </p>
+            <p className="text-gray-600 text-sm mb-5 leading-relaxed">{program.description}</p>
+
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2 mb-5">
+              {program.tags.map((tag, i) => (
+                <span
+                  key={i}
+                  className="px-3 py-1 rounded-full text-xs text-gray-600 bg-purple-50 border border-purple-100"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            {/* CTA Button */}
+            <div className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-gradient-to-r ${program.accentColor} transition-all duration-300 group-hover:shadow-lg shadow-md`}>
+              <span>{program.linkText || 'למידע נוסף'}</span>
+              <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </div>
           </div>
         </div>
       </div>
