@@ -1132,6 +1132,127 @@ For deeper exploration of specific topics, refer to the context files located in
     - Performance best practices
     - Styling components
 
+## 🗄️ בטיחות דאטאבייס - קריטי!
+
+### ההבדל בין פיתוח ל-Production:
+
+| פיתוח (Development) | Production |
+|---------------------|------------|
+| אפשר למחוק דאטא | **אסור למחוק דאטא** |
+| אפשר DROP TABLE | **אסור DROP TABLE** |
+| אפשר לאפס הכל | **הדאטא הוא אמיתי** |
+| push: true בסדר | **push: true מסוכן** |
+
+### קבצים שרצים בכל הפעלה של השרת:
+```
+start.sh          ← רץ בכל container restart
+init-db.cjs       ← רץ מתוך start.sh
+init-db.sql       ← נקרא מתוך init-db.cjs
+```
+
+**כלל ברזל:** קבצים אלה **לעולם לא** יכילו:
+- `DROP TABLE`
+- `DELETE FROM`
+- `TRUNCATE`
+- כל פקודה שמוחקת דאטא
+
+### מה מותר בקבצי אתחול:
+```sql
+-- ✅ מותר - בטוח להריץ כמה פעמים שרוצים
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE TABLE IF NOT EXISTS ... ;  -- IF NOT EXISTS = בטוח
+```
+
+### מה אסור בקבצי אתחול:
+```sql
+-- ❌ אסור - מוחק דאטא בכל restart!
+DROP TABLE IF EXISTS "users" CASCADE;
+DELETE FROM users;
+TRUNCATE users;
+```
+
+### לפני שינוי בקבצי DB:
+1. **שאל את עצמך:** "מה יקרה אם זה ירוץ 100 פעמים?"
+2. אם התשובה "הדאטא יימחק" → **אל תעשה את זה**
+3. אם התשובה "כלום, זה idempotent" → בטוח
+
+### Migrations נכונות:
+```
+src/migrations/
+├── 001_initial.sql      ← CREATE TABLE IF NOT EXISTS
+├── 002_add_field.sql    ← ALTER TABLE ADD COLUMN IF NOT EXISTS
+└── ...
+```
+
+**Migrations רצות פעם אחת** - Payload עוקב אחרי מה כבר רץ.
+**קבצי init רצים בכל פעם** - חייבים להיות בטוחים לריצה חוזרת.
+
+---
+
+## 🔄 push: true vs Migrations
+
+### push: true (ב-payload.config.ts):
+```typescript
+db: postgresAdapter({
+  pool: { connectionString: ... },
+  push: true,  // ← מסוכן ב-production!
+})
+```
+
+**מה זה עושה:** משנה את הסכמה אוטומטית בכל הפעלה
+**הבעיה:** יכול למחוק עמודות/דאטא אם הסכמה השתנתה
+**מתי להשתמש:** רק בפיתוח מקומי
+
+### Migrations (הדרך הנכונה ל-production):
+```typescript
+db: postgresAdapter({
+  pool: { connectionString: ... },
+  // בלי push: true
+})
+```
+
+**מה זה עושה:** שינויי סכמה רק דרך קבצי migration מבוקרים
+**יתרון:** שליטה מלאה, אין מחיקות אוטומטיות
+**מתי להשתמש:** תמיד ב-production
+
+---
+
+## 🚨 אם מצאת DROP TABLE בקוד
+
+### צעדים מיידיים:
+1. **הסר את הפקודה** מהקובץ
+2. בדוק אם יש עוד פקודות מחיקה
+3. החלף ב-`CREATE ... IF NOT EXISTS`
+4. בדוק את start.sh - מה עוד רץ שם?
+5. commit עם הודעה ברורה: `fix: remove dangerous DROP TABLE from init`
+
+### דוגמה לתיקון:
+```sql
+-- ❌ לפני (מסוכן):
+DROP TABLE IF EXISTS "users" CASCADE;
+CREATE TABLE "users" (...);
+
+-- ✅ אחרי (בטוח):
+CREATE TABLE IF NOT EXISTS "users" (...);
+```
+
+---
+
+## 📋 צ'קליסט לשינויי דאטאבייס
+
+לפני כל שינוי בקבצים: `init-db.*`, `start.sh`, `migrations/*`
+
+- [ ] האם יש DROP TABLE? → הסר
+- [ ] האם יש DELETE FROM? → הסר
+- [ ] האם יש TRUNCATE? → הסר
+- [ ] האם כל CREATE הוא IF NOT EXISTS?
+- [ ] האם זה בטוח לרוץ 100 פעמים?
+- [ ] האם בדקתי ב-git diff מה השתנה?
+
+---
+
+**זכור: בproduction, הדאטא שייך ללקוחות. מחיקה = אובדן אמון.**
+
 ## Resources
 
 - Docs: https://payloadcms.com/docs
