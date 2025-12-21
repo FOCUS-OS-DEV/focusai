@@ -10,6 +10,15 @@ import { Media } from './collections/Media'
 import { Courses } from './collections/Courses'
 import { Lessons } from './collections/Lessons'
 import { Enrollments } from './collections/Enrollments'
+import { Progress } from './collections/Progress'
+import { Purchases } from './collections/Purchases'
+import { Messages } from './collections/Messages'
+import { Certificates } from './collections/Certificates'
+import { Coupons } from './collections/Coupons'
+import { Pages } from './collections/Pages'
+import { Posts } from './collections/Posts'
+import { Contacts } from './collections/Contacts'
+import { Recordings } from './collections/Recordings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -21,7 +30,22 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Courses, Lessons, Enrollments],
+  collections: [
+    Users,
+    Media,
+    Courses,
+    Lessons,
+    Enrollments,
+    Progress,
+    Purchases,
+    Messages,
+    Certificates,
+    Coupons,
+    Pages,
+    Posts,
+    Contacts,
+    Recordings,
+  ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

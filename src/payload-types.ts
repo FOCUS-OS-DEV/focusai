@@ -72,6 +72,15 @@ export interface Config {
     courses: Course;
     lessons: Lesson;
     enrollments: Enrollment;
+    progress: Progress;
+    purchases: Purchase;
+    messages: Message;
+    certificates: Certificate;
+    coupons: Coupon;
+    pages: Page;
+    posts: Post;
+    contacts: Contact;
+    recordings: Recording;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -84,6 +93,15 @@ export interface Config {
     courses: CoursesSelect<false> | CoursesSelect<true>;
     lessons: LessonsSelect<false> | LessonsSelect<true>;
     enrollments: EnrollmentsSelect<false> | EnrollmentsSelect<true>;
+    progress: ProgressSelect<false> | ProgressSelect<true>;
+    purchases: PurchasesSelect<false> | PurchasesSelect<true>;
+    messages: MessagesSelect<false> | MessagesSelect<true>;
+    certificates: CertificatesSelect<false> | CertificatesSelect<true>;
+    coupons: CouponsSelect<false> | CouponsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    contacts: ContactsSelect<false> | ContactsSelect<true>;
+    recordings: RecordingsSelect<false> | RecordingsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -289,6 +307,257 @@ export interface Enrollment {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "progress".
+ */
+export interface Progress {
+  id: number;
+  user?: (number | null) | User;
+  course?: (number | null) | Course;
+  lesson?: (number | null) | Lesson;
+  status?: ('not_started' | 'in_progress' | 'completed') | null;
+  progressPercent?: number | null;
+  lastAccessedAt?: string | null;
+  completedAt?: string | null;
+  timeSpentSeconds?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "purchases".
+ */
+export interface Purchase {
+  id: number;
+  user?: (number | null) | User;
+  course?: (number | null) | Course;
+  status?: ('pending' | 'completed' | 'failed' | 'refunded') | null;
+  amount?: number | null;
+  currency?: ('ILS' | 'USD' | 'EUR') | null;
+  paymentMethod?: ('credit_card' | 'paypal' | 'bank_transfer' | 'free') | null;
+  transactionId?: string | null;
+  coupon?: (number | null) | Coupon;
+  discountAmount?: number | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "coupons".
+ */
+export interface Coupon {
+  id: number;
+  code?: string | null;
+  description?: string | null;
+  discountType?: ('percentage' | 'fixed') | null;
+  discountValue?: number | null;
+  minPurchaseAmount?: number | null;
+  maxDiscountAmount?: number | null;
+  applicableCourses?: (number | Course)[] | null;
+  usageLimit?: number | null;
+  usedCount?: number | null;
+  validFrom?: string | null;
+  validUntil?: string | null;
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "messages".
+ */
+export interface Message {
+  id: number;
+  sender?: (number | null) | User;
+  recipient?: (number | null) | User;
+  subject?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  status?: ('unread' | 'read' | 'archived') | null;
+  parentMessage?: (number | null) | Message;
+  attachments?:
+    | {
+        file?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "certificates".
+ */
+export interface Certificate {
+  id: number;
+  certificateNumber?: string | null;
+  user?: (number | null) | User;
+  course?: (number | null) | Course;
+  issuedAt?: string | null;
+  expiresAt?: string | null;
+  status?: ('active' | 'expired' | 'revoked') | null;
+  pdfFile?: (number | null) | Media;
+  grade?: number | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title?: string | null;
+  slug?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  excerpt?: string | null;
+  featuredImage?: (number | null) | Media;
+  status?: ('draft' | 'published') | null;
+  publishedAt?: string | null;
+  seo?: {
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    ogImage?: (number | null) | Media;
+  };
+  template?: ('default' | 'full_width' | 'landing' | 'contact') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title?: string | null;
+  slug?: string | null;
+  author?: (number | null) | User;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  excerpt?: string | null;
+  featuredImage?: (number | null) | Media;
+  categories?: ('technology' | 'education' | 'business' | 'lifestyle' | 'news')[] | null;
+  tags?:
+    | {
+        tag?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  status?: ('draft' | 'published' | 'archived') | null;
+  publishedAt?: string | null;
+  seo?: {
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    ogImage?: (number | null) | Media;
+  };
+  /**
+   * Estimated reading time in minutes
+   */
+  readingTime?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contacts".
+ */
+export interface Contact {
+  id: number;
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  subject?: string | null;
+  message?: string | null;
+  source?: ('contact_form' | 'newsletter' | 'course_inquiry' | 'support' | 'other') | null;
+  status?: ('new' | 'in_progress' | 'resolved' | 'spam') | null;
+  assignedTo?: (number | null) | User;
+  /**
+   * Internal notes
+   */
+  notes?: string | null;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recordings".
+ */
+export interface Recording {
+  id: number;
+  title?: string | null;
+  description?: string | null;
+  course?: (number | null) | Course;
+  lesson?: (number | null) | Lesson;
+  /**
+   * External video URL (YouTube, Vimeo, etc.)
+   */
+  videoUrl?: string | null;
+  videoFile?: (number | null) | Media;
+  thumbnail?: (number | null) | Media;
+  /**
+   * Duration in seconds
+   */
+  duration?: number | null;
+  status?: ('draft' | 'processing' | 'published' | 'archived') | null;
+  recordedAt?: string | null;
+  instructor?: (number | null) | User;
+  views?: number | null;
+  transcription?: string | null;
+  chapters?:
+    | {
+        title?: string | null;
+        timestampSeconds?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -330,6 +599,42 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'enrollments';
         value: number | Enrollment;
+      } | null)
+    | ({
+        relationTo: 'progress';
+        value: number | Progress;
+      } | null)
+    | ({
+        relationTo: 'purchases';
+        value: number | Purchase;
+      } | null)
+    | ({
+        relationTo: 'messages';
+        value: number | Message;
+      } | null)
+    | ({
+        relationTo: 'certificates';
+        value: number | Certificate;
+      } | null)
+    | ({
+        relationTo: 'coupons';
+        value: number | Coupon;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null)
+    | ({
+        relationTo: 'contacts';
+        value: number | Contact;
+      } | null)
+    | ({
+        relationTo: 'recordings';
+        value: number | Recording;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -500,6 +805,198 @@ export interface EnrollmentsSelect<T extends boolean = true> {
   expiresAt?: T;
   progress?: T;
   source?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "progress_select".
+ */
+export interface ProgressSelect<T extends boolean = true> {
+  user?: T;
+  course?: T;
+  lesson?: T;
+  status?: T;
+  progressPercent?: T;
+  lastAccessedAt?: T;
+  completedAt?: T;
+  timeSpentSeconds?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "purchases_select".
+ */
+export interface PurchasesSelect<T extends boolean = true> {
+  user?: T;
+  course?: T;
+  status?: T;
+  amount?: T;
+  currency?: T;
+  paymentMethod?: T;
+  transactionId?: T;
+  coupon?: T;
+  discountAmount?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "messages_select".
+ */
+export interface MessagesSelect<T extends boolean = true> {
+  sender?: T;
+  recipient?: T;
+  subject?: T;
+  content?: T;
+  status?: T;
+  parentMessage?: T;
+  attachments?:
+    | T
+    | {
+        file?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "certificates_select".
+ */
+export interface CertificatesSelect<T extends boolean = true> {
+  certificateNumber?: T;
+  user?: T;
+  course?: T;
+  issuedAt?: T;
+  expiresAt?: T;
+  status?: T;
+  pdfFile?: T;
+  grade?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "coupons_select".
+ */
+export interface CouponsSelect<T extends boolean = true> {
+  code?: T;
+  description?: T;
+  discountType?: T;
+  discountValue?: T;
+  minPurchaseAmount?: T;
+  maxDiscountAmount?: T;
+  applicableCourses?: T;
+  usageLimit?: T;
+  usedCount?: T;
+  validFrom?: T;
+  validUntil?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  content?: T;
+  excerpt?: T;
+  featuredImage?: T;
+  status?: T;
+  publishedAt?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+      };
+  template?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  author?: T;
+  content?: T;
+  excerpt?: T;
+  featuredImage?: T;
+  categories?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  status?: T;
+  publishedAt?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+      };
+  readingTime?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contacts_select".
+ */
+export interface ContactsSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  phone?: T;
+  subject?: T;
+  message?: T;
+  source?: T;
+  status?: T;
+  assignedTo?: T;
+  notes?: T;
+  ipAddress?: T;
+  userAgent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "recordings_select".
+ */
+export interface RecordingsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  course?: T;
+  lesson?: T;
+  videoUrl?: T;
+  videoFile?: T;
+  thumbnail?: T;
+  duration?: T;
+  status?: T;
+  recordedAt?: T;
+  instructor?: T;
+  views?: T;
+  transcription?: T;
+  chapters?:
+    | T
+    | {
+        title?: T;
+        timestampSeconds?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
