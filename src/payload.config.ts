@@ -5,7 +5,6 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
-import { runSeed } from './seed/run'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Courses } from './collections/Courses'
@@ -64,8 +63,4 @@ export default buildConfig({
   }),
   sharp,
   plugins: [],
-  onInit: async (payload) => {
-    // Run seed after Payload is fully initialized
-    await runSeed(payload)
-  },
 })
