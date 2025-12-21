@@ -111,8 +111,14 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-settings': SiteSetting;
+    navigation: Navigation;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    navigation: NavigationSelect<false> | NavigationSelect<true>;
+  };
   locale: null;
   user: User & {
     collection: 'users';
@@ -1039,6 +1045,182 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  siteName?: string | null;
+  logo?: (number | null) | Media;
+  favicon?: (number | null) | Media;
+  contact?: {
+    email?: string | null;
+    phone?: string | null;
+    whatsapp?: string | null;
+    address?: string | null;
+  };
+  social?: {
+    facebook?: string | null;
+    instagram?: string | null;
+    linkedin?: string | null;
+    youtube?: string | null;
+    twitter?: string | null;
+    tiktok?: string | null;
+  };
+  seo?: {
+    defaultTitle?: string | null;
+    titleSuffix?: string | null;
+    defaultDescription?: string | null;
+    defaultImage?: (number | null) | Media;
+    keywords?: string | null;
+  };
+  scripts?: {
+    /**
+     * Google Analytics ID (e.g., G-XXXXXXXXXX)
+     */
+    googleAnalytics?: string | null;
+    /**
+     * Facebook Pixel ID
+     */
+    facebookPixel?: string | null;
+    /**
+     * Scripts to add in <head>
+     */
+    headScripts?: string | null;
+    /**
+     * Scripts to add before </body>
+     */
+    bodyScripts?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation".
+ */
+export interface Navigation {
+  id: number;
+  mainMenu?:
+    | {
+        label?: string | null;
+        url?: string | null;
+        openInNewTab?: boolean | null;
+        children?:
+          | {
+              label?: string | null;
+              url?: string | null;
+              openInNewTab?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  footerMenu?:
+    | {
+        label?: string | null;
+        url?: string | null;
+        openInNewTab?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  ctaButton?: {
+    text?: string | null;
+    url?: string | null;
+    isVisible?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  siteName?: T;
+  logo?: T;
+  favicon?: T;
+  contact?:
+    | T
+    | {
+        email?: T;
+        phone?: T;
+        whatsapp?: T;
+        address?: T;
+      };
+  social?:
+    | T
+    | {
+        facebook?: T;
+        instagram?: T;
+        linkedin?: T;
+        youtube?: T;
+        twitter?: T;
+        tiktok?: T;
+      };
+  seo?:
+    | T
+    | {
+        defaultTitle?: T;
+        titleSuffix?: T;
+        defaultDescription?: T;
+        defaultImage?: T;
+        keywords?: T;
+      };
+  scripts?:
+    | T
+    | {
+        googleAnalytics?: T;
+        facebookPixel?: T;
+        headScripts?: T;
+        bodyScripts?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation_select".
+ */
+export interface NavigationSelect<T extends boolean = true> {
+  mainMenu?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        openInNewTab?: T;
+        children?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              openInNewTab?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  footerMenu?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        openInNewTab?: T;
+        id?: T;
+      };
+  ctaButton?:
+    | T
+    | {
+        text?: T;
+        url?: T;
+        isVisible?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

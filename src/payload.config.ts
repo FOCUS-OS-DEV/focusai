@@ -20,6 +20,9 @@ import { Posts } from './collections/Posts'
 import { Contacts } from './collections/Contacts'
 import { Recordings } from './collections/Recordings'
 
+import { SiteSettings } from './globals/SiteSettings'
+import { Navigation } from './globals/Navigation'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -46,6 +49,7 @@ export default buildConfig({
     Contacts,
     Recordings,
   ],
+  globals: [SiteSettings, Navigation],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
