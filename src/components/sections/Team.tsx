@@ -2,8 +2,10 @@
 
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
+import type { Instructor, Media } from '@/payload-types'
 
-const teamMembers = [
+// Fallback team members
+const fallbackTeamMembers = [
   {
     name: 'אוניל סחר',
     role: 'מייסד ומנכ"ל משותף',
@@ -27,7 +29,34 @@ const teamMembers = [
   },
 ]
 
-const Team = () => {
+interface TeamProps {
+  instructors?: Instructor[]
+}
+
+interface DisplayMember {
+  name: string
+  role: string
+  image: string
+  bio: string
+  highlight: string
+}
+
+function instructorToMember(i: Instructor, index: number): DisplayMember {
+  const image = i.image as Media | null
+  return {
+    name: i.name,
+    role: i.title || 'מרצה',
+    image: image?.url || fallbackTeamMembers[index % fallbackTeamMembers.length].image,
+    bio: i.shortBio || '',
+    highlight: i.specialties?.map(s => s.specialty).filter(Boolean).join(', ') || '',
+  }
+}
+
+const Team = ({ instructors }: TeamProps) => {
+  // Convert instructors from Payload or use fallback
+  const teamMembers: DisplayMember[] = instructors && instructors.length > 0
+    ? instructors.map((i, index) => instructorToMember(i, index))
+    : fallbackTeamMembers
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 })
 
   return (

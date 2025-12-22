@@ -1,6 +1,9 @@
 'use client'
 
-const logos = [
+import type { Partner, Media } from '@/payload-types'
+
+// Fallback logos
+const fallbackLogos = [
   'https://focusai.co.il/wp-content/uploads/2025/11/32-150x150.png',
   'https://focusai.co.il/wp-content/uploads/2025/11/33-150x150.png',
   'https://focusai.co.il/wp-content/uploads/2025/11/34-150x150.png',
@@ -22,7 +25,11 @@ const logos = [
   'https://focusai.co.il/wp-content/uploads/2025/11/unnamed-file-1-150x150.png',
 ]
 
-const LogoSet = () => (
+interface BrandsCarouselProps {
+  partners?: Partner[]
+}
+
+const LogoSet = ({ logos }: { logos: string[] }) => (
   <div className="flex items-center gap-12 md:gap-20 px-6 shrink-0">
     {logos.map((logo, i) => (
       <img
@@ -35,7 +42,14 @@ const LogoSet = () => (
   </div>
 )
 
-const BrandsCarousel = () => {
+const BrandsCarousel = ({ partners }: BrandsCarouselProps) => {
+  // Convert partners to logo URLs or use fallback
+  const logos: string[] = partners && partners.length > 0
+    ? partners.map(p => {
+        const logo = p.logo as Media | null
+        return logo?.url || fallbackLogos[0]
+      }).filter(Boolean)
+    : fallbackLogos
   return (
     <section
       className="w-screen relative py-12 md:py-16 overflow-hidden"
@@ -69,9 +83,9 @@ const BrandsCarousel = () => {
             transform: 'translateX(-33.333%)',
           }}
         >
-          <LogoSet />
-          <LogoSet />
-          <LogoSet />
+          <LogoSet logos={logos} />
+          <LogoSet logos={logos} />
+          <LogoSet logos={logos} />
         </div>
       </div>
 

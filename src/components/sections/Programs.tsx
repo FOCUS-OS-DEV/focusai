@@ -2,8 +2,34 @@
 
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
+import type { Course, Media } from '@/payload-types'
 
-const programs = [
+// Color themes for different course types
+const courseTypeThemes: Record<string, { accentColor: string; glowColor: string; borderColor: string }> = {
+  frontal: {
+    accentColor: 'from-purple-500 to-pink-500',
+    glowColor: 'rgba(168, 85, 247, 0.4)',
+    borderColor: 'purple-500',
+  },
+  digital: {
+    accentColor: 'from-blue-500 to-cyan-400',
+    glowColor: 'rgba(59, 130, 246, 0.4)',
+    borderColor: 'blue-500',
+  },
+  workshop: {
+    accentColor: 'from-orange-500 to-amber-400',
+    glowColor: 'rgba(249, 115, 22, 0.4)',
+    borderColor: 'orange-500',
+  },
+  coaching: {
+    accentColor: 'from-green-500 to-emerald-400',
+    glowColor: 'rgba(34, 197, 94, 0.4)',
+    borderColor: 'green-500',
+  },
+}
+
+// Fallback hardcoded programs for when no courses from Payload
+const fallbackPrograms = [
   {
     id: 1,
     title: 'Bot-Camp',
@@ -73,6 +99,41 @@ interface Program {
   accentColor: string
   glowColor: string
   borderColor: string
+}
+
+// Convert Payload Course to Program format
+function courseToProgram(course: Course, index: number): Program {
+  const theme = courseTypeThemes[course.type] || courseTypeThemes.frontal
+  const featuredImage = course.featuredImage as Media | null
+
+  // Build tags from course data
+  const tags: string[] = []
+  if (course.duration) tags.push(course.duration)
+  if (course.schedule) tags.push(course.schedule)
+  if (course.certificate) tags.push(course.certificate)
+  if (course.highlights && course.highlights.length > 0) {
+    course.highlights.slice(0, 3 - tags.length).forEach(h => {
+      if (h.text && tags.length < 3) tags.push(h.text)
+    })
+  }
+
+  return {
+    id: course.id,
+    title: course.title,
+    subtitle: course.subtitle || '',
+    image: featuredImage?.url || fallbackPrograms[index % fallbackPrograms.length].image,
+    description: course.excerpt || '',
+    tags: tags.length > 0 ? tags : ['מותאם אישית'],
+    link: `/courses/${course.slug}`,
+    linkText: course.ctaText || undefined,
+    highlight: course.featured ? 'מומלץ' : null,
+    ...theme,
+  }
+}
+
+interface ProgramsProps {
+  courses?: Course[]
+  sectionTitle?: string | null
 }
 
 const ProgramCard = ({ program, index }: { program: Program; index: number }) => {
@@ -163,8 +224,13 @@ const ProgramCard = ({ program, index }: { program: Program; index: number }) =>
   )
 }
 
-const Programs = () => {
+const Programs = ({ courses, sectionTitle }: ProgramsProps) => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 })
+
+  // Use courses from Payload or fallback to hardcoded programs
+  const programs: Program[] = courses && courses.length > 0
+    ? courses.map((course, index) => courseToProgram(course, index))
+    : fallbackPrograms
 
   return (
     <section
@@ -184,7 +250,7 @@ const Programs = () => {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
-            המסלולים שלנו
+            {sectionTitle || 'המסלולים שלנו'}
           </h2>
           <p className="text-gray-600 text-lg">
             מיועדים למנהלים, יזמים ואנשי מקצוע שרוצים להטמיע AI בעבודה

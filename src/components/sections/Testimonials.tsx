@@ -2,8 +2,10 @@
 
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
+import type { Testimonial as TestimonialType, Media } from '@/payload-types'
 
-const testimonials = [
+// Fallback testimonials for when no data from Payload
+const fallbackTestimonials = [
   {
     name: 'להב דור',
     role: 'בוגר הכשרה',
@@ -42,6 +44,29 @@ const testimonials = [
   },
 ]
 
+interface TestimonialsProps {
+  testimonials?: TestimonialType[]
+  sectionTitle?: string | null
+}
+
+// Convert Payload Testimonial to display format
+interface DisplayTestimonial {
+  name: string
+  role: string
+  image: string
+  text: string
+}
+
+function testimonialToDisplay(t: TestimonialType, index: number): DisplayTestimonial {
+  const image = t.image as Media | null
+  return {
+    name: t.name,
+    role: t.role || 'בוגר/ת הכשרה',
+    image: image?.url || fallbackTestimonials[index % fallbackTestimonials.length].image,
+    text: t.content,
+  }
+}
+
 const Stars = () => (
   <div className="flex gap-1">
     {[...Array(5)].map((_, i) => (
@@ -52,8 +77,13 @@ const Stars = () => (
   </div>
 )
 
-const Testimonials = () => {
+const Testimonials = ({ testimonials: payloadTestimonials, sectionTitle }: TestimonialsProps) => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 })
+
+  // Use testimonials from Payload or fallback
+  const displayTestimonials: DisplayTestimonial[] = payloadTestimonials && payloadTestimonials.length > 0
+    ? payloadTestimonials.map((t, i) => testimonialToDisplay(t, i))
+    : fallbackTestimonials
 
   return (
     <section
@@ -73,7 +103,7 @@ const Testimonials = () => {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
-            מה אומרים <span className="gradient-text">הבוגרים</span>
+            {sectionTitle || <>מה אומרים <span className="gradient-text">הבוגרים</span></>}
           </h2>
           <p className="text-gray-600 text-lg">
             בוגרי ההכשרות שלנו משתפים את החוויה שלהם
@@ -82,7 +112,7 @@ const Testimonials = () => {
 
         {/* Testimonials Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {testimonials.map((testimonial, i) => (
+          {displayTestimonials.map((testimonial, i) => (
             <motion.div
               key={i}
               className="p-6 rounded-2xl relative bg-white border border-purple-100 hover:border-purple-300 hover:shadow-xl hover:shadow-purple-100/50 transition-all duration-300"

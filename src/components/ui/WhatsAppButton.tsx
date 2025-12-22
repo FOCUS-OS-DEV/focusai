@@ -2,10 +2,18 @@
 
 import { motion } from 'framer-motion'
 
-const WhatsAppButton = () => {
+interface WhatsAppButtonProps {
+  whatsapp?: string | null
+}
+
+const WhatsAppButton = ({ whatsapp }: WhatsAppButtonProps) => {
+  // Use whatsapp from props or fallback to default
+  const phoneNumber = whatsapp || '972539466408'
+  const cleanPhone = phoneNumber.replace(/\D/g, '') // Remove non-digits
+
   return (
     <motion.a
-      href="https://wa.me/972539466408"
+      href={`https://wa.me/${cleanPhone}`}
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-6 left-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30"

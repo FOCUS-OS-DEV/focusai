@@ -2,9 +2,39 @@
 
 import { motion } from 'framer-motion'
 import { useSmoothScroll } from '../../hooks/useSmoothScroll'
+import type { Homepage } from '@/payload-types'
 
-const Hero = () => {
+interface HeroProps {
+  hero?: Homepage['hero']
+  stats?: Homepage['stats']
+}
+
+const Hero = ({ hero, stats }: HeroProps) => {
   const scrollTo = useSmoothScroll()
+
+  // Fallback values
+  const title = hero?.title || 'Focus AI Academy'
+  const subtitle = hero?.subtitle || 'מרכז ההכשרות המוביל בישראל לעולם ה-AI'
+  const primaryCta = hero?.primaryCta || 'גלו את המסלולים'
+  const primaryCtaLink = hero?.primaryCtaLink || '#programs'
+  const secondaryCta = hero?.secondaryCta || 'שיחת ייעוץ חינם'
+  const secondaryCtaLink = hero?.secondaryCtaLink || '#contact'
+
+  const handlePrimaryClick = () => {
+    if (primaryCtaLink?.startsWith('#')) {
+      scrollTo(primaryCtaLink.slice(1))
+    } else if (primaryCtaLink) {
+      window.location.href = primaryCtaLink
+    }
+  }
+
+  const handleSecondaryClick = () => {
+    if (secondaryCtaLink?.startsWith('#')) {
+      scrollTo(secondaryCtaLink.slice(1))
+    } else if (secondaryCtaLink) {
+      window.location.href = secondaryCtaLink
+    }
+  }
 
   return (
     <section
@@ -61,7 +91,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            מרכז ההכשרות המוביל בישראל לעולם ה-AI
+            {title}
           </motion.p>
 
           <motion.p
@@ -70,8 +100,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.15 }}
           >
-            הכשרות מעשיות שייקחו אתכם מ&quot;מה זה בכלל AI?&quot; לשליטה מלאה בכלים המתקדמים ביותר -
-            ויכולת ליישם אותם בעבודה כבר מהשבוע הראשון
+            {subtitle}
           </motion.p>
 
           {/* CTA Buttons */}
@@ -82,7 +111,7 @@ const Hero = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <motion.button
-              onClick={() => scrollTo('programs')}
+              onClick={handlePrimaryClick}
               className="group relative px-8 py-4 rounded-full text-white font-bold text-lg overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, #a855f7, #ec4899)',
@@ -92,48 +121,67 @@ const Hero = () => {
               whileTap={{ scale: 0.98 }}
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
-                גלו את המסלולים
+                {primaryCta}
                 <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </span>
             </motion.button>
             <motion.button
-              onClick={() => scrollTo('contact')}
+              onClick={handleSecondaryClick}
               className="px-8 py-4 rounded-full font-bold text-lg text-purple-600 border-2 border-purple-300 hover:bg-purple-50 hover:border-purple-400 transition-all duration-300"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              שיחת ייעוץ חינם
+              {secondaryCta}
             </motion.button>
           </motion.div>
 
-          {/* Trust indicators */}
-          <motion.div
-            className="pt-8 border-t border-purple-200"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <div className="flex flex-wrap items-center justify-center gap-8 text-gray-500 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold gradient-text">50+</span>
-                <span>ארגונים</span>
+          {/* Trust indicators - Stats from Payload */}
+          {stats && stats.length > 0 ? (
+            <motion.div
+              className="pt-8 border-t border-purple-200"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <div className="flex flex-wrap items-center justify-center gap-8 text-gray-500 text-sm">
+                {stats.map((stat, index) => (
+                  <div key={stat.id || index} className="flex items-center gap-2">
+                    {index > 0 && <div className="w-px h-6 bg-purple-200 mr-8" />}
+                    <span className="text-2xl font-bold gradient-text">{stat.number}</span>
+                    <span>{stat.label}</span>
+                  </div>
+                ))}
               </div>
-              <div className="w-px h-6 bg-purple-200" />
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold gradient-text">1,000+</span>
-                <span>בוגרים</span>
+            </motion.div>
+          ) : (
+            <motion.div
+              className="pt-8 border-t border-purple-200"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <div className="flex flex-wrap items-center justify-center gap-8 text-gray-500 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold gradient-text">50+</span>
+                  <span>ארגונים</span>
+                </div>
+                <div className="w-px h-6 bg-purple-200" />
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold gradient-text">1,000+</span>
+                  <span>בוגרים</span>
+                </div>
+                <div className="w-px h-6 bg-purple-200" />
+                <div className="flex items-center gap-2">
+                  <span>בשיתוף</span>
+                  <span className="text-gray-700 font-medium">הטכניון</span>
+                  <span>&amp;</span>
+                  <span className="text-gray-700 font-medium">אוניברסיטת חיפה</span>
+                </div>
               </div>
-              <div className="w-px h-6 bg-purple-200" />
-              <div className="flex items-center gap-2">
-                <span>בשיתוף</span>
-                <span className="text-gray-700 font-medium">הטכניון</span>
-                <span>&amp;</span>
-                <span className="text-gray-700 font-medium">אוניברסיטת חיפה</span>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
         </div>
       </div>
     </section>
