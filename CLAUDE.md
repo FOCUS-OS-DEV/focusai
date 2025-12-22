@@ -208,6 +208,25 @@ Posts → Categories + Users (מאמר לקטגוריה)
 Courses → Instructors + Testimonials
 ```
 
+## Cloudinary Storage
+
+Media collection משתמש ב-Cloudinary לאחסון תמונות.
+
+**Plugin:** `payload-cloudinary` (community plugin)
+
+**הגדרות נדרשות ב-.env:**
+```
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+```
+
+**תיקיית אחסון:** `focusai-academy/`
+
+**לאחר deploy:** הוסף את המשתנים ב-Railway Variables.
+
+---
+
 ## מוצרי Focus AI
 | מסלול | סוג | משך |
 |-------|-----|-----|
