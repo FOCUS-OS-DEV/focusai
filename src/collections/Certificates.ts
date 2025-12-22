@@ -2,71 +2,61 @@ import type { CollectionConfig } from 'payload'
 
 export const Certificates: CollectionConfig = {
   slug: 'certificates',
-  admin: {
-    useAsTitle: 'certificateNumber',
-    defaultColumns: ['certificateNumber', 'user', 'course', 'issuedAt', 'createdAt'],
+  labels: {
+    singular: 'תעודה',
+    plural: 'תעודות',
   },
-  access: {
-    read: ({ req: { user } }) => {
-      if (!user) return false
-      if (user.role === 'admin' || user.role === 'instructor') return true
-      return { user: { equals: user.id } }
-    },
-    create: ({ req: { user } }) => user?.role === 'admin' || user?.role === 'instructor',
-    update: ({ req: { user } }) => user?.role === 'admin',
-    delete: ({ req: { user } }) => user?.role === 'admin',
+  admin: {
+    defaultColumns: ['student', 'course', 'issuedAt', 'status'],
   },
   fields: [
     {
-      name: 'certificateNumber',
-      type: 'text',
-      unique: true,
-      index: true,
-    },
-    {
-      name: 'user',
+      name: 'student',
       type: 'relationship',
       relationTo: 'users',
-      index: true,
+      required: true,
+      label: 'תלמיד',
     },
     {
       name: 'course',
       type: 'relationship',
       relationTo: 'courses',
-      index: true,
+      required: true,
+      label: 'מסלול',
+    },
+    {
+      name: 'cohort',
+      type: 'relationship',
+      relationTo: 'cohorts',
+      label: 'מחזור',
+    },
+    {
+      name: 'certificateNumber',
+      type: 'text',
+      label: 'מספר תעודה',
+      unique: true,
     },
     {
       name: 'issuedAt',
       type: 'date',
+      label: 'תאריך הנפקה',
     },
     {
-      name: 'expiresAt',
-      type: 'date',
+      name: 'file',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'קובץ PDF',
     },
     {
       name: 'status',
       type: 'select',
-      defaultValue: 'active',
+      label: 'סטטוס',
       options: [
-        { label: 'Active', value: 'active' },
-        { label: 'Expired', value: 'expired' },
-        { label: 'Revoked', value: 'revoked' },
+        { label: 'ממתין', value: 'pending' },
+        { label: 'הונפק', value: 'issued' },
+        { label: 'בוטל', value: 'revoked' },
       ],
-    },
-    {
-      name: 'pdfFile',
-      type: 'upload',
-      relationTo: 'media',
-    },
-    {
-      name: 'grade',
-      type: 'number',
-      min: 0,
-      max: 100,
-    },
-    {
-      name: 'notes',
-      type: 'textarea',
+      defaultValue: 'pending',
     },
   ],
 }

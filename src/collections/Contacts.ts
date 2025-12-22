@@ -2,86 +2,61 @@ import type { CollectionConfig } from 'payload'
 
 export const Contacts: CollectionConfig = {
   slug: 'contacts',
-  admin: {
-    useAsTitle: 'email',
-    defaultColumns: ['name', 'email', 'subject', 'status', 'createdAt'],
+  labels: {
+    singular: 'ליד',
+    plural: 'לידים',
   },
-  access: {
-    read: ({ req: { user } }) => user?.role === 'admin',
-    create: () => true, // Anyone can submit contact form
-    update: ({ req: { user } }) => user?.role === 'admin',
-    delete: ({ req: { user } }) => user?.role === 'admin',
+  admin: {
+    useAsTitle: 'name',
+    defaultColumns: ['name', 'phone', 'interest', 'createdAt'],
   },
   fields: [
     {
       name: 'name',
       type: 'text',
+      label: 'שם',
+      required: true,
     },
     {
       name: 'email',
       type: 'email',
-      index: true,
+      label: 'אימייל',
+      required: true,
     },
     {
       name: 'phone',
       type: 'text',
+      label: 'טלפון',
+      required: true,
     },
     {
-      name: 'subject',
+      name: 'company',
       type: 'text',
+      label: 'חברה',
+    },
+    {
+      name: 'interest',
+      type: 'select',
+      label: 'מתעניין ב-',
+      options: [
+        { label: 'Bot-Camp', value: 'bot-camp' },
+        { label: 'AI Ready', value: 'ai-ready' },
+        { label: 'סדנה לארגון', value: 'workshop' },
+        { label: 'ליווי אישי', value: 'coaching' },
+        { label: 'קורס דיגיטלי', value: 'digital' },
+        { label: 'כללי', value: 'general' },
+      ],
     },
     {
       name: 'message',
       type: 'textarea',
+      label: 'הודעה',
     },
     {
       name: 'source',
-      type: 'select',
-      defaultValue: 'contact_form',
-      options: [
-        { label: 'Contact Form', value: 'contact_form' },
-        { label: 'Newsletter', value: 'newsletter' },
-        { label: 'Course Inquiry', value: 'course_inquiry' },
-        { label: 'Support', value: 'support' },
-        { label: 'Other', value: 'other' },
-      ],
-    },
-    {
-      name: 'status',
-      type: 'select',
-      defaultValue: 'new',
-      options: [
-        { label: 'New', value: 'new' },
-        { label: 'In Progress', value: 'in_progress' },
-        { label: 'Resolved', value: 'resolved' },
-        { label: 'Spam', value: 'spam' },
-      ],
-    },
-    {
-      name: 'assignedTo',
-      type: 'relationship',
-      relationTo: 'users',
-    },
-    {
-      name: 'notes',
-      type: 'textarea',
-      admin: {
-        description: 'Internal notes',
-      },
-    },
-    {
-      name: 'ipAddress',
       type: 'text',
-      admin: {
-        readOnly: true,
-      },
-    },
-    {
-      name: 'userAgent',
-      type: 'text',
-      admin: {
-        readOnly: true,
-      },
+      label: 'מקור',
+      admin: { description: 'מאיזה עמוד הגיע - נקבע אוטומטית' },
     },
   ],
 }

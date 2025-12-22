@@ -5,23 +5,29 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
+// Collections
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Courses } from './collections/Courses'
+import { Cohorts } from './collections/Cohorts'
 import { Lessons } from './collections/Lessons'
 import { Enrollments } from './collections/Enrollments'
 import { Progress } from './collections/Progress'
-import { Purchases } from './collections/Purchases'
-import { Messages } from './collections/Messages'
+import { Attendance } from './collections/Attendance'
+import { Assignments } from './collections/Assignments'
+import { Submissions } from './collections/Submissions'
 import { Certificates } from './collections/Certificates'
-import { Coupons } from './collections/Coupons'
-import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
+import { Categories } from './collections/Categories'
+import { Testimonials } from './collections/Testimonials'
+import { Instructors } from './collections/Instructors'
 import { Contacts } from './collections/Contacts'
-import { Recordings } from './collections/Recordings'
+import { Partners } from './collections/Partners'
 
+// Globals
 import { SiteSettings } from './globals/SiteSettings'
 import { Navigation } from './globals/Navigation'
+import { Homepage } from './globals/Homepage'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -34,22 +40,29 @@ export default buildConfig({
     },
   },
   collections: [
+    // Core
     Users,
     Media,
+    // Academy
     Courses,
+    Cohorts,
     Lessons,
     Enrollments,
     Progress,
-    Purchases,
-    Messages,
+    Attendance,
+    Assignments,
+    Submissions,
     Certificates,
-    Coupons,
-    Pages,
+    // Content
     Posts,
+    Categories,
+    Testimonials,
+    Instructors,
+    // Leads
     Contacts,
-    Recordings,
+    Partners,
   ],
-  globals: [SiteSettings, Navigation],
+  globals: [SiteSettings, Navigation, Homepage],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

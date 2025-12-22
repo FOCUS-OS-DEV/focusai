@@ -2,6 +2,7 @@ import type { GlobalConfig } from 'payload'
 
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
+  label: 'הגדרות אתר',
   access: {
     read: () => true,
     update: ({ req: { user } }) => user?.role === 'admin',
@@ -10,135 +11,60 @@ export const SiteSettings: GlobalConfig = {
     {
       name: 'siteName',
       type: 'text',
-      localized: true,
+      label: 'שם האתר',
+      defaultValue: 'Focus AI Academy',
+    },
+    {
+      name: 'siteDescription',
+      type: 'textarea',
+      label: 'תיאור האתר',
     },
     {
       name: 'logo',
       type: 'upload',
       relationTo: 'media',
+      label: 'לוגו',
     },
     {
       name: 'favicon',
       type: 'upload',
       relationTo: 'media',
+      label: 'Favicon',
     },
+    // פרטי קשר
     {
       name: 'contact',
       type: 'group',
+      label: 'פרטי קשר',
       fields: [
-        {
-          name: 'email',
-          type: 'email',
-        },
-        {
-          name: 'phone',
-          type: 'text',
-        },
-        {
-          name: 'whatsapp',
-          type: 'text',
-        },
-        {
-          name: 'address',
-          type: 'textarea',
-          localized: true,
-        },
+        { name: 'email', type: 'email', label: 'אימייל' },
+        { name: 'phone', type: 'text', label: 'טלפון' },
+        { name: 'whatsapp', type: 'text', label: 'וואטסאפ' },
+        { name: 'address', type: 'textarea', label: 'כתובת' },
       ],
     },
+    // רשתות חברתיות
     {
       name: 'social',
       type: 'group',
+      label: 'רשתות חברתיות',
       fields: [
-        {
-          name: 'facebook',
-          type: 'text',
-        },
-        {
-          name: 'instagram',
-          type: 'text',
-        },
-        {
-          name: 'linkedin',
-          type: 'text',
-        },
-        {
-          name: 'youtube',
-          type: 'text',
-        },
-        {
-          name: 'twitter',
-          type: 'text',
-        },
-        {
-          name: 'tiktok',
-          type: 'text',
-        },
+        { name: 'facebook', type: 'text', label: 'Facebook' },
+        { name: 'instagram', type: 'text', label: 'Instagram' },
+        { name: 'linkedin', type: 'text', label: 'LinkedIn' },
+        { name: 'youtube', type: 'text', label: 'YouTube' },
+        { name: 'tiktok', type: 'text', label: 'TikTok' },
       ],
     },
+    // Tracking
     {
-      name: 'seo',
+      name: 'tracking',
       type: 'group',
+      label: 'קודי מעקב',
       fields: [
-        {
-          name: 'defaultTitle',
-          type: 'text',
-          localized: true,
-        },
-        {
-          name: 'titleSuffix',
-          type: 'text',
-        },
-        {
-          name: 'defaultDescription',
-          type: 'textarea',
-          localized: true,
-        },
-        {
-          name: 'defaultImage',
-          type: 'upload',
-          relationTo: 'media',
-        },
-        {
-          name: 'keywords',
-          type: 'text',
-          localized: true,
-        },
-      ],
-    },
-    {
-      name: 'scripts',
-      type: 'group',
-      fields: [
-        {
-          name: 'googleAnalytics',
-          type: 'text',
-          admin: {
-            description: 'Google Analytics ID (e.g., G-XXXXXXXXXX)',
-          },
-        },
-        {
-          name: 'facebookPixel',
-          type: 'text',
-          admin: {
-            description: 'Facebook Pixel ID',
-          },
-        },
-        {
-          name: 'headScripts',
-          type: 'code',
-          admin: {
-            language: 'html',
-            description: 'Scripts to add in <head>',
-          },
-        },
-        {
-          name: 'bodyScripts',
-          type: 'code',
-          admin: {
-            language: 'html',
-            description: 'Scripts to add before </body>',
-          },
-        },
+        { name: 'metaPixel', type: 'text', label: 'Meta Pixel ID' },
+        { name: 'tiktokPixel', type: 'text', label: 'TikTok Pixel ID' },
+        { name: 'googleAnalytics', type: 'text', label: 'Google Analytics ID' },
       ],
     },
   ],

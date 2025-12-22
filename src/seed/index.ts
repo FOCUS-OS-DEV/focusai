@@ -20,66 +20,35 @@ async function seed() {
     }
   } catch {
     // Table doesn't exist yet - migrations haven't run
-    // Exit gracefully, seed will run on next deploy after migrations
     console.log('⏳ Tables not ready yet. Seed will run after migrations on next deploy.')
     process.exit(0)
   }
 
   console.log('📦 Database is empty, running seed...')
 
-  // 1. Create or find an instructor user for courses
-  let instructorId: number
-
-  const existingInstructor = await payload.find({
-    collection: 'users',
-    where: {
-      role: { equals: 'instructor' },
-    },
-    limit: 1,
-  })
-
-  if (existingInstructor.docs.length > 0) {
-    instructorId = existingInstructor.docs[0].id as number
-    console.log('✅ Found existing instructor:', existingInstructor.docs[0].email)
-  } else {
-    // Create instructor
-    const instructor = await payload.create({
-      collection: 'users',
-      data: {
-        email: 'instructor@focusai.co.il',
-        password: 'instructor123!',
-        role: 'instructor',
-      },
-    })
-    instructorId = instructor.id as number
-    console.log('✅ Created instructor:', instructor.email)
-  }
-
-  // 2. Update SiteSettings Global
+  // 1. Update SiteSettings Global
   console.log('📝 Updating SiteSettings...')
   await payload.updateGlobal({
     slug: 'site-settings',
     data: {
       siteName: 'Focus AI Academy',
+      siteDescription: 'מרכז ההכשרות המוביל בישראל לעולם ה-AI',
       contact: {
         email: 'office@focusai.co.il',
         phone: '054-3456789',
         whatsapp: '972543456789',
+        address: 'אריה שנקר 14, הרצליה פיתוח (Nolton House)',
       },
       social: {
         facebook: 'https://facebook.com/focusai',
         instagram: 'https://instagram.com/focusai',
         linkedin: 'https://linkedin.com/company/focusai',
       },
-      seo: {
-        defaultTitle: 'Focus AI Academy - מרכז ההכשרות המוביל בישראל',
-        titleSuffix: ' | Focus AI',
-      },
     },
   })
   console.log('✅ SiteSettings updated')
 
-  // 3. Update Navigation Global
+  // 2. Update Navigation Global
   console.log('📝 Updating Navigation...')
   await payload.updateGlobal({
     slug: 'navigation',
@@ -99,6 +68,35 @@ async function seed() {
   })
   console.log('✅ Navigation updated')
 
+  // 3. Update Homepage Global
+  console.log('📝 Updating Homepage...')
+  await payload.updateGlobal({
+    slug: 'homepage',
+    data: {
+      hero: {
+        title: 'Focus AI Academy',
+        subtitle: 'מרכז ההכשרות המוביל בישראל לעולם ה-AI',
+        primaryCta: 'לכל המסלולים',
+        primaryCtaLink: '#courses',
+        secondaryCta: 'צרו קשר',
+        secondaryCtaLink: '#contact',
+      },
+      stats: [
+        { number: '500+', label: 'בוגרים' },
+        { number: '12', label: 'שבועות' },
+        { number: '3:18', label: 'יחס מרצים' },
+        { number: '100%', label: 'תעסוקה' },
+      ],
+      sections: {
+        coursesTitle: 'המסלולים שלנו',
+        blogTitle: 'חדש בבלוג',
+        testimonialsTitle: 'מה אומרים עלינו',
+        partnersTitle: 'שותפויות ולקוחות',
+      },
+    },
+  })
+  console.log('✅ Homepage updated')
+
   // 4. Create Courses
   console.log('📝 Creating courses...')
 
@@ -106,61 +104,68 @@ async function seed() {
     {
       title: 'Bot-Camp',
       slug: 'bot-camp',
-      shortDescription: 'הכשרת מפתחי אוטומציות וסוכני AI',
-      price: 5900,
-      level: 'beginner' as const,
-      category: 'development' as const,
+      subtitle: 'הכשרת מפתחי אוטומציות וסוכני AI',
+      excerpt: '12 שבועות של הכשרה מעשית לפיתוח סוכני AI ואוטומציות',
+      type: 'frontal' as const,
+      duration: '12 שבועות',
+      schedule: 'ימי שני 17:00-21:00',
+      location: 'אריה שנקר 14, הרצליה פיתוח (Nolton House)',
+      hasZoom: true,
+      maxStudents: 18,
+      instructorRatio: '3 מרצים על 18 תלמידים',
+      certificate: 'תעודה מקצועית בליווי אקדמי של היחידה ללימודי חוץ באוניברסיטת חיפה',
       status: 'published' as const,
       featured: true,
-      instructor: instructorId,
+      order: 1,
     },
     {
       title: 'AI Ready',
       slug: 'ai-ready',
-      shortDescription: '8 מפגשים מעשיים לשליטה בכלי AI',
-      price: 2900,
-      level: 'beginner' as const,
-      category: 'other' as const,
+      subtitle: '8 מפגשים מעשיים לשליטה בכלי AI',
+      excerpt: 'קורס מעשי לשליטה בכלי AI מתקדמים',
+      type: 'frontal' as const,
+      duration: '8 מפגשים',
+      schedule: 'ימי שישי 9:00-12:00',
+      location: 'אריה שנקר 14, הרצליה פיתוח (Nolton House)',
+      hasZoom: true,
+      maxStudents: 18,
+      certificate: 'תעודת Focus AI',
       status: 'published' as const,
       featured: true,
-      instructor: instructorId,
+      order: 2,
+    },
+    {
+      title: 'סדנאות לארגונים',
+      slug: 'workshops',
+      subtitle: 'הפכו את הארגון למעצמת AI',
+      excerpt: 'סדנאות מותאמות אישית לארגונים',
+      type: 'workshop' as const,
+      duration: 'מותאם אישית',
+      status: 'published' as const,
+      featured: false,
+      order: 3,
     },
     {
       title: 'ליווי אישי 1:1',
       slug: 'personal-coaching',
-      shortDescription: 'ליווי אישי עם המייסדים',
-      price: 3500,
-      level: 'intermediate' as const,
-      category: 'business' as const,
+      subtitle: 'ליווי אישי עם המייסדים',
+      excerpt: 'ליווי אישי לאנשי מקצוע ויזמים',
+      type: 'coaching' as const,
+      duration: 'גמיש',
       status: 'published' as const,
       featured: false,
-      instructor: instructorId,
-    },
-    {
-      title: 'סדנאות והרצאות AI לארגונים',
-      slug: 'workshops',
-      shortDescription: 'הפכו את הארגון למעצמת AI',
-      price: 0,
-      level: 'beginner' as const,
-      category: 'other' as const,
-      status: 'published' as const,
-      featured: false,
-      instructor: instructorId,
+      order: 4,
     },
   ]
 
   for (const courseData of coursesData) {
-    // Check if course already exists
     const existing = await payload.find({
       collection: 'courses',
-      where: {
-        slug: { equals: courseData.slug },
-      },
+      where: { slug: { equals: courseData.slug } },
       limit: 1,
     })
 
     if (existing.docs.length > 0) {
-      // Update existing course
       await payload.update({
         collection: 'courses',
         id: existing.docs[0].id,
@@ -168,7 +173,6 @@ async function seed() {
       })
       console.log(`  ✅ Updated course: ${courseData.title}`)
     } else {
-      // Create new course
       await payload.create({
         collection: 'courses',
         data: courseData,

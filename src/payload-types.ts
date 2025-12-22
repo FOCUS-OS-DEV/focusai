@@ -70,17 +70,20 @@ export interface Config {
     users: User;
     media: Media;
     courses: Course;
+    cohorts: Cohort;
     lessons: Lesson;
     enrollments: Enrollment;
     progress: Progress;
-    purchases: Purchase;
-    messages: Message;
+    attendance: Attendance;
+    assignments: Assignment;
+    submissions: Submission;
     certificates: Certificate;
-    coupons: Coupon;
-    pages: Page;
     posts: Post;
+    categories: Category;
+    testimonials: Testimonial;
+    instructors: Instructor;
     contacts: Contact;
-    recordings: Recording;
+    partners: Partner;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -91,17 +94,20 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
+    cohorts: CohortsSelect<false> | CohortsSelect<true>;
     lessons: LessonsSelect<false> | LessonsSelect<true>;
     enrollments: EnrollmentsSelect<false> | EnrollmentsSelect<true>;
     progress: ProgressSelect<false> | ProgressSelect<true>;
-    purchases: PurchasesSelect<false> | PurchasesSelect<true>;
-    messages: MessagesSelect<false> | MessagesSelect<true>;
+    attendance: AttendanceSelect<false> | AttendanceSelect<true>;
+    assignments: AssignmentsSelect<false> | AssignmentsSelect<true>;
+    submissions: SubmissionsSelect<false> | SubmissionsSelect<true>;
     certificates: CertificatesSelect<false> | CertificatesSelect<true>;
-    coupons: CouponsSelect<false> | CouponsSelect<true>;
-    pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    instructors: InstructorsSelect<false> | InstructorsSelect<true>;
     contacts: ContactsSelect<false> | ContactsSelect<true>;
-    recordings: RecordingsSelect<false> | RecordingsSelect<true>;
+    partners: PartnersSelect<false> | PartnersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -114,10 +120,12 @@ export interface Config {
   globals: {
     'site-settings': SiteSetting;
     navigation: Navigation;
+    homepage: Homepage;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     navigation: NavigationSelect<false> | NavigationSelect<true>;
+    homepage: HomepageSelect<false> | HomepageSelect<true>;
   };
   locale: null;
   user: User & {
@@ -152,6 +160,9 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
+  name?: string | null;
+  phone?: string | null;
+  avatar?: (number | null) | Media;
   role?: ('admin' | 'instructor' | 'student') | null;
   updatedAt: string;
   createdAt: string;
@@ -177,7 +188,8 @@ export interface User {
  */
 export interface Media {
   id: number;
-  alt: string;
+  alt?: string | null;
+  caption?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -189,6 +201,32 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -198,7 +236,7 @@ export interface Course {
   id: number;
   title: string;
   slug: string;
-  shortDescription?: string | null;
+  subtitle?: string | null;
   description?: {
     root: {
       type: string;
@@ -214,33 +252,171 @@ export interface Course {
     };
     [k: string]: unknown;
   } | null;
-  thumbnail?: (number | null) | Media;
-  previewVideo?: string | null;
-  price: number;
-  salePrice?: number | null;
-  instructor: number | User;
-  level: 'beginner' | 'intermediate' | 'advanced';
-  category: 'development' | 'design' | 'business' | 'marketing' | 'other';
-  status: 'draft' | 'published' | 'archived';
+  excerpt?: string | null;
+  featuredImage?: (number | null) | Media;
+  type: 'frontal' | 'digital' | 'workshop' | 'coaching';
+  /**
+   * למשל: 12 שבועות
+   */
+  duration?: string | null;
+  /**
+   * למשל: ימי שני 17:00-21:00
+   */
+  schedule?: string | null;
+  location?: string | null;
+  hasZoom?: boolean | null;
+  maxStudents?: number | null;
+  /**
+   * למשל: 3 מרצים על 18 תלמידים
+   */
+  instructorRatio?: string | null;
+  certificate?: string | null;
+  certificateDescription?: string | null;
+  price?: number | null;
+  showPrice?: boolean | null;
+  highlights?:
+    | {
+        /**
+         * שם אייקון מ-Lucide
+         */
+        icon?: string | null;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  syllabus?:
+    | {
+        weekNumber?: string | null;
+        title: string;
+        topics?:
+          | {
+              topic?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  faq?:
+    | {
+        question: string;
+        answer: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  gallery?:
+    | {
+        image: number | Media;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  instructors?: (number | Instructor)[] | null;
+  testimonials?: (number | Testimonial)[] | null;
+  ctaText?: string | null;
+  ctaType?: ('contact' | 'purchase' | 'link') | null;
+  ctaLink?: string | null;
+  status?: ('draft' | 'published') | null;
+  order?: number | null;
   featured?: boolean | null;
-  features?:
-    | {
-        feature: string;
-        id?: string | null;
-      }[]
-    | null;
-  requirements?:
-    | {
-        requirement: string;
-        id?: string | null;
-      }[]
-    | null;
-  studentsCount?: number | null;
   seo?: {
     metaTitle?: string | null;
     metaDescription?: string | null;
-    metaImage?: (number | null) | Media;
+    ogImage?: (number | null) | Media;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "instructors".
+ */
+export interface Instructor {
+  id: number;
+  name: string;
+  slug?: string | null;
+  title?: string | null;
+  bio?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  shortBio?: string | null;
+  image?: (number | null) | Media;
+  email?: string | null;
+  linkedin?: string | null;
+  specialties?:
+    | {
+        specialty?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  order?: number | null;
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: number;
+  name: string;
+  role?: string | null;
+  image?: (number | null) | Media;
+  content: string;
+  rating?: number | null;
+  course?: (number | null) | Course;
+  videoUrl?: string | null;
+  featured?: boolean | null;
+  status?: ('pending' | 'approved') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cohorts".
+ */
+export interface Cohort {
+  id: number;
+  title: string;
+  slug?: string | null;
+  course: number | Course;
+  startDate: string;
+  endDate?: string | null;
+  schedule?: string | null;
+  location?: string | null;
+  zoomLink?: string | null;
+  whatsappGroup?: string | null;
+  maxStudents?: number | null;
+  instructors?: (number | User)[] | null;
+  status?: ('upcoming' | 'active' | 'completed') | null;
+  registrationOpen?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -251,8 +427,8 @@ export interface Course {
 export interface Lesson {
   id: number;
   title: string;
-  course: number | Course;
-  chapter?: string | null;
+  slug?: string | null;
+  cohort: number | Cohort;
   order: number;
   description?: {
     root: {
@@ -269,14 +445,13 @@ export interface Lesson {
     };
     [k: string]: unknown;
   } | null;
-  videoType?: ('url' | 'upload') | null;
-  videoUrl?: string | null;
-  videoFile?: (number | null) | Media;
-  duration?: number | null;
-  /**
-   * Allow this lesson to be viewed without enrollment
-   */
-  isFree?: boolean | null;
+  date?: string | null;
+  video?: {
+    type?: ('url' | 'upload') | null;
+    url?: string | null;
+    file?: (number | null) | Media;
+    duration?: number | null;
+  };
   materials?:
     | {
         title: string;
@@ -284,13 +459,7 @@ export interface Lesson {
         id?: string | null;
       }[]
     | null;
-  resources?:
-    | {
-        title: string;
-        url: string;
-        id?: string | null;
-      }[]
-    | null;
+  status?: ('draft' | 'published') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -300,14 +469,13 @@ export interface Lesson {
  */
 export interface Enrollment {
   id: number;
-  user: number | User;
-  course: number | Course;
-  status: 'active' | 'completed' | 'expired' | 'cancelled';
-  enrolledAt: string;
+  student: number | User;
+  cohort: number | Cohort;
+  status?: ('pending' | 'active' | 'completed' | 'cancelled') | null;
+  enrolledAt?: string | null;
   completedAt?: string | null;
-  expiresAt?: string | null;
-  progress?: number | null;
-  source?: ('direct' | 'coupon' | 'gift' | 'free') | null;
+  paymentStatus?: ('pending' | 'paid' | 'refunded') | null;
+  notes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -317,67 +485,40 @@ export interface Enrollment {
  */
 export interface Progress {
   id: number;
-  user?: (number | null) | User;
-  course?: (number | null) | Course;
-  lesson?: (number | null) | Lesson;
-  status?: ('not_started' | 'in_progress' | 'completed') | null;
-  progressPercent?: number | null;
-  lastAccessedAt?: string | null;
-  completedAt?: string | null;
-  timeSpentSeconds?: number | null;
+  student: number | User;
+  lesson: number | Lesson;
+  watched?: boolean | null;
+  watchedAt?: string | null;
+  watchTime?: number | null;
+  completed?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "purchases".
+ * via the `definition` "attendance".
  */
-export interface Purchase {
+export interface Attendance {
   id: number;
-  user?: (number | null) | User;
-  course?: (number | null) | Course;
-  status?: ('pending' | 'completed' | 'failed' | 'refunded') | null;
-  amount?: number | null;
-  currency?: ('ILS' | 'USD' | 'EUR') | null;
-  paymentMethod?: ('credit_card' | 'paypal' | 'bank_transfer' | 'free') | null;
-  transactionId?: string | null;
-  coupon?: (number | null) | Coupon;
-  discountAmount?: number | null;
+  student: number | User;
+  lesson: number | Lesson;
+  cohort: number | Cohort;
+  date: string;
+  present?: boolean | null;
+  joinedAt?: string | null;
+  leftAt?: string | null;
   notes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "coupons".
+ * via the `definition` "assignments".
  */
-export interface Coupon {
+export interface Assignment {
   id: number;
-  code?: string | null;
-  description?: string | null;
-  discountType?: ('percentage' | 'fixed') | null;
-  discountValue?: number | null;
-  minPurchaseAmount?: number | null;
-  maxDiscountAmount?: number | null;
-  applicableCourses?: (number | Course)[] | null;
-  usageLimit?: number | null;
-  usedCount?: number | null;
-  validFrom?: string | null;
-  validUntil?: string | null;
-  isActive?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "messages".
- */
-export interface Message {
-  id: number;
-  sender?: (number | null) | User;
-  recipient?: (number | null) | User;
-  subject?: string | null;
-  content?: {
+  title: string;
+  description?: {
     root: {
       type: string;
       children: {
@@ -392,14 +533,53 @@ export interface Message {
     };
     [k: string]: unknown;
   } | null;
-  status?: ('unread' | 'read' | 'archived') | null;
-  parentMessage?: (number | null) | Message;
+  cohort: number | Cohort;
+  type?: ('homework' | 'exam' | 'project') | null;
+  dueDate?: string | null;
   attachments?:
     | {
-        file?: (number | null) | Media;
+        file: number | Media;
         id?: string | null;
       }[]
     | null;
+  maxScore?: number | null;
+  status?: ('draft' | 'published') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "submissions".
+ */
+export interface Submission {
+  id: number;
+  student: number | User;
+  assignment: number | Assignment;
+  files?:
+    | {
+        file: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  notes?: string | null;
+  submittedAt?: string | null;
+  score?: number | null;
+  feedback?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  status?: ('pending' | 'graded' | 'returned') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -409,51 +589,13 @@ export interface Message {
  */
 export interface Certificate {
   id: number;
+  student: number | User;
+  course: number | Course;
+  cohort?: (number | null) | Cohort;
   certificateNumber?: string | null;
-  user?: (number | null) | User;
-  course?: (number | null) | Course;
   issuedAt?: string | null;
-  expiresAt?: string | null;
-  status?: ('active' | 'expired' | 'revoked') | null;
-  pdfFile?: (number | null) | Media;
-  grade?: number | null;
-  notes?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
- */
-export interface Page {
-  id: number;
-  title?: string | null;
-  slug?: string | null;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  excerpt?: string | null;
-  featuredImage?: (number | null) | Media;
-  status?: ('draft' | 'published') | null;
-  publishedAt?: string | null;
-  seo?: {
-    metaTitle?: string | null;
-    metaDescription?: string | null;
-    ogImage?: (number | null) | Media;
-  };
-  template?: ('default' | 'full_width' | 'landing' | 'contact') | null;
+  file?: (number | null) | Media;
+  status?: ('pending' | 'issued' | 'revoked') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -463,10 +605,10 @@ export interface Page {
  */
 export interface Post {
   id: number;
-  title?: string | null;
-  slug?: string | null;
-  author?: (number | null) | User;
-  content?: {
+  title: string;
+  slug: string;
+  excerpt?: string | null;
+  content: {
     root: {
       type: string;
       children: {
@@ -480,27 +622,47 @@ export interface Post {
       version: number;
     };
     [k: string]: unknown;
-  } | null;
-  excerpt?: string | null;
+  };
   featuredImage?: (number | null) | Media;
-  categories?: ('technology' | 'education' | 'business' | 'lifestyle' | 'news')[] | null;
+  category?: (number | null) | Category;
+  author?: (number | null) | User;
   tags?:
     | {
         tag?: string | null;
         id?: string | null;
       }[]
     | null;
-  status?: ('draft' | 'published' | 'archived') | null;
+  cta?: {
+    enabled?: boolean | null;
+    text?: string | null;
+    url?: string | null;
+    style?: ('primary' | 'secondary') | null;
+  };
+  relatedCourse?: (number | null) | Course;
+  readTime?: number | null;
+  status?: ('draft' | 'published') | null;
   publishedAt?: string | null;
   seo?: {
     metaTitle?: string | null;
     metaDescription?: string | null;
-    ogImage?: (number | null) | Media;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
   /**
-   * Estimated reading time in minutes
+   * קוד צבע HEX
    */
-  readingTime?: number | null;
+  color?: string | null;
+  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -510,55 +672,31 @@ export interface Post {
  */
 export interface Contact {
   id: number;
-  name?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  subject?: string | null;
+  name: string;
+  email: string;
+  phone: string;
+  company?: string | null;
+  interest?: ('bot-camp' | 'ai-ready' | 'workshop' | 'coaching' | 'digital' | 'general') | null;
   message?: string | null;
-  source?: ('contact_form' | 'newsletter' | 'course_inquiry' | 'support' | 'other') | null;
-  status?: ('new' | 'in_progress' | 'resolved' | 'spam') | null;
-  assignedTo?: (number | null) | User;
   /**
-   * Internal notes
+   * מאיזה עמוד הגיע - נקבע אוטומטית
    */
-  notes?: string | null;
-  ipAddress?: string | null;
-  userAgent?: string | null;
+  source?: string | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "recordings".
+ * via the `definition` "partners".
  */
-export interface Recording {
+export interface Partner {
   id: number;
-  title?: string | null;
-  description?: string | null;
-  course?: (number | null) | Course;
-  lesson?: (number | null) | Lesson;
-  /**
-   * External video URL (YouTube, Vimeo, etc.)
-   */
-  videoUrl?: string | null;
-  videoFile?: (number | null) | Media;
-  thumbnail?: (number | null) | Media;
-  /**
-   * Duration in seconds
-   */
-  duration?: number | null;
-  status?: ('draft' | 'processing' | 'published' | 'archived') | null;
-  recordedAt?: string | null;
-  instructor?: (number | null) | User;
-  views?: number | null;
-  transcription?: string | null;
-  chapters?:
-    | {
-        title?: string | null;
-        timestampSeconds?: number | null;
-        id?: string | null;
-      }[]
-    | null;
+  name: string;
+  logo: number | Media;
+  website?: string | null;
+  type: 'academic' | 'corporate' | 'media';
+  featured?: boolean | null;
+  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -599,6 +737,10 @@ export interface PayloadLockedDocument {
         value: number | Course;
       } | null)
     | ({
+        relationTo: 'cohorts';
+        value: number | Cohort;
+      } | null)
+    | ({
         relationTo: 'lessons';
         value: number | Lesson;
       } | null)
@@ -611,36 +753,44 @@ export interface PayloadLockedDocument {
         value: number | Progress;
       } | null)
     | ({
-        relationTo: 'purchases';
-        value: number | Purchase;
+        relationTo: 'attendance';
+        value: number | Attendance;
       } | null)
     | ({
-        relationTo: 'messages';
-        value: number | Message;
+        relationTo: 'assignments';
+        value: number | Assignment;
+      } | null)
+    | ({
+        relationTo: 'submissions';
+        value: number | Submission;
       } | null)
     | ({
         relationTo: 'certificates';
         value: number | Certificate;
       } | null)
     | ({
-        relationTo: 'coupons';
-        value: number | Coupon;
-      } | null)
-    | ({
-        relationTo: 'pages';
-        value: number | Page;
-      } | null)
-    | ({
         relationTo: 'posts';
         value: number | Post;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'testimonials';
+        value: number | Testimonial;
+      } | null)
+    | ({
+        relationTo: 'instructors';
+        value: number | Instructor;
       } | null)
     | ({
         relationTo: 'contacts';
         value: number | Contact;
       } | null)
     | ({
-        relationTo: 'recordings';
-        value: number | Recording;
+        relationTo: 'partners';
+        value: number | Partner;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -689,6 +839,9 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  avatar?: T;
   role?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -713,6 +866,7 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  caption?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -724,6 +878,40 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        hero?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -732,37 +920,91 @@ export interface MediaSelect<T extends boolean = true> {
 export interface CoursesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
-  shortDescription?: T;
+  subtitle?: T;
   description?: T;
-  thumbnail?: T;
-  previewVideo?: T;
+  excerpt?: T;
+  featuredImage?: T;
+  type?: T;
+  duration?: T;
+  schedule?: T;
+  location?: T;
+  hasZoom?: T;
+  maxStudents?: T;
+  instructorRatio?: T;
+  certificate?: T;
+  certificateDescription?: T;
   price?: T;
-  salePrice?: T;
-  instructor?: T;
-  level?: T;
-  category?: T;
+  showPrice?: T;
+  highlights?:
+    | T
+    | {
+        icon?: T;
+        text?: T;
+        id?: T;
+      };
+  syllabus?:
+    | T
+    | {
+        weekNumber?: T;
+        title?: T;
+        topics?:
+          | T
+          | {
+              topic?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  gallery?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  instructors?: T;
+  testimonials?: T;
+  ctaText?: T;
+  ctaType?: T;
+  ctaLink?: T;
   status?: T;
+  order?: T;
   featured?: T;
-  features?:
-    | T
-    | {
-        feature?: T;
-        id?: T;
-      };
-  requirements?:
-    | T
-    | {
-        requirement?: T;
-        id?: T;
-      };
-  studentsCount?: T;
   seo?:
     | T
     | {
         metaTitle?: T;
         metaDescription?: T;
-        metaImage?: T;
+        ogImage?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cohorts_select".
+ */
+export interface CohortsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  course?: T;
+  startDate?: T;
+  endDate?: T;
+  schedule?: T;
+  location?: T;
+  zoomLink?: T;
+  whatsappGroup?: T;
+  maxStudents?: T;
+  instructors?: T;
+  status?: T;
+  registrationOpen?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -772,15 +1014,19 @@ export interface CoursesSelect<T extends boolean = true> {
  */
 export interface LessonsSelect<T extends boolean = true> {
   title?: T;
-  course?: T;
-  chapter?: T;
+  slug?: T;
+  cohort?: T;
   order?: T;
   description?: T;
-  videoType?: T;
-  videoUrl?: T;
-  videoFile?: T;
-  duration?: T;
-  isFree?: T;
+  date?: T;
+  video?:
+    | T
+    | {
+        type?: T;
+        url?: T;
+        file?: T;
+        duration?: T;
+      };
   materials?:
     | T
     | {
@@ -788,13 +1034,7 @@ export interface LessonsSelect<T extends boolean = true> {
         file?: T;
         id?: T;
       };
-  resources?:
-    | T
-    | {
-        title?: T;
-        url?: T;
-        id?: T;
-      };
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -803,14 +1043,13 @@ export interface LessonsSelect<T extends boolean = true> {
  * via the `definition` "enrollments_select".
  */
 export interface EnrollmentsSelect<T extends boolean = true> {
-  user?: T;
-  course?: T;
+  student?: T;
+  cohort?: T;
   status?: T;
   enrolledAt?: T;
   completedAt?: T;
-  expiresAt?: T;
-  progress?: T;
-  source?: T;
+  paymentStatus?: T;
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -819,52 +1058,70 @@ export interface EnrollmentsSelect<T extends boolean = true> {
  * via the `definition` "progress_select".
  */
 export interface ProgressSelect<T extends boolean = true> {
-  user?: T;
-  course?: T;
+  student?: T;
   lesson?: T;
-  status?: T;
-  progressPercent?: T;
-  lastAccessedAt?: T;
-  completedAt?: T;
-  timeSpentSeconds?: T;
+  watched?: T;
+  watchedAt?: T;
+  watchTime?: T;
+  completed?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "purchases_select".
+ * via the `definition` "attendance_select".
  */
-export interface PurchasesSelect<T extends boolean = true> {
-  user?: T;
-  course?: T;
-  status?: T;
-  amount?: T;
-  currency?: T;
-  paymentMethod?: T;
-  transactionId?: T;
-  coupon?: T;
-  discountAmount?: T;
+export interface AttendanceSelect<T extends boolean = true> {
+  student?: T;
+  lesson?: T;
+  cohort?: T;
+  date?: T;
+  present?: T;
+  joinedAt?: T;
+  leftAt?: T;
   notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "messages_select".
+ * via the `definition` "assignments_select".
  */
-export interface MessagesSelect<T extends boolean = true> {
-  sender?: T;
-  recipient?: T;
-  subject?: T;
-  content?: T;
-  status?: T;
-  parentMessage?: T;
+export interface AssignmentsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  cohort?: T;
+  type?: T;
+  dueDate?: T;
   attachments?:
     | T
     | {
         file?: T;
         id?: T;
       };
+  maxScore?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "submissions_select".
+ */
+export interface SubmissionsSelect<T extends boolean = true> {
+  student?: T;
+  assignment?: T;
+  files?:
+    | T
+    | {
+        file?: T;
+        id?: T;
+      };
+  notes?: T;
+  submittedAt?: T;
+  score?: T;
+  feedback?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -873,58 +1130,13 @@ export interface MessagesSelect<T extends boolean = true> {
  * via the `definition` "certificates_select".
  */
 export interface CertificatesSelect<T extends boolean = true> {
-  certificateNumber?: T;
-  user?: T;
+  student?: T;
   course?: T;
+  cohort?: T;
+  certificateNumber?: T;
   issuedAt?: T;
-  expiresAt?: T;
+  file?: T;
   status?: T;
-  pdfFile?: T;
-  grade?: T;
-  notes?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "coupons_select".
- */
-export interface CouponsSelect<T extends boolean = true> {
-  code?: T;
-  description?: T;
-  discountType?: T;
-  discountValue?: T;
-  minPurchaseAmount?: T;
-  maxDiscountAmount?: T;
-  applicableCourses?: T;
-  usageLimit?: T;
-  usedCount?: T;
-  validFrom?: T;
-  validUntil?: T;
-  isActive?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_select".
- */
-export interface PagesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  content?: T;
-  excerpt?: T;
-  featuredImage?: T;
-  status?: T;
-  publishedAt?: T;
-  seo?:
-    | T
-    | {
-        metaTitle?: T;
-        metaDescription?: T;
-        ogImage?: T;
-      };
-  template?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -935,17 +1147,27 @@ export interface PagesSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
-  author?: T;
-  content?: T;
   excerpt?: T;
+  content?: T;
   featuredImage?: T;
-  categories?: T;
+  category?: T;
+  author?: T;
   tags?:
     | T
     | {
         tag?: T;
         id?: T;
       };
+  cta?:
+    | T
+    | {
+        enabled?: T;
+        text?: T;
+        url?: T;
+        style?: T;
+      };
+  relatedCourse?: T;
+  readTime?: T;
   status?: T;
   publishedAt?: T;
   seo?:
@@ -953,9 +1175,61 @@ export interface PostsSelect<T extends boolean = true> {
     | {
         metaTitle?: T;
         metaDescription?: T;
-        ogImage?: T;
       };
-  readingTime?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  color?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  image?: T;
+  content?: T;
+  rating?: T;
+  course?: T;
+  videoUrl?: T;
+  featured?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "instructors_select".
+ */
+export interface InstructorsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  title?: T;
+  bio?: T;
+  shortBio?: T;
+  image?: T;
+  email?: T;
+  linkedin?: T;
+  specialties?:
+    | T
+    | {
+        specialty?: T;
+        id?: T;
+      };
+  order?: T;
+  featured?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -967,42 +1241,24 @@ export interface ContactsSelect<T extends boolean = true> {
   name?: T;
   email?: T;
   phone?: T;
-  subject?: T;
+  company?: T;
+  interest?: T;
   message?: T;
   source?: T;
-  status?: T;
-  assignedTo?: T;
-  notes?: T;
-  ipAddress?: T;
-  userAgent?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "recordings_select".
+ * via the `definition` "partners_select".
  */
-export interface RecordingsSelect<T extends boolean = true> {
-  title?: T;
-  description?: T;
-  course?: T;
-  lesson?: T;
-  videoUrl?: T;
-  videoFile?: T;
-  thumbnail?: T;
-  duration?: T;
-  status?: T;
-  recordedAt?: T;
-  instructor?: T;
-  views?: T;
-  transcription?: T;
-  chapters?:
-    | T
-    | {
-        title?: T;
-        timestampSeconds?: T;
-        id?: T;
-      };
+export interface PartnersSelect<T extends boolean = true> {
+  name?: T;
+  logo?: T;
+  website?: T;
+  type?: T;
+  featured?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1053,6 +1309,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface SiteSetting {
   id: number;
   siteName?: string | null;
+  siteDescription?: string | null;
   logo?: (number | null) | Media;
   favicon?: (number | null) | Media;
   contact?: {
@@ -1066,33 +1323,12 @@ export interface SiteSetting {
     instagram?: string | null;
     linkedin?: string | null;
     youtube?: string | null;
-    twitter?: string | null;
     tiktok?: string | null;
   };
-  seo?: {
-    defaultTitle?: string | null;
-    titleSuffix?: string | null;
-    defaultDescription?: string | null;
-    defaultImage?: (number | null) | Media;
-    keywords?: string | null;
-  };
-  scripts?: {
-    /**
-     * Google Analytics ID (e.g., G-XXXXXXXXXX)
-     */
+  tracking?: {
+    metaPixel?: string | null;
+    tiktokPixel?: string | null;
     googleAnalytics?: string | null;
-    /**
-     * Facebook Pixel ID
-     */
-    facebookPixel?: string | null;
-    /**
-     * Scripts to add in <head>
-     */
-    headScripts?: string | null;
-    /**
-     * Scripts to add before </body>
-     */
-    bodyScripts?: string | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1137,10 +1373,61 @@ export interface Navigation {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homepage".
+ */
+export interface Homepage {
+  id: number;
+  hero?: {
+    title?: string | null;
+    subtitle?: string | null;
+    primaryCta?: string | null;
+    primaryCtaLink?: string | null;
+    secondaryCta?: string | null;
+    secondaryCtaLink?: string | null;
+    image?: (number | null) | Media;
+  };
+  stats?:
+    | {
+        number?: string | null;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  whyUs?:
+    | {
+        icon?: string | null;
+        title?: string | null;
+        description?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  sections?: {
+    coursesTitle?: string | null;
+    blogTitle?: string | null;
+    testimonialsTitle?: string | null;
+    partnersTitle?: string | null;
+  };
+  newsletter?: {
+    title?: string | null;
+    description?: string | null;
+    webhookUrl?: string | null;
+  };
+  bottomCta?: {
+    title?: string | null;
+    description?: string | null;
+    showForm?: boolean | null;
+    showWhatsapp?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
   siteName?: T;
+  siteDescription?: T;
   logo?: T;
   favicon?: T;
   contact?:
@@ -1158,25 +1445,14 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         instagram?: T;
         linkedin?: T;
         youtube?: T;
-        twitter?: T;
         tiktok?: T;
       };
-  seo?:
+  tracking?:
     | T
     | {
-        defaultTitle?: T;
-        titleSuffix?: T;
-        defaultDescription?: T;
-        defaultImage?: T;
-        keywords?: T;
-      };
-  scripts?:
-    | T
-    | {
+        metaPixel?: T;
+        tiktokPixel?: T;
         googleAnalytics?: T;
-        facebookPixel?: T;
-        headScripts?: T;
-        bodyScripts?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1217,6 +1493,64 @@ export interface NavigationSelect<T extends boolean = true> {
         text?: T;
         url?: T;
         isVisible?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homepage_select".
+ */
+export interface HomepageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        title?: T;
+        subtitle?: T;
+        primaryCta?: T;
+        primaryCtaLink?: T;
+        secondaryCta?: T;
+        secondaryCtaLink?: T;
+        image?: T;
+      };
+  stats?:
+    | T
+    | {
+        number?: T;
+        label?: T;
+        id?: T;
+      };
+  whyUs?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  sections?:
+    | T
+    | {
+        coursesTitle?: T;
+        blogTitle?: T;
+        testimonialsTitle?: T;
+        partnersTitle?: T;
+      };
+  newsletter?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        webhookUrl?: T;
+      };
+  bottomCta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        showForm?: T;
+        showWhatsapp?: T;
       };
   updatedAt?: T;
   createdAt?: T;

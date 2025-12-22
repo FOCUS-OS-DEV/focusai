@@ -25,89 +25,57 @@ export async function GET() {
 
     console.log('📦 Running seed...')
 
-    // 1. Find or create instructor
-    let instructorId: number
-
-    const existingInstructor = await payload.find({
-      collection: 'users',
-      where: { role: { equals: 'instructor' } },
-      limit: 1,
-    })
-
-    if (existingInstructor.docs.length > 0) {
-      instructorId = existingInstructor.docs[0].id as number
-      console.log('✅ Found instructor:', existingInstructor.docs[0].email)
-    } else {
-      // Try to find any user to use as instructor
-      const anyUser = await payload.find({
-        collection: 'users',
-        limit: 1,
-      })
-
-      if (anyUser.docs.length > 0) {
-        instructorId = anyUser.docs[0].id as number
-        console.log('✅ Using existing user as instructor:', anyUser.docs[0].email)
-      } else {
-        // Create instructor user
-        const instructor = await payload.create({
-          collection: 'users',
-          data: {
-            email: 'instructor@focusai.co.il',
-            password: 'instructor123!',
-            role: 'instructor',
-          },
-        })
-        instructorId = instructor.id as number
-        console.log('✅ Created instructor:', instructor.email)
-      }
-    }
-
-    // 2. Create Courses (skip globals for now)
+    // Create Courses
     console.log('📝 Creating courses...')
     const courses = [
       {
         title: 'Bot-Camp',
         slug: 'bot-camp',
-        shortDescription: 'הכשרת מפתחי אוטומציות וסוכני AI',
-        price: 5900,
-        level: 'beginner' as const,
-        category: 'development' as const,
+        subtitle: 'הכשרת מפתחי אוטומציות וסוכני AI',
+        excerpt: '12 שבועות של הכשרה מעשית לפיתוח סוכני AI ואוטומציות',
+        type: 'frontal' as const,
+        duration: '12 שבועות',
+        schedule: 'ימי שני 17:00-21:00',
+        location: 'אריה שנקר 14, הרצליה פיתוח (Nolton House)',
+        hasZoom: true,
+        maxStudents: 18,
+        certificate: 'תעודה מקצועית בליווי אקדמי של היחידה ללימודי חוץ באוניברסיטת חיפה',
         status: 'published' as const,
         featured: true,
-        instructor: instructorId,
+        order: 1,
       },
       {
         title: 'AI Ready',
         slug: 'ai-ready',
-        shortDescription: '8 מפגשים מעשיים לשליטה בכלי AI',
-        price: 2900,
-        level: 'beginner' as const,
-        category: 'other' as const,
+        subtitle: '8 מפגשים מעשיים לשליטה בכלי AI',
+        excerpt: 'קורס מעשי לשליטה בכלי AI מתקדמים',
+        type: 'frontal' as const,
+        duration: '8 מפגשים',
+        schedule: 'ימי שישי 9:00-12:00',
+        certificate: 'תעודת Focus AI',
         status: 'published' as const,
         featured: true,
-        instructor: instructorId,
+        order: 2,
+      },
+      {
+        title: 'סדנאות לארגונים',
+        slug: 'workshops',
+        subtitle: 'הפכו את הארגון למעצמת AI',
+        type: 'workshop' as const,
+        duration: 'מותאם אישית',
+        status: 'published' as const,
+        featured: false,
+        order: 3,
       },
       {
         title: 'ליווי אישי 1:1',
         slug: 'personal-coaching',
-        shortDescription: 'ליווי אישי עם המייסדים',
-        price: 3500,
-        level: 'intermediate' as const,
-        category: 'business' as const,
+        subtitle: 'ליווי אישי עם המייסדים',
+        type: 'coaching' as const,
+        duration: 'גמיש',
         status: 'published' as const,
         featured: false,
-        instructor: instructorId,
-      },
-      {
-        title: 'סדנאות והרצאות AI לארגונים',
-        slug: 'workshops',
-        shortDescription: 'הפכו את הארגון למעצמת AI',
-        price: 0,
-        level: 'beginner' as const,
-        category: 'other' as const,
-        status: 'published' as const,
-        featured: false,
-        instructor: instructorId,
+        order: 4,
       },
     ]
 
