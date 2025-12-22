@@ -2,53 +2,71 @@
 
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
+import type { Homepage } from '@/payload-types'
+import type { ReactElement } from 'react'
 
-const reasons = [
+// Icon mapping for Payload data
+const iconComponents: Record<string, ReactElement> = {
+  'alert-triangle': (
+    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+  ),
+  'bar-chart': (
+    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="20" x2="12" y2="10"/>
+      <line x1="18" y1="20" x2="18" y2="4"/>
+      <line x1="6" y1="20" x2="6" y2="16"/>
+    </svg>
+  ),
+  'rocket': (
+    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+    </svg>
+  ),
+  'clock': (
+    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 6v6l4 2"/>
+    </svg>
+  ),
+}
+
+const iconColors: Record<number, { bg: string; color: string }> = {
+  0: { bg: 'bg-red-100', color: 'text-red-500' },
+  1: { bg: 'bg-green-100', color: 'text-green-500' },
+  2: { bg: 'bg-blue-100', color: 'text-blue-500' },
+  3: { bg: 'bg-purple-100', color: 'text-purple-500' },
+}
+
+// Fallback reasons
+const fallbackReasons = [
   {
-    icon: (
-      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-        <line x1="12" y1="9" x2="12" y2="13"/>
-        <line x1="12" y1="17" x2="12.01" y2="17"/>
-      </svg>
-    ),
+    icon: iconComponents['alert-triangle'],
     iconBg: 'bg-red-100',
     iconColor: 'text-red-500',
     title: 'פער משמעותי בשוק העבודה',
     desc: 'ארגונים מחפשים עובדים שיודעים לעבוד עם AI. מי שלא מתעדכן - נשאר מאחור.',
   },
   {
-    icon: (
-      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="12" y1="20" x2="12" y2="10"/>
-        <line x1="18" y1="20" x2="18" y2="4"/>
-        <line x1="6" y1="20" x2="6" y2="16"/>
-      </svg>
-    ),
+    icon: iconComponents['bar-chart'],
     iconBg: 'bg-green-100',
     iconColor: 'text-green-500',
     title: 'ROI מהשבוע הראשון',
     desc: 'שימוש נכון בכלי AI מניב חיסכון משמעותי בשעות עבודה ודיוק גבוה יותר במשימות.',
   },
   {
-    icon: (
-      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-        <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
-      </svg>
-    ),
+    icon: iconComponents['rocket'],
     iconBg: 'bg-blue-100',
     iconColor: 'text-blue-500',
     title: 'אימוץ מהיר בארגונים',
     desc: 'ארגונים בכל הגדלים מטמיעים AI. מי שמוביל את השינוי - מקבל יתרון בקריירה.',
   },
   {
-    icon: (
-      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 6v6l4 2"/>
-      </svg>
-    ),
+    icon: iconComponents['clock'],
     iconBg: 'bg-purple-100',
     iconColor: 'text-purple-500',
     title: 'העתיד כבר כאן',
@@ -56,7 +74,24 @@ const reasons = [
   },
 ]
 
-const WhyNow = () => {
+interface WhyNowProps {
+  whyUs?: Homepage['whyUs']
+}
+
+const WhyNow = ({ whyUs }: WhyNowProps) => {
+  // Convert Payload whyUs to display format or use fallback
+  const reasons = whyUs && whyUs.length > 0
+    ? whyUs.map((item, i) => {
+        const colors = iconColors[i % 4]
+        return {
+          icon: iconComponents[item.icon || 'clock'] || iconComponents['clock'],
+          iconBg: colors.bg,
+          iconColor: colors.color,
+          title: item.title || '',
+          desc: item.description || '',
+        }
+      })
+    : fallbackReasons
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 })
 
   return (

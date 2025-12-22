@@ -3,10 +3,17 @@
 import { useState, FormEvent, ChangeEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
+import type { SiteSetting } from '@/payload-types'
 
 const WEBHOOK_URL = 'https://focus2025.app.n8n.cloud/webhook/06374873-ea8a-4d27-bfa2-453ab2bf03d8'
 
-const Contact = () => {
+interface ContactProps {
+  contact?: SiteSetting['contact']
+}
+
+const Contact = ({ contact }: ContactProps) => {
+  // contact prop can be used in the future to customize form behavior
+  void contact // For now, just acknowledge the prop
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', interest: '', message: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
