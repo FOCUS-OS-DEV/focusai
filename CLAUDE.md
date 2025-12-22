@@ -72,6 +72,31 @@ init-db.sql    ← רק UUID extension!
 
 ---
 
+## דפים עם Payload API (קריטי!)
+
+כל דף שמשתמש ב-`getPayload()` חייב להיות **dynamic** ולא static!
+
+```typescript
+// ב-page.tsx שקורא ל-Payload API:
+export const dynamic = 'force-dynamic'
+```
+
+**למה?**
+- `getPayload()` דורש `PAYLOAD_SECRET`
+- ב-build time אין גישה ל-environment variables
+- בלי `force-dynamic` - Next.js מנסה לבנות את הדף סטטית ונכשל
+
+**השגיאה שתראה אם תשכח:**
+```
+Error: missing secret key. A secret key is needed to secure Payload.
+```
+
+**דפים שצריכים את זה:**
+- `src/app/(frontend)/page.tsx` - דף הבית (משתמש ב-Payload API)
+- כל דף עתידי שקורא ל-`getPayload()`
+
+---
+
 ## תהליך עבודה עם GitHub
 
 **לפני כל עבודה:**
