@@ -2,146 +2,90 @@ import type { CollectionConfig } from 'payload'
 
 export const Lessons: CollectionConfig = {
   slug: 'lessons',
+  labels: {
+    singular: 'שיעור',
+    plural: 'שיעורים',
+  },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'course', 'chapter', 'order', 'isFree'],
-  },
-  access: {
-    read: ({ req: { user } }) => {
-      if (user?.role === 'admin') return true
-      return { isFree: { equals: true } }
-    },
-    create: ({ req: { user } }) =>
-      user?.role === 'admin' || user?.role === 'instructor',
-    update: ({ req: { user } }) =>
-      user?.role === 'admin' || user?.role === 'instructor',
-    delete: ({ req: { user } }) => user?.role === 'admin',
+    defaultColumns: ['title', 'cohort', 'order', 'status'],
   },
   fields: [
     {
       name: 'title',
       type: 'text',
+      label: 'כותרת השיעור',
       required: true,
-      label: 'Title',
     },
     {
-      name: 'course',
-      type: 'relationship',
-      relationTo: 'courses',
-      required: true,
-      label: 'Course',
-      admin: {
-        position: 'sidebar',
-      },
-    },
-    {
-      name: 'chapter',
+      name: 'slug',
       type: 'text',
-      label: 'Chapter',
-      admin: {
-        position: 'sidebar',
-      },
+      label: 'Slug',
+    },
+    {
+      name: 'cohort',
+      type: 'relationship',
+      relationTo: 'cohorts',
+      required: true,
+      label: 'מחזור',
     },
     {
       name: 'order',
       type: 'number',
+      label: 'מספר שיעור',
       required: true,
-      min: 0,
-      defaultValue: 0,
-      label: 'Order',
-      admin: {
-        position: 'sidebar',
-      },
     },
     {
       name: 'description',
       type: 'richText',
-      label: 'Description',
+      label: 'תיאור',
     },
     {
-      name: 'videoType',
-      type: 'select',
-      defaultValue: 'url',
-      options: [
-        { label: 'URL', value: 'url' },
-        { label: 'Upload', value: 'upload' },
+      name: 'date',
+      type: 'date',
+      label: 'תאריך השיעור',
+    },
+    // וידאו
+    {
+      name: 'video',
+      type: 'group',
+      label: 'וידאו',
+      fields: [
+        {
+          name: 'type',
+          type: 'select',
+          label: 'סוג',
+          options: [
+            { label: 'קישור (Zoom/YouTube)', value: 'url' },
+            { label: 'העלאה', value: 'upload' },
+          ],
+          defaultValue: 'url',
+        },
+        { name: 'url', type: 'text', label: 'קישור לוידאו' },
+        { name: 'file', type: 'upload', relationTo: 'media', label: 'קובץ וידאו' },
+        { name: 'duration', type: 'number', label: 'משך (דקות)' },
       ],
-      label: 'Video Type',
     },
-    {
-      name: 'videoUrl',
-      type: 'text',
-      label: 'Video URL',
-      admin: {
-        condition: (data) => data.videoType === 'url',
-      },
-    },
-    {
-      name: 'videoFile',
-      type: 'upload',
-      relationTo: 'media',
-      label: 'Video File',
-      admin: {
-        condition: (data) => data.videoType === 'upload',
-      },
-    },
-    {
-      name: 'duration',
-      type: 'number',
-      min: 0,
-      label: 'Duration (minutes)',
-      admin: {
-        position: 'sidebar',
-      },
-    },
-    {
-      name: 'isFree',
-      type: 'checkbox',
-      defaultValue: false,
-      label: 'Free Preview',
-      admin: {
-        position: 'sidebar',
-        description: 'Allow this lesson to be viewed without enrollment',
-      },
-    },
+    // חומרים
     {
       name: 'materials',
       type: 'array',
-      label: 'Materials',
+      label: 'חומרים להורדה',
       fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-          label: 'Title',
-        },
-        {
-          name: 'file',
-          type: 'upload',
-          relationTo: 'media',
-          required: true,
-          label: 'File',
-        },
+        { name: 'title', type: 'text', label: 'שם הקובץ', required: true },
+        { name: 'file', type: 'upload', relationTo: 'media', label: 'קובץ', required: true },
       ],
     },
     {
-      name: 'resources',
-      type: 'array',
-      label: 'Resources',
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-          required: true,
-          label: 'Title',
-        },
-        {
-          name: 'url',
-          type: 'text',
-          required: true,
-          label: 'URL',
-        },
+      name: 'status',
+      type: 'select',
+      label: 'סטטוס',
+      options: [
+        { label: 'טיוטה', value: 'draft' },
+        { label: 'פורסם', value: 'published' },
       ],
+      defaultValue: 'draft',
+      admin: { position: 'sidebar' },
     },
   ],
 }

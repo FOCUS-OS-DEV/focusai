@@ -2,121 +2,66 @@ import type { CollectionConfig } from 'payload'
 
 export const Enrollments: CollectionConfig = {
   slug: 'enrollments',
+  labels: {
+    singular: 'הרשמה',
+    plural: 'הרשמות',
+  },
   admin: {
     useAsTitle: 'id',
-    defaultColumns: ['user', 'course', 'status', 'progress', 'enrolledAt'],
-  },
-  access: {
-    read: ({ req: { user } }) => {
-      if (!user) return false
-      if (user.role === 'admin') return true
-      return { user: { equals: user.id } }
-    },
-    create: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => {
-      if (!user) return false
-      if (user.role === 'admin') return true
-      return { user: { equals: user.id } }
-    },
-    delete: ({ req: { user } }) => user?.role === 'admin',
+    defaultColumns: ['student', 'cohort', 'status', 'enrolledAt'],
   },
   fields: [
     {
-      name: 'user',
+      name: 'student',
       type: 'relationship',
       relationTo: 'users',
       required: true,
-      label: 'User',
-      admin: {
-        position: 'sidebar',
-      },
+      label: 'תלמיד',
     },
     {
-      name: 'course',
+      name: 'cohort',
       type: 'relationship',
-      relationTo: 'courses',
+      relationTo: 'cohorts',
       required: true,
-      label: 'Course',
-      admin: {
-        position: 'sidebar',
-      },
+      label: 'מחזור',
     },
     {
       name: 'status',
       type: 'select',
-      required: true,
-      defaultValue: 'active',
+      label: 'סטטוס',
       options: [
-        { label: 'Active', value: 'active' },
-        { label: 'Completed', value: 'completed' },
-        { label: 'Expired', value: 'expired' },
-        { label: 'Cancelled', value: 'cancelled' },
+        { label: 'ממתין', value: 'pending' },
+        { label: 'פעיל', value: 'active' },
+        { label: 'הושלם', value: 'completed' },
+        { label: 'בוטל', value: 'cancelled' },
       ],
-      label: 'Status',
-      admin: {
-        position: 'sidebar',
-      },
+      defaultValue: 'pending',
     },
     {
       name: 'enrolledAt',
       type: 'date',
-      required: true,
-      defaultValue: () => new Date().toISOString(),
-      label: 'Enrolled At',
-      admin: {
-        position: 'sidebar',
-        date: {
-          pickerAppearance: 'dayAndTime',
-        },
-      },
+      label: 'תאריך הרשמה',
     },
     {
       name: 'completedAt',
       type: 'date',
-      label: 'Completed At',
-      admin: {
-        position: 'sidebar',
-        date: {
-          pickerAppearance: 'dayAndTime',
-        },
-      },
+      label: 'תאריך סיום',
     },
     {
-      name: 'expiresAt',
-      type: 'date',
-      label: 'Expires At',
-      admin: {
-        position: 'sidebar',
-        date: {
-          pickerAppearance: 'dayAndTime',
-        },
-      },
-    },
-    {
-      name: 'progress',
-      type: 'number',
-      min: 0,
-      max: 100,
-      defaultValue: 0,
-      label: 'Progress (%)',
-      admin: {
-        position: 'sidebar',
-      },
-    },
-    {
-      name: 'source',
+      name: 'paymentStatus',
       type: 'select',
-      defaultValue: 'direct',
+      label: 'סטטוס תשלום',
       options: [
-        { label: 'Direct', value: 'direct' },
-        { label: 'Coupon', value: 'coupon' },
-        { label: 'Gift', value: 'gift' },
-        { label: 'Free', value: 'free' },
+        { label: 'ממתין', value: 'pending' },
+        { label: 'שולם', value: 'paid' },
+        { label: 'זוכה', value: 'refunded' },
       ],
-      label: 'Source',
-      admin: {
-        position: 'sidebar',
-      },
+      defaultValue: 'pending',
+    },
+    {
+      name: 'notes',
+      type: 'textarea',
+      label: 'הערות',
     },
   ],
 }

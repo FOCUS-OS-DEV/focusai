@@ -89,3 +89,89 @@ Fixes #<issue-number>
 - `.github/pull_request_template.md` - תבנית PR
 
 **קובץ:** `CONTRIBUTING.md` - מדריך תהליך העבודה המלא
+
+---
+
+## Collections (17)
+
+### Core
+| Collection | Slug | תיאור |
+|------------|------|--------|
+| Users | `users` | משתמשים (admin/instructor/student) |
+| Media | `media` | קבצי מדיה עם image sizes |
+
+### Academy
+| Collection | Slug | תיאור |
+|------------|------|--------|
+| Courses | `courses` | מסלולים (frontal/digital/workshop/coaching) |
+| Cohorts | `cohorts` | מחזורים לכל מסלול |
+| Lessons | `lessons` | שיעורים עם וידאו וחומרים |
+| Enrollments | `enrollments` | הרשמות תלמידים למחזורים |
+| Progress | `progress` | התקדמות צפייה בשיעורים |
+| Attendance | `attendance` | נוכחות במפגשים |
+| Assignments | `assignments` | עבודות ותרגילים |
+| Submissions | `submissions` | הגשות תלמידים |
+| Certificates | `certificates` | תעודות סיום |
+
+### Content
+| Collection | Slug | תיאור |
+|------------|------|--------|
+| Posts | `posts` | מאמרים בבלוג |
+| Categories | `categories` | קטגוריות לבלוג |
+| Testimonials | `testimonials` | המלצות בוגרים |
+| Instructors | `instructors` | פרופילי מרצים |
+
+### Leads
+| Collection | Slug | תיאור |
+|------------|------|--------|
+| Contacts | `contacts` | לידים מטפסים |
+| Partners | `partners` | שותפים אקדמיים/תאגידיים |
+
+## Globals (3)
+
+| Global | Slug | תיאור |
+|--------|------|--------|
+| SiteSettings | `site-settings` | הגדרות אתר, קשר, רשתות |
+| Navigation | `navigation` | תפריט ראשי |
+| Homepage | `homepage` | תוכן דף הבית |
+
+## מבנה Courses (שדות עיקריים)
+```
+title, slug, subtitle, excerpt, description
+type: frontal | digital | workshop | coaching
+duration, schedule, location, hasZoom
+maxStudents, instructorRatio
+certificate, certificateDescription
+highlights[], syllabus[], faq[], gallery[]
+instructors → Instructors
+testimonials → Testimonials
+ctaText, ctaType, ctaLink
+status: draft | published
+order, featured
+seo: { metaTitle, metaDescription, ogImage }
+```
+
+## קשרים בין Collections
+```
+Cohorts → Courses (מחזור שייך למסלול)
+Lessons → Cohorts (שיעור שייך למחזור)
+Enrollments → Users + Cohorts (תלמיד רשום למחזור)
+Progress → Users + Lessons (התקדמות תלמיד בשיעור)
+Attendance → Users + Lessons + Cohorts (נוכחות)
+Assignments → Cohorts (עבודה למחזור)
+Submissions → Users + Assignments (הגשת תלמיד)
+Certificates → Users + Courses + Cohorts (תעודה)
+Posts → Categories + Users (מאמר לקטגוריה)
+Courses → Instructors + Testimonials
+```
+
+## מוצרי Focus AI
+| מסלול | סוג | משך |
+|-------|-----|-----|
+| Bot-Camp | frontal | 12 שבועות, שני 17-21 |
+| AI Ready | frontal | 8 מפגשים, שישי 9-12 |
+| סדנאות לארגונים | workshop | מותאם אישית |
+| ליווי אישי 1:1 | coaching | גמיש |
+| קורסים דיגיטליים | digital | עצמאי (בקרוב) |
+
+מיקום: אריה שנקר 14, הרצליה פיתוח (Nolton House)
