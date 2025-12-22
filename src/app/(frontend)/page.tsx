@@ -1,6 +1,9 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
+// Force dynamic rendering - page uses Payload which requires runtime secrets
+export const dynamic = 'force-dynamic'
+
 import Hero from '@/components/sections/Hero'
 import About from '@/components/sections/About'
 import BrandsCarousel from '@/components/sections/BrandsCarousel'
