@@ -52,6 +52,24 @@
 ## אם יש שגיאת סכמה
 המשתמש צריך לעשות Redeploy ב-Railway
 
+## קבצי Startup (קריטי!)
+```
+start.sh       ← רץ בכל deploy
+init-db.cjs    ← מריץ את init-db.sql
+init-db.sql    ← רק UUID extension!
+```
+
+**אסור ב-init-db.sql:**
+- CREATE TABLE עם סכמה ספציפית (Payload מטפל בזה עם push: true)
+- DROP TABLE
+- כל דבר שמתנגש עם הסכמה של Payload
+
+**מותר ב-init-db.sql:**
+- `CREATE EXTENSION IF NOT EXISTS`
+- פקודות idempotent בלבד
+
+**למה?** Payload עם `push: true` מסנכרן את הסכמה אוטומטית. אם init-db.sql מנסה ליצור טבלאות עם סכמה אחרת - יהיו התנגשויות.
+
 ---
 
 ## תהליך עבודה עם GitHub
