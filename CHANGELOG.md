@@ -4,6 +4,37 @@
 
 ---
 
+## [2025-12-23] - Course Single Page
+
+### קבצים ששונו:
+- `src/app/(frontend)/courses/[slug]/page.tsx` - נוצר חדש
+
+### מה נעשה:
+יצירת דף דינמי להצגת קורס בודד לפי slug.
+
+**סקשנים בדף:**
+- Hero Section עם תמונה/gradient ו-CTA
+- Info Bar (משך, לוח זמנים, מקומות, מיקום)
+- Highlights - מה תלמדו
+- Syllabus - סילבוס מפורט
+- Instructors - כרטיסי מרצים
+- Testimonials - המלצות בוגרים
+- FAQ - שאלות נפוצות
+- Certificate - תעודה
+- Final CTA - WhatsApp
+
+**תכונות:**
+- Dynamic rendering עם `force-dynamic`
+- SEO metadata מ-Payload
+- Theme colors לפי סוג קורס
+- Responsive design
+- RTL support
+
+### למה:
+זה הדף החשוב ביותר אחרי דף הבית - מציג את כל פרטי הקורס למתעניינים.
+
+---
+
 ## [2025-12-23] - Enhanced Workflow & Documentation
 
 ### קבצים ששונו:

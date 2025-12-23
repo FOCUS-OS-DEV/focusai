@@ -124,7 +124,8 @@ Error: missing secret key. A secret key is needed to secure Payload.
 ```
 
 **דפים שצריכים את זה:**
-- `src/app/(frontend)/page.tsx` - דף הבית (משתמש ב-Payload API)
+- `src/app/(frontend)/page.tsx` - דף הבית
+- `src/app/(frontend)/courses/[slug]/page.tsx` - דף קורס בודד
 - כל דף עתידי שקורא ל-`getPayload()`
 
 ---
@@ -239,6 +240,15 @@ Certificates → Users + Courses + Cohorts (תעודה)
 Posts → Categories + Users (מאמר לקטגוריה)
 Courses → Instructors + Testimonials
 ```
+
+## Frontend Routes
+
+| Route | קובץ | תיאור |
+|-------|------|--------|
+| `/` | `page.tsx` | דף הבית |
+| `/courses/[slug]` | `courses/[slug]/page.tsx` | דף קורס בודד |
+
+---
 
 ## Cloudinary Storage
 
