@@ -4,6 +4,23 @@
 
 ---
 
+## [2025-12-23] - Enhanced Workflow & Documentation
+
+### קבצים ששונו:
+- `CHANGELOG.md` - נוצר חדש
+- `CLAUDE.md` - תהליך עבודה משופר
+
+### מה נעשה:
+- יצירת CHANGELOG.md עם היסטוריית הפרויקט
+- הוספת תהליך READ → ANALYZE → PLAN → IMPLEMENT
+- הוספת checklist לפני שינוי קבצים
+- הוספת איסורים מוחלטים
+
+### למה:
+שיפור תהליך העבודה עם LLM - מניעת טעויות, שמירת עקביות, זיכרון ארוך טווח.
+
+---
+
 ## [2025-12-23] - Cloudinary Storage Integration
 
 ### Issue/PR: #9, #10
