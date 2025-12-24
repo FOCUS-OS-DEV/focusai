@@ -4,6 +4,46 @@
 
 ---
 
+## [2025-12-24] - Blog System
+
+### קבצים שנוצרו:
+- `src/app/(frontend)/blog/page.tsx` - דף רשימת מאמרים
+- `src/app/(frontend)/blog/[slug]/page.tsx` - דף מאמר בודד
+- `src/components/BlogCard.tsx` - כרטיס מאמר עם אנימציה
+- `src/components/BlogFilter.tsx` - פילטר חיפוש וקטגוריות
+- `src/components/RichText.tsx` - רנדור Lexical rich text
+
+### מה נעשה:
+מערכת בלוג מלאה עם רשימת מאמרים ודף מאמר בודד.
+
+**Blog Listing (/blog):**
+- Hero section עם גרדיאנט
+- חיפוש מאמרים
+- פילטר קטגוריות עם צבעים מותאמים
+- Grid responsive של BlogCards
+- Empty state כשאין תוצאות
+- CTA section
+
+**Blog Single (/blog/[slug]):**
+- Breadcrumbs navigation
+- Featured image מלא
+- RichText rendering ל-Lexical content
+- In-article CTA (אם מוגדר)
+- תגיות
+- Related Course (אם מוגדר)
+- מאמרים קשורים מאותה קטגוריה
+- CTA section
+
+**תכונות:**
+- Error handling מלא
+- Responsive design
+- RTL support
+- SEO metadata עם generateMetadata
+- notFound() למאמרים שלא קיימים
+- Category colors from Payload
+
+---
+
 ## [2025-12-24] - About Page
 
 ### קבצים שנוצרו:
