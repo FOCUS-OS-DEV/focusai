@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import type { Where } from 'payload'
+import type { Course } from '@/payload-types'
 import CourseCard from '@/components/CourseCard'
 import CoursesFilter from '@/components/CoursesFilter'
 
@@ -21,35 +22,43 @@ interface PageProps {
 
 export default async function CoursesPage({ searchParams }: PageProps) {
   const params = await searchParams
-  const payload = await getPayload({ config })
 
-  // Build query based on filters
-  const conditions: Where[] = [
-    { status: { equals: 'published' } },
-  ]
+  let courses: { docs: Course[] } = { docs: [] }
 
-  if (params.type && params.type !== 'all') {
-    conditions.push({ type: { equals: params.type } })
-  }
+  try {
+    const payload = await getPayload({ config })
 
-  if (params.search) {
-    conditions.push({
-      or: [
-        { title: { contains: params.search } },
-        { subtitle: { contains: params.search } },
-        { excerpt: { contains: params.search } },
-      ],
+    // Build query based on filters
+    const conditions: Where[] = [
+      { status: { equals: 'published' } },
+    ]
+
+    if (params.type && params.type !== 'all') {
+      conditions.push({ type: { equals: params.type } })
+    }
+
+    if (params.search) {
+      conditions.push({
+        or: [
+          { title: { contains: params.search } },
+          { subtitle: { contains: params.search } },
+          { excerpt: { contains: params.search } },
+        ],
+      })
+    }
+
+    const where: Where = conditions.length === 1 ? conditions[0] : { and: conditions }
+
+    courses = await payload.find({
+      collection: 'courses',
+      where,
+      depth: 1,
+      sort: 'order',
     })
+  } catch (error) {
+    console.error('Error fetching courses:', error)
+    // Continue with empty courses array
   }
-
-  const where: Where = conditions.length === 1 ? conditions[0] : { and: conditions }
-
-  const courses = await payload.find({
-    collection: 'courses',
-    where,
-    depth: 1,
-    sort: 'order',
-  })
 
   return (
     <>
