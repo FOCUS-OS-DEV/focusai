@@ -80,7 +80,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Redirect to thank you page
-    const thankYouUrl = new URL('/thank-you', request.url)
+    // Get the proper origin from headers (handles proxy scenarios like Railway)
+    const forwardedHost = request.headers.get('x-forwarded-host')
+    const forwardedProto = request.headers.get('x-forwarded-proto') || 'https'
+    const host = forwardedHost || request.headers.get('host') || 'localhost:3000'
+    const origin = `${forwardedProto}://${host}`
+
+    const thankYouUrl = new URL('/thank-you', origin)
     thankYouUrl.searchParams.set('name', name)
     thankYouUrl.searchParams.set('source', source)
 

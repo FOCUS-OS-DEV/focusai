@@ -3,7 +3,6 @@
 import { useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 
 // Declare fbq type for TypeScript
 declare global {
