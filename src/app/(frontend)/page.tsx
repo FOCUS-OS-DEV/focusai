@@ -1,5 +1,6 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import type { Homepage, SiteSetting, Course, Testimonial, Instructor, Partner } from '@/payload-types'
 
 // Force dynamic rendering - page uses Payload which requires runtime secrets
 export const dynamic = 'force-dynamic'
@@ -18,86 +19,131 @@ import Integration from '@/components/sections/Integration'
 import Contact from '@/components/sections/Contact'
 import WhatsAppButton from '@/components/ui/WhatsAppButton'
 
-// Types are inferred from Payload's findGlobal and find methods
+// Default fallback data for when CMS data is unavailable
+const defaultContact: SiteSetting['contact'] = {
+  email: 'info@focusai.co.il',
+  phone: '053-946-6408',
+  whatsapp: '972539466408',
+  address: 'אריה שנקר 14, הרצליה פיתוח',
+}
 
 export default async function HomePage() {
   const payload = await getPayload({ config })
 
-  // Fetch Homepage global
-  const homepage = await payload.findGlobal({
-    slug: 'homepage',
-  })
+  // Initialize with defaults
+  let homepage: Homepage | null = null
+  let siteSettings: SiteSetting | null = null
+  let courses: Course[] = []
+  let testimonials: Testimonial[] = []
+  let instructors: Instructor[] = []
+  let partners: Partner[] = []
 
-  // Fetch SiteSettings global
-  const siteSettings = await payload.findGlobal({
-    slug: 'site-settings',
-  })
+  try {
+    // Fetch Homepage global
+    homepage = await payload.findGlobal({
+      slug: 'homepage',
+    })
+  } catch (error) {
+    console.error('Error fetching homepage global:', error)
+  }
 
-  // Fetch featured courses
-  const coursesResult = await payload.find({
-    collection: 'courses',
-    where: {
-      status: { equals: 'published' },
-      featured: { equals: true },
-    },
-    sort: 'order',
-    limit: 4,
-  })
+  try {
+    // Fetch SiteSettings global
+    siteSettings = await payload.findGlobal({
+      slug: 'site-settings',
+    })
+  } catch (error) {
+    console.error('Error fetching site-settings global:', error)
+  }
 
-  // Fetch featured testimonials
-  const testimonialsResult = await payload.find({
-    collection: 'testimonials',
-    where: {
-      status: { equals: 'approved' },
-      featured: { equals: true },
-    },
-    limit: 6,
-  })
+  try {
+    // Fetch featured courses
+    const result = await payload.find({
+      collection: 'courses',
+      where: {
+        status: { equals: 'published' },
+        featured: { equals: true },
+      },
+      sort: 'order',
+      limit: 4,
+    })
+    courses = result.docs
+  } catch (error) {
+    console.error('Error fetching courses:', error)
+  }
 
-  // Fetch featured instructors
-  const instructorsResult = await payload.find({
-    collection: 'instructors',
-    where: {
-      featured: { equals: true },
-    },
-    sort: 'order',
-    limit: 4,
-  })
+  try {
+    // Fetch featured testimonials
+    const result = await payload.find({
+      collection: 'testimonials',
+      where: {
+        status: { equals: 'approved' },
+        featured: { equals: true },
+      },
+      limit: 6,
+    })
+    testimonials = result.docs
+  } catch (error) {
+    console.error('Error fetching testimonials:', error)
+  }
 
-  // Fetch partners
-  const partnersResult = await payload.find({
-    collection: 'partners',
-    where: {
-      featured: { equals: true },
-    },
-    sort: 'order',
-    limit: 10,
-  })
+  try {
+    // Fetch featured instructors
+    const result = await payload.find({
+      collection: 'instructors',
+      where: {
+        featured: { equals: true },
+      },
+      sort: 'order',
+      limit: 4,
+    })
+    instructors = result.docs
+  } catch (error) {
+    console.error('Error fetching instructors:', error)
+  }
+
+  try {
+    // Fetch partners
+    const result = await payload.find({
+      collection: 'partners',
+      where: {
+        featured: { equals: true },
+      },
+      sort: 'order',
+      limit: 10,
+    })
+    partners = result.docs
+  } catch (error) {
+    console.error('Error fetching partners:', error)
+  }
+
+  // Use fallback contact if siteSettings failed to load
+  const contact = siteSettings?.contact || defaultContact
 
   return (
     <>
       <Hero
-        hero={homepage.hero}
-        stats={homepage.stats}
+        hero={homepage?.hero}
+        stats={homepage?.stats}
       />
       <About />
-      <BrandsCarousel partners={partnersResult.docs} />
-      <QuickContact contact={siteSettings.contact} />
-      <WhyNow whyUs={homepage.whyUs} />
+      <BrandsCarousel partners={partners} />
+      <QuickContact contact={contact} />
+      <WhyNow whyUs={homepage?.whyUs} />
       <Programs
-        courses={coursesResult.docs}
-        sectionTitle={homepage.sections?.coursesTitle}
+        courses={courses}
+        sectionTitle={homepage?.sections?.coursesTitle}
       />
       <Schedule />
       <Story />
       <Testimonials
-        testimonials={testimonialsResult.docs}
-        sectionTitle={homepage.sections?.testimonialsTitle}
+        testimonials={testimonials}
+        sectionTitle={homepage?.sections?.testimonialsTitle}
       />
-      <Team instructors={instructorsResult.docs} />
+      <Team instructors={instructors} />
       <Integration />
-      <Contact contact={siteSettings.contact} />
-      <WhatsAppButton whatsapp={siteSettings.contact?.whatsapp} />
+      <Contact contact={contact} />
+      <WhatsAppButton whatsapp={contact?.whatsapp} />
     </>
   )
 }
