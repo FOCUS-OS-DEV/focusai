@@ -4,6 +4,51 @@
 
 ---
 
+## [2025-12-24] - About Page
+
+### קבצים שנוצרו:
+- `src/app/(frontend)/about/page.tsx` - דף אודות חדש
+
+### מה נעשה:
+יצירת דף "אודות" מקצועי עם כל הסקשנים הנדרשים.
+
+**סקשנים בדף:**
+- Hero Section - כותרת ראשית עם גרדיאנט
+- Mission Section - המשימה שלנו עם סטטיסטיקות ויזואליות
+- Values Section - 4 ערכים מנחים (מעשיות, חדשנות, תמיכה אישית, תוצאות)
+- Team Section - הצגת מרצים מ-Payload עם fallback data
+- Stats Section - סטטיסטיקות על רקע גרדיאנט סגול
+- CTA Section - קריאה לפעולה עם לינקים לקורסים ו-WhatsApp
+
+**תכונות:**
+- Error handling מלא עם try-catch
+- Fallback data למרצים אם ה-API נכשל
+- Responsive design מלא
+- RTL support
+
+### למה:
+דף אודות חשוב לאמינות ו-SEO, מספר את הסיפור של Focus AI Academy.
+
+---
+
+## [2025-12-24] - Homepage Error Handling
+
+### קבצים ששונו:
+- `src/app/(frontend)/page.tsx` - הוספת error handling
+
+### מה נעשה:
+עטיפת כל קריאות ה-Payload API ב-try-catch למניעת קריסת האתר כאשר סכמת הדאטאבייס לא מסונכרנת.
+
+**שינויים:**
+- כל fetch עטוף ב-try-catch נפרד
+- Fallback data לפרטי קשר
+- הוספת types מפורשים מ-payload-types
+
+### למה:
+תיקון קריסת production עקב טבלת `site_settings_pixels` חסרה.
+
+---
+
 ## [2025-12-23] - Course Page Redesign - Focus AI Academy Style
 
 ### קבצים ששונו:
