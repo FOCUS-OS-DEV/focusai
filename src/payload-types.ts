@@ -1408,7 +1408,37 @@ export interface SiteSetting {
     metaPixel?: string | null;
     tiktokPixel?: string | null;
     googleAnalytics?: string | null;
+    fixdigitalClientKey?: string | null;
   };
+  /**
+   * הוספת קודי מעקב וסקריפטים חיצוניים לאתר
+   */
+  scripts?: {
+    /**
+     * קוד שירוץ בתוך תגית <head>
+     */
+    headScripts?: string | null;
+    /**
+     * קוד שירוץ מיד אחרי <body>
+     */
+    bodyStartScripts?: string | null;
+    /**
+     * קוד שירוץ לפני </body>
+     */
+    footerScripts?: string | null;
+  };
+  /**
+   * ניהול פיקסלים בצורה מובנית
+   */
+  pixels?:
+    | {
+        platform: 'meta' | 'tiktok' | 'google' | 'googleAds' | 'linkedin' | 'twitter' | 'fixdigital' | 'custom';
+        pixelId: string;
+        enabled?: boolean | null;
+        customScript?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1532,6 +1562,23 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         metaPixel?: T;
         tiktokPixel?: T;
         googleAnalytics?: T;
+        fixdigitalClientKey?: T;
+      };
+  scripts?:
+    | T
+    | {
+        headScripts?: T;
+        bodyStartScripts?: T;
+        footerScripts?: T;
+      };
+  pixels?:
+    | T
+    | {
+        platform?: T;
+        pixelId?: T;
+        enabled?: T;
+        customScript?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
