@@ -134,6 +134,7 @@ function courseToProgram(course: Course, index: number): Program {
 interface ProgramsProps {
   courses?: Course[]
   sectionTitle?: string | null
+  sectionSubtitle?: string | null
 }
 
 const ProgramCard = ({ program, index }: { program: Program; index: number }) => {
@@ -224,7 +225,7 @@ const ProgramCard = ({ program, index }: { program: Program; index: number }) =>
   )
 }
 
-const Programs = ({ courses, sectionTitle }: ProgramsProps) => {
+const Programs = ({ courses, sectionTitle, sectionSubtitle }: ProgramsProps) => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 })
 
   // Use courses from Payload or fallback to hardcoded programs
@@ -253,7 +254,7 @@ const Programs = ({ courses, sectionTitle }: ProgramsProps) => {
             {sectionTitle || 'המסלולים שלנו'}
           </h2>
           <p className="text-gray-600 text-lg">
-            מיועדים למנהלים, יזמים ואנשי מקצוע שרוצים להטמיע AI בעבודה
+            {sectionSubtitle || 'מיועדים למנהלים, יזמים ואנשי מקצוע שרוצים להטמיע AI בעבודה'}
           </p>
         </motion.div>
 

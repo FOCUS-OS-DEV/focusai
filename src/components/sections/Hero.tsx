@@ -15,10 +15,10 @@ const Hero = ({ hero, stats }: HeroProps) => {
   // Fallback values
   const title = hero?.title || 'Focus AI Academy'
   const subtitle = hero?.subtitle || 'מרכז ההכשרות המוביל בישראל לעולם ה-AI'
-  const primaryCta = hero?.primaryCta || 'גלו את המסלולים'
-  const primaryCtaLink = hero?.primaryCtaLink || '#programs'
-  const secondaryCta = hero?.secondaryCta || 'שיחת ייעוץ חינם'
-  const secondaryCtaLink = hero?.secondaryCtaLink || '#contact'
+  const primaryCtaText = hero?.primaryCta?.text || 'גלו את המסלולים'
+  const primaryCtaLink = hero?.primaryCta?.link || '#programs'
+  const secondaryCtaText = hero?.secondaryCta?.text || 'שיחת ייעוץ חינם'
+  const secondaryCtaLink = hero?.secondaryCta?.link || '#contact'
 
   const handlePrimaryClick = () => {
     if (primaryCtaLink?.startsWith('#')) {
@@ -121,7 +121,7 @@ const Hero = ({ hero, stats }: HeroProps) => {
               whileTap={{ scale: 0.98 }}
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
-                {primaryCta}
+                {primaryCtaText}
                 <svg className="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
@@ -133,7 +133,7 @@ const Hero = ({ hero, stats }: HeroProps) => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              {secondaryCta}
+              {secondaryCtaText}
             </motion.button>
           </motion.div>
 

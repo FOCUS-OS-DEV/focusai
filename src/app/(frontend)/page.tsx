@@ -4,6 +4,7 @@ import type { Homepage, SiteSetting, Course, Testimonial, Instructor, Partner } 
 
 // Force dynamic rendering - page uses Payload which requires runtime secrets
 export const dynamic = 'force-dynamic'
+export const revalidate = 3600 // Revalidate every hour
 
 import Hero from '@/components/sections/Hero'
 import About from '@/components/sections/About'
@@ -126,21 +127,27 @@ export default async function HomePage() {
         hero={homepage?.hero}
         stats={homepage?.stats}
       />
-      <About />
+      <About about={homepage?.about} />
       <BrandsCarousel partners={partners} />
       <QuickContact contact={contact} />
       <WhyNow whyUs={homepage?.whyUs} />
       <Programs
         courses={courses}
-        sectionTitle={homepage?.sections?.coursesTitle}
+        sectionTitle={homepage?.sections?.programs?.title || homepage?.sections?.coursesTitle}
+        sectionSubtitle={homepage?.sections?.programs?.subtitle}
       />
       <Schedule />
       <Story />
       <Testimonials
         testimonials={testimonials}
-        sectionTitle={homepage?.sections?.testimonialsTitle}
+        sectionTitle={homepage?.sections?.testimonials?.title || homepage?.sections?.testimonialsTitle}
+        sectionSubtitle={homepage?.sections?.testimonials?.subtitle}
       />
-      <Team instructors={instructors} />
+      <Team
+        instructors={instructors}
+        sectionTitle={homepage?.sections?.team?.title}
+        sectionSubtitle={homepage?.sections?.team?.subtitle}
+      />
       <Integration />
       <Contact contact={contact} />
       <WhatsAppButton whatsapp={contact?.whatsapp} />

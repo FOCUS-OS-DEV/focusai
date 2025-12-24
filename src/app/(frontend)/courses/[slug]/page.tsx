@@ -4,8 +4,14 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import type { Course, Instructor, Testimonial, Media } from '@/payload-types'
+import { getSharedContent } from '@/lib/getSharedContent'
+import { CourseSchema } from '@/lib/schema'
+import Breadcrumbs from '@/components/Breadcrumbs'
+
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://focusai.co.il'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 3600 // Revalidate every hour
 
 // Helper to extract plain text from Lexical rich text
 function extractTextFromLexical(richText: unknown): string {
@@ -34,21 +40,49 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const coursesResult = await payload.find({
     collection: 'courses',
     where: { slug: { equals: slug } },
-    depth: 0,
+    depth: 1,
   })
   if (!coursesResult.docs.length) {
     return { title: 'קורס לא נמצא' }
   }
   const course = coursesResult.docs[0]
+  const seoImage = course.seo?.ogImage as Media | null
+  const featuredImage = course.featuredImage as Media | null
+  const ogImageUrl = seoImage?.url || featuredImage?.url || '/og-image.jpg'
+
   return {
-    title: `${course.seo?.metaTitle || course.title} | Focus AI Academy`,
-    description: course.seo?.metaDescription || course.excerpt || '',
+    title: course.seo?.metaTitle || course.title,
+    description: course.seo?.metaDescription || course.excerpt || course.subtitle || '',
+    openGraph: {
+      title: course.seo?.metaTitle || course.title,
+      description: course.seo?.metaDescription || course.excerpt || course.subtitle || '',
+      type: 'website',
+      url: `${BASE_URL}/courses/${slug}`,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: course.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: course.seo?.metaTitle || course.title,
+      description: course.seo?.metaDescription || course.excerpt || course.subtitle || '',
+      images: [ogImageUrl],
+    },
+    alternates: {
+      canonical: `${BASE_URL}/courses/${slug}`,
+    },
   }
 }
 
 export default async function CoursePage({ params }: PageProps) {
   const { slug } = await params
   const payload = await getPayload({ config })
+  const { pages } = await getSharedContent()
 
   const coursesResult = await payload.find({
     collection: 'courses',
@@ -65,13 +99,50 @@ export default async function CoursePage({ params }: PageProps) {
   const testimonials = (course.testimonials as Testimonial[]) || []
   const featuredImage = course.featuredImage as Media | null
 
-  const whatsappNumber = '972539466408'
+  // Get dynamic content from CMS
+  const cs = pages?.courseSingle
+  const commonCta = pages?.commonCta
+
+  // Section titles from CMS
+  const sectionTitles = {
+    whoIsItFor: cs?.sections?.whoIsItFor || 'למי זה מתאים?',
+    whyNow: cs?.sections?.whyNow || 'למה עכשיו?',
+    whatYouGet: cs?.sections?.whatYouGet || 'מה תקבלו בהכשרה?',
+    highlights: cs?.sections?.highlights || 'מה תלמדו?',
+    syllabus: cs?.sections?.syllabus || 'הסילבוס',
+    team: cs?.sections?.team || 'הצוות',
+    testimonials: cs?.sections?.testimonials || 'מה אומרים הבוגרים?',
+    faq: cs?.sections?.faq || 'שאלות נפוצות',
+  }
+
+  // Button texts from CMS
+  const buttonTexts = {
+    register: cs?.buttons?.register || 'הרשמה לקורס',
+    syllabus: cs?.buttons?.syllabus || 'לסילבוס המלא',
+    contact: cs?.buttons?.contact || 'דברו איתנו',
+    backHome: cs?.buttons?.backHome || 'חזרה לדף הבית',
+  }
+
+  // Alert texts from CMS
+  const alertTexts = {
+    spotsLeft: cs?.alerts?.spotsLeft || 'נותרו מקומות אחרונים למחזור הקרוב',
+  }
+
+  // CTA texts from CMS
+  const ctaTexts = {
+    title: cs?.cta?.title || 'מוכנים להתחיל?',
+    subtitle: cs?.cta?.subtitle || 'הצטרפו למאות בוגרים שכבר עובדים עם AI',
+  }
+
+  const whatsappNumber = commonCta?.whatsappNumber || '972539466408'
   const whatsappMessage = encodeURIComponent(`היי! אני מעוניין/ת לקבל פרטים על ${course.title}`)
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
 
   return (
-    <main className="min-h-screen" dir="rtl" style={{ fontFamily: '"Rubik", system-ui, sans-serif' }}>
-      {/* Hero Section */}
+    <>
+      <CourseSchema course={course} />
+      <main className="min-h-screen" dir="rtl" style={{ fontFamily: '"Rubik", system-ui, sans-serif' }}>
+        {/* Hero Section */}
       <section
         className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden"
         style={{ background: 'linear-gradient(180deg, #f7f0fe 0%, #ede4fa 100%)' }}
@@ -81,6 +152,17 @@ export default async function CoursePage({ params }: PageProps) {
         <div className="absolute bottom-20 right-1/4 w-[500px] h-[500px] rounded-full opacity-30" style={{ background: 'radial-gradient(circle, rgba(255,79,216,0.3), transparent 70%)', filter: 'blur(100px)' }} />
 
         <div className="container mx-auto px-4 max-w-5xl relative z-10 text-center">
+          {/* Breadcrumbs */}
+          <div className="flex justify-center mb-6">
+            <Breadcrumbs
+              items={[
+                { label: 'קורסים', href: '/courses' },
+                { label: course.title }
+              ]}
+              className="text-gray-600"
+            />
+          </div>
+
           {/* University Badge */}
           <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full mb-8" style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.4)' }}>
             <span className="text-sm font-medium" style={{ color: '#1f1138' }}>בליווי אקדמי של</span>
@@ -137,7 +219,7 @@ export default async function CoursePage({ params }: PageProps) {
                 boxShadow: '0 8px 25px rgba(139,92,246,.3)',
               }}
             >
-              {course.ctaText || 'הרשמה לקורס'}
+              {course.ctaText || buttonTexts.register}
             </a>
             <a
               href="#syllabus"
@@ -147,7 +229,7 @@ export default async function CoursePage({ params }: PageProps) {
                 color: '#a16eff',
               }}
             >
-              לסילבוס המלא
+              {buttonTexts.syllabus}
             </a>
           </div>
 
@@ -157,7 +239,7 @@ export default async function CoursePage({ params }: PageProps) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
             </span>
-            <span className="text-sm font-semibold" style={{ color: '#1f1138' }}>נותרו מקומות אחרונים למחזור הקרוב</span>
+            <span className="text-sm font-semibold" style={{ color: '#1f1138' }}>{alertTexts.spotsLeft}</span>
           </div>
         </div>
       </section>
@@ -166,7 +248,7 @@ export default async function CoursePage({ params }: PageProps) {
       <section className="py-20 lg:py-28" style={{ background: '#fff' }}>
         <div className="container mx-auto px-4 max-w-6xl">
           <h2 className="text-3xl md:text-4xl font-black text-center mb-4" style={{ color: '#1f1138' }}>
-            למי זה מתאים?
+            {sectionTitles.whoIsItFor}
           </h2>
           <p className="text-center text-lg mb-12" style={{ color: '#6b7280' }}>
             התוכנית מתאימה למגוון רחב של אנשים
@@ -224,7 +306,7 @@ export default async function CoursePage({ params }: PageProps) {
       <section className="py-20 lg:py-28" style={{ background: 'linear-gradient(180deg, #f7f0fe 0%, #ede4fa 100%)' }}>
         <div className="container mx-auto px-4 max-w-4xl">
           <h2 className="text-3xl md:text-4xl font-black text-center mb-4" style={{ color: '#1f1138' }}>
-            למה עכשיו?
+            {sectionTitles.whyNow}
           </h2>
           <p className="text-center text-lg mb-16" style={{ color: '#6b7280' }}>
             80% מהאינטראקציות עם לקוחות ינוהלו על ידי סוכני AI בשנת 2027 - Gartner
@@ -268,7 +350,7 @@ export default async function CoursePage({ params }: PageProps) {
       <section className="py-20 lg:py-28" style={{ background: '#fff' }}>
         <div className="container mx-auto px-4 max-w-6xl">
           <h2 className="text-3xl md:text-4xl font-black text-center mb-4" style={{ color: '#1f1138' }}>
-            מה תקבלו בהכשרה?
+            {sectionTitles.whatYouGet}
           </h2>
           <p className="text-center text-lg mb-12" style={{ color: '#6b7280' }}>
             כל מה שצריך להצלחה בתחום
@@ -311,7 +393,7 @@ export default async function CoursePage({ params }: PageProps) {
         <section className="py-20 lg:py-28" style={{ background: 'linear-gradient(180deg, #f7f0fe 0%, #ede4fa 100%)' }}>
           <div className="container mx-auto px-4 max-w-6xl">
             <h2 className="text-3xl md:text-4xl font-black text-center mb-4" style={{ color: '#1f1138' }}>
-              מה תלמדו?
+              {sectionTitles.highlights}
             </h2>
             <p className="text-center text-lg mb-12" style={{ color: '#6b7280' }}>
               נושאים מרכזיים בתוכנית
@@ -346,7 +428,7 @@ export default async function CoursePage({ params }: PageProps) {
         <section id="syllabus" className="py-20 lg:py-28" style={{ background: '#fff' }}>
           <div className="container mx-auto px-4 max-w-4xl">
             <h2 className="text-3xl md:text-4xl font-black text-center mb-4" style={{ color: '#1f1138' }}>
-              הסילבוס
+              {sectionTitles.syllabus}
             </h2>
             <p className="text-center text-lg mb-12" style={{ color: '#6b7280' }}>
               {course.syllabus.length} מפגשים מעשיים
@@ -396,7 +478,7 @@ export default async function CoursePage({ params }: PageProps) {
         <section className="py-20 lg:py-28" style={{ background: 'linear-gradient(180deg, #f7f0fe 0%, #ede4fa 100%)' }}>
           <div className="container mx-auto px-4 max-w-6xl">
             <h2 className="text-3xl md:text-4xl font-black text-center mb-4" style={{ color: '#1f1138' }}>
-              הצוות
+              {sectionTitles.team}
             </h2>
             <p className="text-center text-lg mb-12" style={{ color: '#6b7280' }}>
               המומחים שילוו אתכם
@@ -442,7 +524,7 @@ export default async function CoursePage({ params }: PageProps) {
         <section className="py-20 lg:py-28" style={{ background: '#fff' }}>
           <div className="container mx-auto px-4 max-w-6xl">
             <h2 className="text-3xl md:text-4xl font-black text-center mb-4" style={{ color: '#1f1138' }}>
-              מה אומרים הבוגרים?
+              {sectionTitles.testimonials}
             </h2>
             <p className="text-center text-lg mb-12" style={{ color: '#6b7280' }}>
               הצטרפו למאות בוגרים מרוצים
@@ -504,7 +586,7 @@ export default async function CoursePage({ params }: PageProps) {
         <section className="py-20 lg:py-28" style={{ background: 'linear-gradient(180deg, #f7f0fe 0%, #ede4fa 100%)' }}>
           <div className="container mx-auto px-4 max-w-3xl">
             <h2 className="text-3xl md:text-4xl font-black text-center mb-4" style={{ color: '#1f1138' }}>
-              שאלות נפוצות
+              {sectionTitles.faq}
             </h2>
             <p className="text-center text-lg mb-12" style={{ color: '#6b7280' }}>
               יש שאלות? יש לנו תשובות
@@ -543,10 +625,10 @@ export default async function CoursePage({ params }: PageProps) {
       <section className="py-20 lg:py-28" style={{ background: 'linear-gradient(135deg, #1f1138, #3b1d6e, #581c87)' }}>
         <div className="container mx-auto px-4 text-center max-w-3xl">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-6">
-            מוכנים להתחיל?
+            {ctaTexts.title}
           </h2>
           <p className="text-white/70 text-lg mb-10">
-            הצטרפו למאות בוגרים שכבר עובדים עם AI
+            {ctaTexts.subtitle}
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-12">
@@ -561,7 +643,7 @@ export default async function CoursePage({ params }: PageProps) {
                 boxShadow: '0 8px 25px rgba(139,92,246,.4)',
               }}
             >
-              דברו איתנו
+              {buttonTexts.contact}
             </a>
             <Link
               href="/"
@@ -571,7 +653,7 @@ export default async function CoursePage({ params }: PageProps) {
                 color: '#fff',
               }}
             >
-              חזרה לדף הבית
+              {buttonTexts.backHome}
             </Link>
           </div>
 
@@ -592,6 +674,7 @@ export default async function CoursePage({ params }: PageProps) {
           </div>
         </div>
       </section>
-    </main>
+      </main>
+    </>
   )
 }

@@ -1,8 +1,10 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
+import { getSharedContent } from '@/lib/getSharedContent'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 3600 // Revalidate every hour
 
 export const metadata: Metadata = {
   title: 'AI Ready - הכשרה מקצועית לשימוש בכלי AI | Focus AI',
@@ -129,7 +131,40 @@ function AudienceIcon({ type }: { type: string }) {
   )
 }
 
-export default function AIReadyPage() {
+export default async function AIReadyPage() {
+  // Fetch shared content from Payload
+  const { pages } = await getSharedContent()
+  const aiReady = pages?.aiReady
+
+  // Dynamic content with fallbacks
+  const hero = {
+    badge: aiReady?.hero?.badge || 'AI BUILT',
+    title: aiReady?.hero?.title || 'ARE YOU',
+    titleHighlight: aiReady?.hero?.titleHighlight || 'AI READY?',
+    subtitle: aiReady?.hero?.subtitle || 'הכשרה ייחודית בת 8 מפגשים שתלמד אתכם לעבוד עם הכלים המתקדמים ביותר בעולם ה-AI ולהטמיע אותם בעבודה היומיומית שלכם.',
+    primaryCta: aiReady?.hero?.primaryCta || 'הרשמה להכשרה',
+    secondaryCta: aiReady?.hero?.secondaryCta || 'לסילבוס המלא',
+  }
+
+  const pricing = {
+    title: aiReady?.pricing?.title || 'מסלולי הכשרה',
+    nextCohortDate: aiReady?.pricing?.nextCohortDate || '27.02.2026',
+    frontal: {
+      title: aiReady?.pricing?.frontalTrack?.title || 'מסלול פרונטלי',
+      schedule: aiReady?.pricing?.frontalTrack?.schedule || 'הרצליה פיתוח | ימי שישי | 9:00-12:00',
+      originalPrice: aiReady?.pricing?.frontalTrack?.originalPrice || '7,900 ₪',
+      price: aiReady?.pricing?.frontalTrack?.price || '4,900',
+      priceNote: aiReady?.pricing?.frontalTrack?.priceNote || 'מחיר השקה מוקדם',
+    },
+    zoom: {
+      title: aiReady?.pricing?.zoomTrack?.title || 'מסלול Zoom',
+      schedule: aiReady?.pricing?.zoomTrack?.schedule || 'אונליין | ימי שישי | 9:00-12:00',
+      originalPrice: aiReady?.pricing?.zoomTrack?.originalPrice || '3,900 ₪',
+      price: aiReady?.pricing?.zoomTrack?.price || '2,490',
+      priceNote: aiReady?.pricing?.zoomTrack?.priceNote || 'מחיר השקה מוקדם',
+    },
+  }
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: `
@@ -183,17 +218,17 @@ export default function AIReadyPage() {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
                   </span>
-                  <span className="text-sm font-bold text-[#a855f7]">AI BUILT</span>
+                  <span className="text-sm font-bold text-[#a855f7]">{hero.badge}</span>
                 </div>
 
                 {/* Headlines */}
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight">
-                  <span className="block">ARE YOU</span>
-                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#a855f7] to-[#ec4899]">AI READY?</span>
+                  <span className="block">{hero.title}</span>
+                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#a855f7] to-[#ec4899]">{hero.titleHighlight}</span>
                 </h1>
 
                 <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-xl mx-auto lg:mx-0 lg:mr-0">
-                  הכשרה ייחודית בת <strong className="text-[#a855f7]">8 מפגשים</strong> שתלמד אתכם לעבוד עם הכלים המתקדמים ביותר בעולם ה-AI ולהטמיע אותם בעבודה היומיומית שלכם.
+                  {hero.subtitle}
                 </p>
 
                 {/* Trust badges */}
@@ -216,10 +251,10 @@ export default function AIReadyPage() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <a href="#contact" className="group relative overflow-hidden px-8 py-4 text-lg font-bold rounded-full bg-gradient-to-r from-[#a855f7] to-[#ec4899] text-white shadow-[0_10px_25px_rgba(168,85,247,0.4)] hover:shadow-[0_20px_40px_rgba(168,85,247,0.5)] transition-all duration-300 transform hover:-translate-y-1">
                     <span className="absolute top-0 -left-[100%] w-[50%] h-full bg-gradient-to-r from-transparent via-white/25 to-transparent transform -skew-x-12 transition-all duration-700 ease-out group-hover:left-[200%]" />
-                    <span className="relative">הרשמה להכשרה</span>
+                    <span className="relative">{hero.primaryCta}</span>
                   </a>
                   <a href="#syllabus" className="px-8 py-4 text-lg font-bold rounded-full border-2 border-[#a855f7] text-[#a855f7] hover:bg-[#a855f7]/10 transition-all duration-300">
-                    לסילבוס המלא
+                    {hero.secondaryCta}
                   </a>
                 </div>
               </div>
@@ -382,7 +417,7 @@ export default function AIReadyPage() {
           <div className="container mx-auto px-4 max-w-7xl">
             <header className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="text-3xl md:text-5xl font-black mb-6">
-                מסלולי <span className="text-[#a855f7]">הכשרה</span>
+                {pricing.title.split(' ')[0]} <span className="text-[#a855f7]">{pricing.title.split(' ').slice(1).join(' ') || 'הכשרה'}</span>
               </h2>
               <p className="text-gray-600 text-lg">
                 בחרו את המסלול שמתאים לכם - פרונטלי בהרצליה פיתוח או אונליין ב-Zoom
@@ -405,17 +440,17 @@ export default function AIReadyPage() {
 
                 <div className="relative z-10 pt-6 flex flex-col flex-grow">
                   <div className="text-center mb-6">
-                    <h3 className="text-2xl font-black text-gray-900 mb-2">מסלול פרונטלי</h3>
-                    <p className="text-gray-600 text-sm">הרצליה פיתוח | ימי שישי | 9:00-12:00</p>
+                    <h3 className="text-2xl font-black text-gray-900 mb-2">{pricing.frontal.title}</h3>
+                    <p className="text-gray-600 text-sm">{pricing.frontal.schedule}</p>
                   </div>
 
                   <div className="text-center mb-6">
-                    <div className="text-gray-600 text-sm line-through mb-1">7,900 ₪</div>
+                    <div className="text-gray-600 text-sm line-through mb-1">{pricing.frontal.originalPrice}</div>
                     <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-5xl font-black text-gray-900">4,900</span>
+                      <span className="text-5xl font-black text-gray-900">{pricing.frontal.price}</span>
                       <span className="text-xl text-gray-600">₪</span>
                     </div>
-                    <p className="text-[#a855f7] text-sm font-bold mt-2">מחיר השקה מוקדם</p>
+                    <p className="text-[#a855f7] text-sm font-bold mt-2">{pricing.frontal.priceNote}</p>
                   </div>
 
                   <div className="space-y-3 mb-8">
@@ -440,17 +475,17 @@ export default function AIReadyPage() {
               <article className="relative bg-purple-50/50 rounded-3xl p-8 border border-purple-100 hover:border-[#a855f7]/40 transition-all duration-300 overflow-hidden flex flex-col">
                 <div className="relative z-10 flex flex-col flex-grow pt-6">
                   <div className="text-center mb-6">
-                    <h3 className="text-2xl font-black text-gray-900 mb-2">מסלול Zoom</h3>
-                    <p className="text-gray-600 text-sm">אונליין | ימי שישי | 9:00-12:00</p>
+                    <h3 className="text-2xl font-black text-gray-900 mb-2">{pricing.zoom.title}</h3>
+                    <p className="text-gray-600 text-sm">{pricing.zoom.schedule}</p>
                   </div>
 
                   <div className="text-center mb-6">
-                    <div className="text-gray-600 text-sm line-through mb-1">3,900 ₪</div>
+                    <div className="text-gray-600 text-sm line-through mb-1">{pricing.zoom.originalPrice}</div>
                     <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-5xl font-black text-gray-900">2,490</span>
+                      <span className="text-5xl font-black text-gray-900">{pricing.zoom.price}</span>
                       <span className="text-xl text-gray-600">₪</span>
                     </div>
-                    <p className="text-[#a855f7] text-sm font-bold mt-2">מחיר השקה מוקדם</p>
+                    <p className="text-[#a855f7] text-sm font-bold mt-2">{pricing.zoom.priceNote}</p>
                   </div>
 
                   <div className="space-y-3 mb-8">
@@ -478,7 +513,7 @@ export default function AIReadyPage() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
                 </span>
-                <span className="text-gray-700 font-medium">המחזור הקרוב נפתח ב-<span className="text-gray-900 font-bold">27.02.2026</span></span>
+                <span className="text-gray-700 font-medium">המחזור הקרוב נפתח ב-<span className="text-gray-900 font-bold">{pricing.nextCohortDate}</span></span>
               </div>
             </div>
           </div>

@@ -47,6 +47,7 @@ const fallbackTestimonials = [
 interface TestimonialsProps {
   testimonials?: TestimonialType[]
   sectionTitle?: string | null
+  sectionSubtitle?: string | null
 }
 
 // Convert Payload Testimonial to display format
@@ -77,7 +78,7 @@ const Stars = () => (
   </div>
 )
 
-const Testimonials = ({ testimonials: payloadTestimonials, sectionTitle }: TestimonialsProps) => {
+const Testimonials = ({ testimonials: payloadTestimonials, sectionTitle, sectionSubtitle }: TestimonialsProps) => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 })
 
   // Use testimonials from Payload or fallback
@@ -106,7 +107,7 @@ const Testimonials = ({ testimonials: payloadTestimonials, sectionTitle }: Testi
             {sectionTitle || <>מה אומרים <span className="gradient-text">הבוגרים</span></>}
           </h2>
           <p className="text-gray-600 text-lg">
-            בוגרי ההכשרות שלנו משתפים את החוויה שלהם
+            {sectionSubtitle || 'בוגרי ההכשרות שלנו משתפים את החוויה שלהם'}
           </p>
         </motion.div>
 

@@ -31,6 +31,8 @@ const fallbackTeamMembers = [
 
 interface TeamProps {
   instructors?: Instructor[]
+  sectionTitle?: string | null
+  sectionSubtitle?: string | null
 }
 
 interface DisplayMember {
@@ -52,7 +54,7 @@ function instructorToMember(i: Instructor, index: number): DisplayMember {
   }
 }
 
-const Team = ({ instructors }: TeamProps) => {
+const Team = ({ instructors, sectionTitle, sectionSubtitle }: TeamProps) => {
   // Convert instructors from Payload or use fallback
   const teamMembers: DisplayMember[] = instructors && instructors.length > 0
     ? instructors.map((i, index) => instructorToMember(i, index))
@@ -77,10 +79,10 @@ const Team = ({ instructors }: TeamProps) => {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
-            צוות המרצים
+            {sectionTitle || 'צוות המרצים'}
           </h2>
           <p className="text-gray-600">
-            המומחים שילוו אתכם לאורך ההכשרה
+            {sectionSubtitle || 'המומחים שילוו אתכם לאורך ההכשרה'}
           </p>
         </motion.div>
 

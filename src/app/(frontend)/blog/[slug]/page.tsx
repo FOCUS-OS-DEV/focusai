@@ -7,8 +7,12 @@ import type { Metadata } from 'next'
 import type { Post, Media, Category, Course } from '@/payload-types'
 import BlogCard from '@/components/BlogCard'
 import RichText from '@/components/RichText'
+import { ArticleSchema } from '@/lib/schema'
+
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://focusai.co.il'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 3600 // Revalidate every hour
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -29,14 +33,39 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     if (!post) return {}
 
     const featuredImage = post.featuredImage as Media | null
+    const ogImageUrl = featuredImage?.url || '/og-image.jpg'
+    const category = post.category as Category | null
 
     return {
-      title: post.seo?.metaTitle || `${post.title} | Focus AI Academy`,
+      title: post.seo?.metaTitle || post.title,
       description: post.seo?.metaDescription || post.excerpt || post.title,
+      authors: [{ name: 'Focus AI Academy' }],
       openGraph: {
+        type: 'article',
         title: post.title,
-        description: post.excerpt || undefined,
-        images: featuredImage?.url ? [featuredImage.url] : [],
+        description: post.excerpt || post.title,
+        url: `${BASE_URL}/blog/${slug}`,
+        siteName: 'Focus AI Academy',
+        publishedTime: post.publishedAt || undefined,
+        modifiedTime: post.updatedAt || undefined,
+        section: category?.name || undefined,
+        images: [
+          {
+            url: ogImageUrl,
+            width: 1200,
+            height: 630,
+            alt: post.title,
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: post.title,
+        description: post.excerpt || post.title,
+        images: [ogImageUrl],
+      },
+      alternates: {
+        canonical: `${BASE_URL}/blog/${slug}`,
       },
     }
   } catch {
@@ -95,6 +124,8 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <>
+      <ArticleSchema post={post} />
+
       {/* Hero Section */}
       <section className="relative py-16 lg:py-24 overflow-hidden" style={{ background: 'linear-gradient(180deg, #f3e8ff 0%, #fce7f3 100%)' }}>
         {/* Decorative orbs */}

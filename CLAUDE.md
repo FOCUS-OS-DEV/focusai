@@ -203,13 +203,36 @@ Fixes #<issue-number>
 | Contacts | `contacts` | לידים מטפסים |
 | Partners | `partners` | שותפים אקדמיים/תאגידיים |
 
-## Globals (3)
+## Globals (4)
 
 | Global | Slug | תיאור |
 |--------|------|--------|
 | SiteSettings | `site-settings` | הגדרות אתר, קשר, רשתות |
 | Navigation | `navigation` | תפריט ראשי |
-| Homepage | `homepage` | תוכן דף הבית |
+| Homepage | `homepage` | תוכן דף הבית (hero, about, stats, sections) |
+| Pages | `pages` | תוכן דפים (about, courses, blog, thankYou, aiReady, courseSingle) |
+
+## מבנה Homepage Global
+```
+hero: { title, titleHighlight, subtitle, image, primaryCta, secondaryCta }
+globalStats: { graduates, courses, companies, satisfaction }
+whyUs[]
+about: { title, subtitle, content, image, features[], cta }
+sections: { programs, testimonials, team, partners }
+newsletter: { title, description, buttonText, webhookUrl }
+bottomCta: { title, subtitle, showForm, showWhatsapp, primaryButton, secondaryButton }
+```
+
+## מבנה Pages Global
+```
+about: { hero, mission, values[], team, cta }
+courses: { hero }
+blog: { hero, filters, emptyState, cta, postCta }
+thankYou: { icon, title, subtitle, description, whatNext, buttons[] }
+aiReady: { hero, trustBadges[], audience, benefits, pricing, testimonials, about, team, cta, form }
+courseSingle: { buttons, sections, alerts, cta }
+commonCta: { whatsappNumber, whatsappText }
+```
 
 ## מבנה Courses (שדות עיקריים)
 ```
@@ -243,10 +266,16 @@ Courses → Instructors + Testimonials
 
 ## Frontend Routes
 
-| Route | קובץ | תיאור |
-|-------|------|--------|
-| `/` | `page.tsx` | דף הבית |
-| `/courses/[slug]` | `courses/[slug]/page.tsx` | דף קורס בודד |
+| Route | קובץ | תיאור | Dynamic Content |
+|-------|------|--------|-----------------|
+| `/` | `page.tsx` | דף הבית | homepage global + sections |
+| `/about` | `about/page.tsx` | דף אודות | pages.about |
+| `/courses` | `courses/page.tsx` | רשימת קורסים | pages.courses |
+| `/courses/[slug]` | `courses/[slug]/page.tsx` | דף קורס בודד | pages.courseSingle |
+| `/blog` | `blog/page.tsx` | רשימת מאמרים | pages.blog |
+| `/blog/[slug]` | `blog/[slug]/page.tsx` | מאמר בודד | pages.blog.postCta |
+| `/ai-ready` | `ai-ready/page.tsx` | דף נחיתה AI Ready | pages.aiReady |
+| `/thank-you` | `thank-you/page.tsx` | דף תודה | pages.thankYou |
 
 ---
 
@@ -266,6 +295,116 @@ CLOUDINARY_API_SECRET=your-api-secret
 **תיקיית אחסון:** `focusai-academy/`
 
 **לאחר deploy:** הוסף את המשתנים ב-Railway Variables.
+
+---
+
+## Caching & Performance
+
+### Caching Strategy:
+- **getSharedContent()** משתמש ב-`unstable_cache` עם TTL של שעה
+- כל הגלובלים נטענים במקביל עם `Promise.allSettled`
+- Cache tags: `globals`, `homepage`, `pages`, `site-settings`
+
+### Revalidation:
+כל הדפים יש להם `export const revalidate = 3600`:
+- `/` (homepage)
+- `/about`
+- `/courses` + `/courses/[slug]`
+- `/blog` + `/blog/[slug]`
+- `/ai-ready`
+- `/thank-you`
+
+### Error Handling:
+| קובץ | תפקיד |
+|------|--------|
+| `src/app/(frontend)/not-found.tsx` | דף 404 |
+| `src/app/error.tsx` | Error boundary ראשי |
+| `src/app/(frontend)/error.tsx` | Error boundary ל-frontend |
+| `src/app/loading.tsx` | Loading state ראשי |
+| `src/app/(frontend)/loading.tsx` | Loading state ל-frontend |
+
+### Performance Utilities:
+```typescript
+import { logPerformance, measureAsync, createTimer } from '@/lib/performance'
+
+// Option 1: Manual timing
+const start = performance.now()
+await someOperation()
+logPerformance('someOperation', start)
+
+// Option 2: Async wrapper
+const data = await measureAsync('fetchData', () => fetchData())
+
+// Option 3: Timer object
+const timer = createTimer('myOperation')
+timer.start()
+doSomething()
+timer.end()
+```
+
+---
+
+## SEO Implementation
+
+### Sitemap & Robots:
+```
+src/app/sitemap.ts     ← Sitemap דינמי
+src/app/robots.ts      ← robots.txt
+```
+
+**Sitemap כולל:**
+- דפים סטטיים: /, /about, /courses, /blog, /ai-ready
+- דפי קורסים: /courses/[slug] (מ-Payload)
+- דפי מאמרים: /blog/[slug] (מ-Payload)
+
+### Schema.org Components:
+```
+src/lib/schema/
+├── index.ts                 ← Export file
+├── OrganizationSchema.tsx   ← EducationalOrganization
+├── CourseSchema.tsx         ← Course schema
+└── ArticleSchema.tsx        ← Article schema
+```
+
+**שימוש:**
+```typescript
+import { OrganizationSchema, CourseSchema, ArticleSchema } from '@/lib/schema'
+
+// Layout - OrganizationSchema
+<OrganizationSchema />
+
+// Course page
+<CourseSchema course={course} />
+
+// Blog post
+<ArticleSchema post={post} />
+```
+
+### Metadata Pattern:
+```typescript
+// Static metadata (layout.tsx)
+export const metadata: Metadata = {
+  metadataBase: new URL(BASE_URL),
+  title: { default: '...', template: '%s | Focus AI Academy' },
+  // ...
+}
+
+// Dynamic metadata (generateMetadata)
+export async function generateMetadata({ params }): Promise<Metadata> {
+  // Fetch data and return metadata
+  return {
+    title: course.title,
+    openGraph: { ... },
+    twitter: { ... },
+    alternates: { canonical: `${BASE_URL}/courses/${slug}` },
+  }
+}
+```
+
+### משתני סביבה:
+```
+NEXT_PUBLIC_SITE_URL=https://focusai.co.il
+```
 
 ---
 

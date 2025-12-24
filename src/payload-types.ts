@@ -121,11 +121,13 @@ export interface Config {
     'site-settings': SiteSetting;
     navigation: Navigation;
     homepage: Homepage;
+    pages: Page;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     navigation: NavigationSelect<false> | NavigationSelect<true>;
     homepage: HomepageSelect<false> | HomepageSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
   };
   locale: null;
   user: User & {
@@ -1481,20 +1483,61 @@ export interface Navigation {
   createdAt?: string | null;
 }
 /**
+ * כל התוכן של דף הבית - כותרות, סטטיסטיקות, CTAs
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "homepage".
  */
 export interface Homepage {
   id: number;
+  /**
+   * הסקשן הראשי בראש הדף
+   */
   hero?: {
     title?: string | null;
+    /**
+     * המילה שתהיה בצבע הגרדיאנט
+     */
+    titleHighlight?: string | null;
     subtitle?: string | null;
-    primaryCta?: string | null;
-    primaryCtaLink?: string | null;
-    secondaryCta?: string | null;
-    secondaryCtaLink?: string | null;
     image?: (number | null) | Media;
+    primaryCta?: {
+      text?: string | null;
+      link?: string | null;
+    };
+    secondaryCta?: {
+      text?: string | null;
+      link?: string | null;
+    };
   };
+  /**
+   * מספרים שמוצגים בכל האתר (דף הבית, אודות וכו')
+   */
+  globalStats: {
+    graduates: {
+      value: number;
+      label?: string | null;
+      suffix?: string | null;
+    };
+    courses: {
+      value: number;
+      label?: string | null;
+      suffix?: string | null;
+    };
+    companies: {
+      value: number;
+      label?: string | null;
+      suffix?: string | null;
+    };
+    satisfaction: {
+      value: number;
+      label?: string | null;
+      suffix?: string | null;
+    };
+  };
+  /**
+   * שדה ישן - השתמש ב-globalStats במקום
+   */
   stats?:
     | {
         number?: string | null;
@@ -1502,15 +1545,75 @@ export interface Homepage {
         id?: string | null;
       }[]
     | null;
+  /**
+   * נקודות מפתח שמסבירות למה לבחור בנו
+   */
   whyUs?:
     | {
         icon?: string | null;
-        title?: string | null;
-        description?: string | null;
+        title: string;
+        description: string;
         id?: string | null;
       }[]
     | null;
+  /**
+   * סקשן אודות בדף הבית
+   */
+  about?: {
+    title?: string | null;
+    subtitle?: string | null;
+    content?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    image?: (number | null) | Media;
+    /**
+     * נקודות מפתח שמוצגות בסקשן
+     */
+    features?:
+      | {
+          icon?: string | null;
+          title: string;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    cta?: {
+      text?: string | null;
+      link?: string | null;
+    };
+  };
+  /**
+   * כותרות ותתי-כותרות לכל סקשן בדף
+   */
   sections?: {
+    programs?: {
+      title?: string | null;
+      subtitle?: string | null;
+    };
+    testimonials?: {
+      title?: string | null;
+      subtitle?: string | null;
+    };
+    team?: {
+      title?: string | null;
+      subtitle?: string | null;
+    };
+    partners?: {
+      title?: string | null;
+      subtitle?: string | null;
+    };
     coursesTitle?: string | null;
     blogTitle?: string | null;
     testimonialsTitle?: string | null;
@@ -1519,13 +1622,258 @@ export interface Homepage {
   newsletter?: {
     title?: string | null;
     description?: string | null;
+    buttonText?: string | null;
     webhookUrl?: string | null;
   };
   bottomCta?: {
     title?: string | null;
-    description?: string | null;
+    subtitle?: string | null;
     showForm?: boolean | null;
     showWhatsapp?: boolean | null;
+    primaryButton?: {
+      text?: string | null;
+      link?: string | null;
+    };
+    secondaryButton?: {
+      text?: string | null;
+      link?: string | null;
+    };
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * תוכן דינמי לכל הדפים באתר
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  about?: {
+    hero?: {
+      title?: string | null;
+      titleHighlight?: string | null;
+      subtitle?: string | null;
+    };
+    mission?: {
+      badge?: string | null;
+      title?: string | null;
+      titleHighlight?: string | null;
+      paragraphs?:
+        | {
+            text: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    values?:
+      | {
+          icon?: string | null;
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    team?: {
+      badge?: string | null;
+      title?: string | null;
+      subtitle?: string | null;
+    };
+    cta?: {
+      title?: string | null;
+      subtitle?: string | null;
+      primaryButton?: {
+        text?: string | null;
+        link?: string | null;
+      };
+      secondaryButton?: {
+        text?: string | null;
+        link?: string | null;
+      };
+    };
+  };
+  courses?: {
+    hero?: {
+      title?: string | null;
+      titleHighlight?: string | null;
+      subtitle?: string | null;
+    };
+    emptyState?: {
+      title?: string | null;
+      subtitle?: string | null;
+      buttonText?: string | null;
+    };
+    cta?: {
+      title?: string | null;
+      subtitle?: string | null;
+      primaryButton?: {
+        text?: string | null;
+        link?: string | null;
+      };
+      secondaryButton?: {
+        text?: string | null;
+        link?: string | null;
+      };
+    };
+  };
+  blog?: {
+    hero?: {
+      title?: string | null;
+      titleHighlight?: string | null;
+      subtitle?: string | null;
+    };
+    emptyState?: {
+      noResults?: string | null;
+      noPosts?: string | null;
+      noPostsSubtitle?: string | null;
+      filterSubtitle?: string | null;
+    };
+    cta?: {
+      title?: string | null;
+      subtitle?: string | null;
+      primaryButton?: {
+        text?: string | null;
+        link?: string | null;
+      };
+      secondaryButton?: {
+        text?: string | null;
+        link?: string | null;
+      };
+    };
+    postCta?: {
+      title?: string | null;
+      subtitle?: string | null;
+    };
+  };
+  thankYou?: {
+    icon?: string | null;
+    title?: string | null;
+    subtitle?: string | null;
+    description?: string | null;
+    whatNext?: {
+      title?: string | null;
+      items?:
+        | {
+            icon?: string | null;
+            text: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    buttons?:
+      | {
+          text: string;
+          link: string;
+          style?: ('primary' | 'secondary' | 'whatsapp') | null;
+          icon?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * תוכן לדף הנחיתה AI Ready
+   */
+  aiReady?: {
+    hero?: {
+      badge?: string | null;
+      title?: string | null;
+      titleHighlight?: string | null;
+      subtitle?: string | null;
+      primaryCta?: string | null;
+      secondaryCta?: string | null;
+    };
+    trustBadges?:
+      | {
+          icon?: string | null;
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    audience?: {
+      title?: string | null;
+      subtitle?: string | null;
+    };
+    benefits?: {
+      title?: string | null;
+      subtitle?: string | null;
+    };
+    pricing?: {
+      title?: string | null;
+      subtitle?: string | null;
+      nextCohortDate?: string | null;
+      frontalTrack?: {
+        title?: string | null;
+        schedule?: string | null;
+        originalPrice?: string | null;
+        price?: string | null;
+        priceNote?: string | null;
+      };
+      zoomTrack?: {
+        title?: string | null;
+        schedule?: string | null;
+        originalPrice?: string | null;
+        price?: string | null;
+        priceNote?: string | null;
+      };
+    };
+    testimonials?: {
+      badge?: string | null;
+      title?: string | null;
+      titleHighlight?: string | null;
+    };
+    about?: {
+      title?: string | null;
+    };
+    team?: {
+      title?: string | null;
+      subtitle?: string | null;
+    };
+    cta?: {
+      title?: string | null;
+      subtitle?: string | null;
+    };
+    form?: {
+      title?: string | null;
+      subtitle?: string | null;
+      buttonText?: string | null;
+    };
+  };
+  /**
+   * טקסטים וכותרות לדפי קורסים בודדים
+   */
+  courseSingle?: {
+    buttons?: {
+      register?: string | null;
+      syllabus?: string | null;
+      contact?: string | null;
+      backHome?: string | null;
+    };
+    sections?: {
+      whoIsItFor?: string | null;
+      whyNow?: string | null;
+      whatYouGet?: string | null;
+      highlights?: string | null;
+      syllabus?: string | null;
+      team?: string | null;
+      testimonials?: string | null;
+      faq?: string | null;
+    };
+    alerts?: {
+      spotsLeft?: string | null;
+    };
+    cta?: {
+      title?: string | null;
+      subtitle?: string | null;
+    };
+  };
+  /**
+   * הגדרות ברירת מחדל ל-CTA sections בכל הדפים
+   */
+  commonCta?: {
+    whatsappNumber?: string | null;
+    whatsappText?: string | null;
+    contactButtonText?: string | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1633,12 +1981,53 @@ export interface HomepageSelect<T extends boolean = true> {
     | T
     | {
         title?: T;
+        titleHighlight?: T;
         subtitle?: T;
-        primaryCta?: T;
-        primaryCtaLink?: T;
-        secondaryCta?: T;
-        secondaryCtaLink?: T;
         image?: T;
+        primaryCta?:
+          | T
+          | {
+              text?: T;
+              link?: T;
+            };
+        secondaryCta?:
+          | T
+          | {
+              text?: T;
+              link?: T;
+            };
+      };
+  globalStats?:
+    | T
+    | {
+        graduates?:
+          | T
+          | {
+              value?: T;
+              label?: T;
+              suffix?: T;
+            };
+        courses?:
+          | T
+          | {
+              value?: T;
+              label?: T;
+              suffix?: T;
+            };
+        companies?:
+          | T
+          | {
+              value?: T;
+              label?: T;
+              suffix?: T;
+            };
+        satisfaction?:
+          | T
+          | {
+              value?: T;
+              label?: T;
+              suffix?: T;
+            };
       };
   stats?:
     | T
@@ -1655,9 +2044,55 @@ export interface HomepageSelect<T extends boolean = true> {
         description?: T;
         id?: T;
       };
+  about?:
+    | T
+    | {
+        title?: T;
+        subtitle?: T;
+        content?: T;
+        image?: T;
+        features?:
+          | T
+          | {
+              icon?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        cta?:
+          | T
+          | {
+              text?: T;
+              link?: T;
+            };
+      };
   sections?:
     | T
     | {
+        programs?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+            };
+        testimonials?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+            };
+        team?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+            };
+        partners?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+            };
         coursesTitle?: T;
         blogTitle?: T;
         testimonialsTitle?: T;
@@ -1668,15 +2103,333 @@ export interface HomepageSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        buttonText?: T;
         webhookUrl?: T;
       };
   bottomCta?:
     | T
     | {
         title?: T;
-        description?: T;
+        subtitle?: T;
         showForm?: T;
         showWhatsapp?: T;
+        primaryButton?:
+          | T
+          | {
+              text?: T;
+              link?: T;
+            };
+        secondaryButton?:
+          | T
+          | {
+              text?: T;
+              link?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  about?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              title?: T;
+              titleHighlight?: T;
+              subtitle?: T;
+            };
+        mission?:
+          | T
+          | {
+              badge?: T;
+              title?: T;
+              titleHighlight?: T;
+              paragraphs?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+            };
+        values?:
+          | T
+          | {
+              icon?: T;
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        team?:
+          | T
+          | {
+              badge?: T;
+              title?: T;
+              subtitle?: T;
+            };
+        cta?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              primaryButton?:
+                | T
+                | {
+                    text?: T;
+                    link?: T;
+                  };
+              secondaryButton?:
+                | T
+                | {
+                    text?: T;
+                    link?: T;
+                  };
+            };
+      };
+  courses?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              title?: T;
+              titleHighlight?: T;
+              subtitle?: T;
+            };
+        emptyState?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              buttonText?: T;
+            };
+        cta?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              primaryButton?:
+                | T
+                | {
+                    text?: T;
+                    link?: T;
+                  };
+              secondaryButton?:
+                | T
+                | {
+                    text?: T;
+                    link?: T;
+                  };
+            };
+      };
+  blog?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              title?: T;
+              titleHighlight?: T;
+              subtitle?: T;
+            };
+        emptyState?:
+          | T
+          | {
+              noResults?: T;
+              noPosts?: T;
+              noPostsSubtitle?: T;
+              filterSubtitle?: T;
+            };
+        cta?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              primaryButton?:
+                | T
+                | {
+                    text?: T;
+                    link?: T;
+                  };
+              secondaryButton?:
+                | T
+                | {
+                    text?: T;
+                    link?: T;
+                  };
+            };
+        postCta?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+            };
+      };
+  thankYou?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        subtitle?: T;
+        description?: T;
+        whatNext?:
+          | T
+          | {
+              title?: T;
+              items?:
+                | T
+                | {
+                    icon?: T;
+                    text?: T;
+                    id?: T;
+                  };
+            };
+        buttons?:
+          | T
+          | {
+              text?: T;
+              link?: T;
+              style?: T;
+              icon?: T;
+              id?: T;
+            };
+      };
+  aiReady?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              badge?: T;
+              title?: T;
+              titleHighlight?: T;
+              subtitle?: T;
+              primaryCta?: T;
+              secondaryCta?: T;
+            };
+        trustBadges?:
+          | T
+          | {
+              icon?: T;
+              text?: T;
+              id?: T;
+            };
+        audience?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+            };
+        benefits?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+            };
+        pricing?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              nextCohortDate?: T;
+              frontalTrack?:
+                | T
+                | {
+                    title?: T;
+                    schedule?: T;
+                    originalPrice?: T;
+                    price?: T;
+                    priceNote?: T;
+                  };
+              zoomTrack?:
+                | T
+                | {
+                    title?: T;
+                    schedule?: T;
+                    originalPrice?: T;
+                    price?: T;
+                    priceNote?: T;
+                  };
+            };
+        testimonials?:
+          | T
+          | {
+              badge?: T;
+              title?: T;
+              titleHighlight?: T;
+            };
+        about?:
+          | T
+          | {
+              title?: T;
+            };
+        team?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+            };
+        cta?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+            };
+        form?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              buttonText?: T;
+            };
+      };
+  courseSingle?:
+    | T
+    | {
+        buttons?:
+          | T
+          | {
+              register?: T;
+              syllabus?: T;
+              contact?: T;
+              backHome?: T;
+            };
+        sections?:
+          | T
+          | {
+              whoIsItFor?: T;
+              whyNow?: T;
+              whatYouGet?: T;
+              highlights?: T;
+              syllabus?: T;
+              team?: T;
+              testimonials?: T;
+              faq?: T;
+            };
+        alerts?:
+          | T
+          | {
+              spotsLeft?: T;
+            };
+        cta?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+            };
+      };
+  commonCta?:
+    | T
+    | {
+        whatsappNumber?: T;
+        whatsappText?: T;
+        contactButtonText?: T;
       };
   updatedAt?: T;
   createdAt?: T;

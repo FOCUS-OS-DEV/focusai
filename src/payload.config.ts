@@ -29,6 +29,7 @@ import { Partners } from './collections/Partners'
 import { SiteSettings } from './globals/SiteSettings'
 import { Navigation } from './globals/Navigation'
 import { Homepage } from './globals/Homepage'
+import { Pages } from './globals/Pages'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -63,7 +64,7 @@ export default buildConfig({
     Contacts,
     Partners,
   ],
-  globals: [SiteSettings, Navigation, Homepage],
+  globals: [SiteSettings, Navigation, Homepage, Pages],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
