@@ -9,7 +9,15 @@ export async function GET() {
   try {
     const payload = await getPayload({ config })
 
-    // Query the database directly to check tables
+    // Query ALL tables in public schema
+    const allTables = await payload.db.drizzle.execute(sql`
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = 'public'
+      ORDER BY table_name;
+    `)
+
+    // Query the database directly to check pages tables
     const result = await payload.db.drizzle.execute(sql`
       SELECT table_name
       FROM information_schema.tables
@@ -29,6 +37,8 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
+      allTablesCount: allTables.rows.length,
+      allTables: allTables.rows.map((r: { table_name: string }) => r.table_name),
       pagesTablesCount: result.rows.length,
       pagesTables: result.rows,
       aiReadyTablesCount: aiReadyTables.rows.length,
