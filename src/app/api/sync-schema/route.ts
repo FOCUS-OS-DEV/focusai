@@ -69,7 +69,8 @@ export async function GET() {
     }
 
     // Try to access all globals to trigger any missing table creation
-    const globals = ['site-settings', 'navigation', 'homepage', 'pages']
+    type GlobalSlug = 'site-settings' | 'navigation' | 'homepage' | 'pages'
+    const globals: GlobalSlug[] = ['site-settings', 'navigation', 'homepage', 'pages']
     for (const globalSlug of globals) {
       try {
         await payload.findGlobal({ slug: globalSlug, depth: 0 })
