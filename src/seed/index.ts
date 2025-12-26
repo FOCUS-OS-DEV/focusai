@@ -276,34 +276,46 @@ async function seed() {
       ],
       syllabus: [
         {
-          weekNumber: '1-2',
-          title: 'יסודות הבינה המלאכותית',
-          topics: [{ topic: 'מהי בינה מלאכותית' }, { topic: 'מודלי שפה גדולים' }, { topic: 'ChatGPT ו-Claude' }],
+          number: 1,
+          title: 'יסודות הבינה המלאכותית (שבועות 1-2)',
+          description: 'מבוא מקיף לעולם ה-AI, היכרות עם מודלי שפה גדולים ויכולות הכלים המובילים.',
+          topics: [{ text: 'מהי בינה מלאכותית' }, { text: 'מודלי שפה גדולים' }, { text: 'ChatGPT ו-Claude' }],
+          tools: [{ name: 'ChatGPT' }, { name: 'Claude' }],
         },
         {
-          weekNumber: '3-4',
-          title: 'הנדסת פרומפטים',
-          topics: [{ topic: 'עקרונות כתיבת פרומפטים' }, { topic: 'טכניקות מתקדמות' }, { topic: 'בניית GPTs' }],
+          number: 2,
+          title: 'הנדסת פרומפטים (שבועות 3-4)',
+          description: 'למידה מעמיקה של עקרונות חשיבה ובניית בקשות מדויקות למודלי AI.',
+          topics: [{ text: 'עקרונות כתיבת פרומפטים' }, { text: 'טכניקות מתקדמות' }, { text: 'בניית GPTs' }],
+          tools: [{ name: 'GPTs Builder' }, { name: 'Prompt Engineering' }],
         },
         {
-          weekNumber: '5-6',
-          title: 'אוטומציות עם Make ו-n8n',
-          topics: [{ topic: 'ממשק וסביבת עבודה' }, { topic: 'בניית תרחישים' }, { topic: 'אינטגרציות' }],
+          number: 3,
+          title: 'אוטומציות עם Make ו-n8n (שבועות 5-6)',
+          description: 'בניית אוטומציות מורכבות עם פלטפורמות No-Code מובילות.',
+          topics: [{ text: 'ממשק וסביבת עבודה' }, { text: 'בניית תרחישים' }, { text: 'אינטגרציות' }],
+          tools: [{ name: 'Make' }, { name: 'n8n' }],
         },
         {
-          weekNumber: '7-8',
-          title: 'בניית בוטים וסוכני AI',
-          topics: [{ topic: 'ארכיטקטורת סוכנים' }, { topic: 'כלים וזיכרון' }, { topic: 'RAG' }],
+          number: 4,
+          title: 'בניית בוטים וסוכני AI (שבועות 7-8)',
+          description: 'בניית סוכנים חכמים המיועדים לכל מטרה אישית או מקצועית.',
+          topics: [{ text: 'ארכיטקטורת סוכנים' }, { text: 'כלים וזיכרון' }, { text: 'RAG' }],
+          tools: [{ name: 'AI Agents' }, { name: 'RAG' }],
         },
         {
-          weekNumber: '9-10',
-          title: 'אינטגרציות מתקדמות',
-          topics: [{ topic: 'APIs' }, { topic: 'Webhooks' }, { topic: 'WhatsApp ו-Manychat' }],
+          number: 5,
+          title: 'אינטגרציות מתקדמות (שבועות 9-10)',
+          description: 'חיבור מערכות חיצוניות והטמעת AI בתהליכים עסקיים.',
+          topics: [{ text: 'APIs' }, { text: 'Webhooks' }, { text: 'WhatsApp ו-Manychat' }],
+          tools: [{ name: 'APIs' }, { name: 'WhatsApp' }, { name: 'Manychat' }],
         },
         {
-          weekNumber: '11-12',
-          title: 'פרויקט גמר',
-          topics: [{ topic: 'תכנון ואפיון' }, { topic: 'פיתוח' }, { topic: 'הצגה ומשוב' }],
+          number: 6,
+          title: 'פרויקט גמר (שבועות 11-12)',
+          description: 'יישום כל היכולות שנרכשו בפרויקט אמיתי מהעסק או הארגון שלכם.',
+          topics: [{ text: 'תכנון ואפיון' }, { text: 'פיתוח' }, { text: 'הצגה ומשוב' }],
+          tools: [{ name: 'פרויקט אמיתי' }, { name: 'ליווי צמוד' }],
         },
       ],
       faq: [
@@ -339,6 +351,109 @@ async function seed() {
       status: 'published' as const,
       featured: true,
       order: 2,
+      nextCohortDate: '27.02.2026',
+      trustBadges: [
+        { icon: '🎓', text: '8 מפגשים' },
+        { icon: '👥', text: 'קבוצות קטנות' },
+        { icon: '💻', text: 'פרונטלי + זום' },
+        { icon: '📜', text: 'תעודה' },
+      ],
+      pricingTracks: [
+        {
+          name: 'מסלול פרונטלי',
+          schedule: 'הרצליה פיתוח | ימי שישי | 9:00-12:00',
+          price: 4900,
+          originalPrice: 7900,
+          priceNote: 'מחיר השקה מוקדם',
+        },
+        {
+          name: 'מסלול Zoom',
+          schedule: 'אונליין | ימי שישי | 9:00-12:00',
+          price: 2490,
+          originalPrice: 3900,
+          priceNote: 'מחיר השקה מוקדם',
+        },
+      ],
+      syllabus: [
+        {
+          number: 1,
+          title: 'מבוא לבינה מלאכותית והנדסת פרומפטים',
+          description: 'מבוא מקיף לעולם ה-AI, היכרות עם מודלי שפה גדולים ויכולות הכלים המובילים. למידה מעמיקה של עקרונות חשיבה ובניית בקשות מדויקות.',
+          topics: [{ text: 'מודלי שפה' }, { text: 'Prompt Engineering' }],
+          tools: [{ name: 'ChatGPT' }, { name: 'Claude' }],
+        },
+        {
+          number: 2,
+          title: 'מחקר חכם ובניית סוכני AI',
+          description: 'בניית סוכנים חכמים המיועדים לכל מטרה אישית או מקצועית. ביצוע מחקר ואיסוף מידע לבניית בסיס ידע איכותי.',
+          topics: [{ text: 'GPTs Builder' }, { text: 'AI Agents' }],
+          tools: [{ name: 'GPTs Builder' }, { name: 'Perplexity' }],
+        },
+        {
+          number: 3,
+          title: 'סיכום פגישות, עיבוד מסמכים ויצירת מצגות',
+          description: 'למידה מעמיקה של כלים לניתוח מסמכים, תמלול וסיכום פגישות, עיבוד תוכן מורכב ובניית תובנות.',
+          topics: [{ text: 'ניתוח מסמכים' }, { text: 'מצגות' }],
+          tools: [{ name: 'GenSpark' }, { name: 'NotebookLM' }, { name: 'Google AI Studio' }],
+        },
+        {
+          number: 4,
+          title: 'יצירת תמונות וסרטונים בכלים חדשניים',
+          description: 'יצירת תמונות ווידאו מקצועיים באמצעות כלי AI מתקדמים. כתיבת פרומפטים יצירתיים, עריכת תמונות קיימות.',
+          topics: [{ text: 'Image Generation' }, { text: 'Video AI' }],
+          tools: [{ name: 'DALL-E' }, { name: 'Midjourney' }, { name: 'Kling AI' }],
+        },
+        {
+          number: 5,
+          title: 'בניית דשבורדים חכמים',
+          description: 'בניית דשבורדים אינטראקטיביים לצרכים ניהוליים ועסקיים. הגדרת ויזואליזציה של נתונים, מעקב אחר KPIs.',
+          topics: [{ text: 'Dashboards' }, { text: 'Data Visualization' }],
+          tools: [{ name: 'Lovable' }, { name: 'Data Tools' }],
+        },
+        {
+          number: 6,
+          title: 'אפיון עסקי, איסוף מידע ויצירת דשבורדים',
+          description: 'שיטות לאיסוף מידע איכותי ומיפוי תהליכים בארגון, זיהוי נקודות כאב וצווארי בקבוק.',
+          topics: [{ text: 'Business Analysis' }, { text: 'Process Mapping' }],
+          tools: [{ name: 'BPMN' }, { name: 'RACI' }],
+        },
+        {
+          number: 7,
+          title: 'דפי נחיתה, מיילים מעוצבים ואוטומציה',
+          description: 'יסודות הפיתוח לבניית דפי נחיתה ומיילים שיווקיים מעוצבים. שימוש נכון בכותרות, טקסטים ואוטומציות.',
+          topics: [{ text: 'Landing Pages' }, { text: 'Automation' }],
+          tools: [{ name: 'n8n' }, { name: 'Email Tools' }],
+        },
+        {
+          number: 8,
+          title: 'יישום מעשי ופרויקט אישי',
+          description: 'התכלית של כל ההכשרה! יישום כל היכולות שנרכשו בפרויקט אמיתי מהארגון או מהעסק שלכם.',
+          topics: [{ text: 'פרויקט גמר' }, { text: 'יישום' }],
+          tools: [{ name: 'פרויקט אמיתי' }, { name: 'ליווי צמוד' }],
+        },
+      ],
+      whyNow: [
+        {
+          icon: '📉',
+          title: 'פער משמעותי בשוק העבודה',
+          description: 'ארגונים מפטרים עובדים שלא יודעים לעבוד עם AI ומחפשים מועמדים שמבינים איך ליישם את הכלים האלה בפועל.',
+        },
+        {
+          icon: '📈',
+          title: 'ROI מהשבוע הראשון',
+          description: 'שימוש נכון בכלי AI מניב תוצאות כבר מהשבוע הראשון - חיסכון משמעותי בשעות עבודה, דיוק גבוה יותר במשימות.',
+        },
+        {
+          icon: '🏢',
+          title: 'אימוץ מהיר בארגונים',
+          description: 'ארגונים בכל הגדלים מטמיעים כלי AI לשיפור יעילות ותקשורת. מי שיודע להוביל את השינוי הזה - מקבל יתרון משמעותי.',
+        },
+        {
+          icon: '🚀',
+          title: 'העתיד כבר כאן',
+          description: 'הביקוש למיומנויות AI רק ימשיך לצמוח בשנים הקרובות. להתחיל עכשיו זה לא "להיות מוקדם" - זה להיות בזמן.',
+        },
+      ],
     },
     {
       title: 'סדנאות AI לארגונים',
@@ -517,100 +632,8 @@ async function seed() {
     console.log(`  ✅ Created partner: ${partner.name}`)
   }
 
-  // ============================================
-  // 9. Update Pages Global with AI Ready gallery images
-  // ============================================
-  console.log('\n📄 Updating Pages global with gallery images...')
-
-  await payload.updateGlobal({
-    slug: 'pages',
-    data: {
-      aiReady: {
-        syllabus: {
-          badge: '📚 תכנית לימודים',
-          title: 'סילבוס במיקוד יישומי ופרקטי',
-          subtitle: '8 מפגשים שייקחו אותכם מהבסיס לשליטה מלאה בכלי AI המתקדמים ביותר',
-          meetings: [
-            {
-              number: 1,
-              title: 'מבוא לבינה מלאכותית והנדסת פרומפטים',
-              description: 'מבוא מקיף לעולם ה-AI, היכרות עם מודלי שפה גדולים ויכולות הכלים המובילים. למידה מעמיקה של עקרונות חשיבה ובניית בקשות מדויקות.',
-              tools: [{ name: 'ChatGPT' }, { name: 'Claude' }, { name: 'Prompt Engineering' }],
-            },
-            {
-              number: 2,
-              title: 'מחקר חכם ובניית סוכני AI',
-              description: 'בניית סוכנים חכמים המיועדים לכל מטרה אישית או מקצועית. ביצוע מחקר ואיסוף מידע לבניית בסיס ידע איכותי. כל משתתף יבנה סוכן AI פעיל!',
-              tools: [{ name: 'GPTs Builder' }, { name: 'Perplexity' }, { name: 'AI Agents' }],
-            },
-            {
-              number: 3,
-              title: 'סיכום פגישות, עיבוד מסמכים ויצירת מצגות',
-              description: 'למידה מעמיקה של כלים לניתוח מסמכים, תמלול וסיכום פגישות, עיבוד תוכן מורכב ובניית תובנות. יצירת מצגות מקצועיות.',
-              tools: [{ name: 'GenSpark' }, { name: 'NotebookLM' }, { name: 'Google AI Studio' }],
-            },
-            {
-              number: 4,
-              title: 'יצירת תמונות וסרטונים בכלים חדשניים',
-              description: 'יצירת תמונות ווידאו מקצועיים באמצעות כלי AI מתקדמים. כתיבת פרומפטים יצירתיים, עריכת תמונות קיימות, והפקת סרטונים קצרים.',
-              tools: [{ name: 'DALL-E' }, { name: 'Midjourney' }, { name: 'Kling AI' }],
-            },
-            {
-              number: 5,
-              title: 'בניית דשבורדים חכמים',
-              description: 'בניית דשבורדים אינטראקטיביים לצרכים ניהוליים ועסקיים. הגדרת ויזואליזציה של נתונים, מעקב אחר KPIs, והפקת תובנות מהירות.',
-              tools: [{ name: 'Lovable' }, { name: 'Dashboards' }, { name: 'Data Visualization' }],
-            },
-            {
-              number: 6,
-              title: 'אפיון עסקי, איסוף מידע ויצירת דשבורדים',
-              description: 'שיטות לאיסוף מידע איכותי ומיפוי תהליכים בארגון, זיהוי נקודות כאב, צווארי בקבוק ואבדן יעילות.',
-              tools: [{ name: 'BPMN' }, { name: 'RACI' }, { name: 'Dashboards' }],
-            },
-            {
-              number: 7,
-              title: 'דפי נחיתה, מיילים מעוצבים ואוטומציה',
-              description: 'יסודות הפיתוח לבניית דפי נחיתה ומיילים שיווקיים מעוצבים. שימוש נכון בכותרות, טקסטים, תמונות, כפתורי פעולה ואוטומציות.',
-              tools: [{ name: 'n8n' }, { name: 'Landing Pages' }, { name: 'Automation' }],
-            },
-            {
-              number: 8,
-              title: 'יישום מעשי ופרויקט אישי',
-              description: 'התכלית של כל ההכשרה! יישום כל היכולות שנרכשו בפרויקט אמיתי מהארגון או מהעסק שלכם. בניית פתרון מבוסס AI, ליווי צמוד ומשוב.',
-              tools: [{ name: 'פרויקט אמיתי' }, { name: 'ליווי צמוד' }],
-            },
-          ],
-        },
-        whyNow: {
-          badge: '⏰ למה עכשיו?',
-          title: 'למה עכשיו זה הזמן?',
-          cards: [
-            {
-              icon: '📉',
-              title: 'פער משמעותי בשוק העבודה',
-              description: 'ארגונים מפטרים עובדים שלא יודעים לעבוד עם AI ומחפשים מועמדים שמבינים איך ליישם את הכלים האלה בפועל.',
-            },
-            {
-              icon: '📈',
-              title: 'ROI מהשבוע הראשון',
-              description: 'שימוש נכון בכלי AI מניב תוצאות כבר מהשבוע הראשון - חיסכון משמעותי בשעות עבודה, דיוק גבוה יותר במשימות.',
-            },
-            {
-              icon: '🏢',
-              title: 'אימוץ מהיר בארגונים',
-              description: 'ארגונים בכל הגדלים מטמיעים כלי AI לשיפור יעילות ותקשורת. מי שיודע להוביל את השינוי הזה - מקבל יתרון משמעותי.',
-            },
-            {
-              icon: '🚀',
-              title: 'העתיד כבר כאן',
-              description: 'הביקוש למיומנויות AI רק ימשיך לצמוח בשנים הקרובות. להתחיל עכשיו זה לא "להיות מוקדם" - זה להיות בזמן.',
-            },
-          ],
-        },
-      },
-    },
-  })
-  console.log('  ✅ Pages global updated with syllabus and whyNow')
+  // NOTE: AI Ready syllabus, whyNow, trustBadges, pricingTracks are now seeded
+  // directly in the AI Ready course above (Single Source of Truth!)
 
   console.log('\n🎉 Seed completed successfully!')
   console.log('\nSummary:')
@@ -618,12 +641,11 @@ async function seed() {
   console.log('  - 5 Categories (קטגוריות)')
   console.log(`  - ${testimonialsData.length} Testimonials (המלצות) with photos`)
   console.log('  - 8 Blog Posts (מאמרים)')
-  console.log('  - 4 Courses (מסלולים)')
+  console.log('  - 4 Courses (מסלולים) - includes AI Ready with full syllabus & whyNow')
   console.log(`  - ${partnersData.length} Partners (שותפים) with logos`)
   console.log('  - SiteSettings Global')
   console.log('  - Navigation Global')
   console.log('  - Homepage Global')
-  console.log('  - Pages Global (with AI Ready syllabus & whyNow)')
 
   process.exit(0)
 }

@@ -450,16 +450,19 @@ export default async function CoursePage({ params }: PageProps) {
 
                   <div className="flex items-start gap-4 pr-4">
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(90deg, rgba(184,108,255,.15), rgba(255,79,216,.15))' }}>
-                      <span className="text-lg font-black" style={{ color: '#8B5CF6' }}>{item.weekNumber || i + 1}</span>
+                      <span className="text-lg font-black" style={{ color: '#8B5CF6' }}>{item.number || i + 1}</span>
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-bold mb-2" style={{ color: '#1f1138' }}>{item.title}</h3>
+                      {item.description && (
+                        <p className="text-sm mb-2" style={{ color: '#6b7280' }}>{item.description}</p>
+                      )}
                       {item.topics && item.topics.length > 0 && (
                         <ul className="space-y-1">
                           {item.topics.map((topicItem, j) => (
                             <li key={j} className="flex items-center gap-2 text-sm" style={{ color: '#6b7280' }}>
                               <span style={{ color: '#8B5CF6' }}>•</span>
-                              {topicItem.topic}
+                              {topicItem.text}
                             </li>
                           ))}
                         </ul>

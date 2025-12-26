@@ -116,7 +116,7 @@ export const Courses: CollectionConfig = {
       type: 'textarea',
       label: 'תיאור התעודה',
     },
-    // מחיר
+    // מחיר בסיסי (לקורסים דיגיטליים)
     {
       name: 'price',
       type: 'number',
@@ -129,6 +129,122 @@ export const Courses: CollectionConfig = {
       label: 'הצג מחיר באתר',
       defaultValue: false,
     },
+    // מסלולי מחיר (לקורסים עם מספר אופציות - פרונטלי/זום)
+    {
+      name: 'pricingTracks',
+      type: 'array',
+      label: 'מסלולי מחיר',
+      admin: {
+        description: 'מחירון לקורסים עם מספר אופציות (פרונטלי, זום, וכו\')',
+        condition: (data) => data.type === 'frontal' || data.type === 'workshop',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          label: 'שם המסלול',
+          required: true,
+          admin: { description: 'לדוגמה: מסלול פרונטלי, מסלול Zoom' },
+        },
+        {
+          name: 'schedule',
+          type: 'text',
+          label: 'לו"ז',
+          admin: { description: 'לדוגמה: הרצליה פיתוח | ימי שישי | 9:00-12:00' },
+        },
+        {
+          name: 'price',
+          type: 'number',
+          label: 'מחיר',
+          required: true,
+        },
+        {
+          name: 'originalPrice',
+          type: 'number',
+          label: 'מחיר מקורי (לפני הנחה)',
+        },
+        {
+          name: 'priceNote',
+          type: 'text',
+          label: 'הערה למחיר',
+          admin: { description: 'לדוגמה: מחיר השקה מוקדם' },
+        },
+        {
+          name: 'features',
+          type: 'array',
+          label: 'מה כלול',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+              label: 'פיצ\'ר',
+            },
+          ],
+        },
+      ],
+    },
+    // תאריך מחזור קרוב
+    {
+      name: 'nextCohortDate',
+      type: 'text',
+      label: 'תאריך מחזור קרוב',
+      admin: {
+        description: 'לדוגמה: 27.02.2026',
+      },
+    },
+    // למה עכשיו - כרטיסי שיווק
+    {
+      name: 'whyNow',
+      type: 'array',
+      label: 'למה עכשיו',
+      admin: {
+        description: 'כרטיסי שיווק שמסבירים למה עכשיו זה הזמן להצטרף',
+      },
+      fields: [
+        {
+          name: 'icon',
+          type: 'text',
+          label: 'אייקון',
+          defaultValue: '🎯',
+        },
+        {
+          name: 'title',
+          type: 'text',
+          label: 'כותרת',
+          required: true,
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          label: 'תיאור',
+          required: true,
+        },
+      ],
+    },
+    // תגי אמון
+    {
+      name: 'trustBadges',
+      type: 'array',
+      label: 'תגי אמון',
+      admin: {
+        description: 'תגים כמו "8 מפגשים", "קבוצות קטנות", וכו\'',
+      },
+      maxRows: 6,
+      fields: [
+        {
+          name: 'icon',
+          type: 'text',
+          label: 'אייקון',
+          defaultValue: '🎓',
+        },
+        {
+          name: 'text',
+          type: 'text',
+          label: 'טקסט',
+          required: true,
+        },
+      ],
+    },
     // נקודות מפתח
     {
       name: 'highlights',
@@ -139,19 +255,68 @@ export const Courses: CollectionConfig = {
         { name: 'text', type: 'text', label: 'טקסט', required: true },
       ],
     },
-    // סילבוס
+    // סילבוס (מבנה מלא - מקור האמת היחיד)
     {
       name: 'syllabus',
       type: 'array',
       label: 'סילבוס',
+      admin: {
+        initCollapsed: true,
+        description: 'תכנית הלימודים - מפגשים/שבועות',
+      },
       fields: [
-        { name: 'weekNumber', type: 'text', label: 'שבוע/מפגש' },
-        { name: 'title', type: 'text', label: 'כותרת', required: true },
+        {
+          name: 'number',
+          type: 'number',
+          label: 'מספר מפגש',
+          required: true,
+        },
+        {
+          name: 'title',
+          type: 'text',
+          label: 'כותרת',
+          required: true,
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          label: 'תיאור',
+          required: true,
+        },
         {
           name: 'topics',
           type: 'array',
           label: 'נושאים',
-          fields: [{ name: 'topic', type: 'text', label: 'נושא' }],
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+              label: 'נושא',
+            },
+          ],
+        },
+        {
+          name: 'tools',
+          type: 'array',
+          label: 'כלים וטכנולוגיות',
+          admin: {
+            description: 'כלי AI שילמדו במפגש (ChatGPT, Claude, וכו\')',
+          },
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+              label: 'שם הכלי',
+            },
+          ],
+        },
+        {
+          name: 'icon',
+          type: 'text',
+          label: 'אייקון',
+          admin: {
+            description: 'אמוג\'י או אייקון',
+          },
         },
       ],
     },

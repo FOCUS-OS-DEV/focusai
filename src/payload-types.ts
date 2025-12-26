@@ -342,6 +342,59 @@ export interface Course {
   certificateDescription?: string | null;
   price?: number | null;
   showPrice?: boolean | null;
+  /**
+   * מחירון לקורסים עם מספר אופציות (פרונטלי, זום, וכו')
+   */
+  pricingTracks?:
+    | {
+        /**
+         * לדוגמה: מסלול פרונטלי, מסלול Zoom
+         */
+        name: string;
+        /**
+         * לדוגמה: הרצליה פיתוח | ימי שישי | 9:00-12:00
+         */
+        schedule?: string | null;
+        price: number;
+        originalPrice?: number | null;
+        /**
+         * לדוגמה: מחיר השקה מוקדם
+         */
+        priceNote?: string | null;
+        features?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * לדוגמה: 27.02.2026
+   */
+  nextCohortDate?: string | null;
+  /**
+   * כרטיסי שיווק שמסבירים למה עכשיו זה הזמן להצטרף
+   */
+  whyNow?:
+    | {
+        icon?: string | null;
+        title: string;
+        description: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * תגים כמו "8 מפגשים", "קבוצות קטנות", וכו'
+   */
+  trustBadges?:
+    | {
+        icon?: string | null;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
   highlights?:
     | {
         /**
@@ -352,16 +405,33 @@ export interface Course {
         id?: string | null;
       }[]
     | null;
+  /**
+   * תכנית הלימודים - מפגשים/שבועות
+   */
   syllabus?:
     | {
-        weekNumber?: string | null;
+        number: number;
         title: string;
+        description: string;
         topics?:
           | {
-              topic?: string | null;
+              text?: string | null;
               id?: string | null;
             }[]
           | null;
+        /**
+         * כלי AI שילמדו במפגש (ChatGPT, Claude, וכו')
+         */
+        tools?:
+          | {
+              name?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * אמוג'י או אייקון
+         */
+        icon?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1035,6 +1105,38 @@ export interface CoursesSelect<T extends boolean = true> {
   certificateDescription?: T;
   price?: T;
   showPrice?: T;
+  pricingTracks?:
+    | T
+    | {
+        name?: T;
+        schedule?: T;
+        price?: T;
+        originalPrice?: T;
+        priceNote?: T;
+        features?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  nextCohortDate?: T;
+  whyNow?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  trustBadges?:
+    | T
+    | {
+        icon?: T;
+        text?: T;
+        id?: T;
+      };
   highlights?:
     | T
     | {
@@ -1045,14 +1147,22 @@ export interface CoursesSelect<T extends boolean = true> {
   syllabus?:
     | T
     | {
-        weekNumber?: T;
+        number?: T;
         title?: T;
+        description?: T;
         topics?:
           | T
           | {
-              topic?: T;
+              text?: T;
               id?: T;
             };
+        tools?:
+          | T
+          | {
+              name?: T;
+              id?: T;
+            };
+        icon?: T;
         id?: T;
       };
   faq?:
@@ -1860,68 +1970,6 @@ export interface Page {
       subtitle?: string | null;
       buttonText?: string | null;
     };
-    /**
-     * תכנית הלימודים - 8 מפגשים
-     */
-    syllabus?: {
-      badge?: string | null;
-      title?: string | null;
-      subtitle?: string | null;
-      /**
-       * הוסף מפגשים עם כותרות, תיאורים וכלים
-       */
-      meetings?:
-        | {
-            /**
-             * מספר המפגש (1-12)
-             */
-            number: number;
-            title: string;
-            /**
-             * מה ילמדו במפגש זה
-             */
-            description: string;
-            /**
-             * נקודות מפתח או נושאים
-             */
-            topics?:
-              | {
-                  text?: string | null;
-                  id?: string | null;
-                }[]
-              | null;
-            /**
-             * תגיות לכלים (ChatGPT, Claude, וכו')
-             */
-            tools?:
-              | {
-                  name?: string | null;
-                  id?: string | null;
-                }[]
-              | null;
-            /**
-             * אמוג'י או אייקון למפגש
-             */
-            icon?: string | null;
-            id?: string | null;
-          }[]
-        | null;
-    };
-    /**
-     * סקשן "למה עכשיו זה הזמן"
-     */
-    whyNow?: {
-      badge?: string | null;
-      title?: string | null;
-      cards?:
-        | {
-            icon?: string | null;
-            title: string;
-            description: string;
-            id?: string | null;
-          }[]
-        | null;
-    };
   };
   /**
    * טקסטים וכותרות לדפי קורסים בודדים
@@ -2471,48 +2519,6 @@ export interface PagesSelect<T extends boolean = true> {
               title?: T;
               subtitle?: T;
               buttonText?: T;
-            };
-        syllabus?:
-          | T
-          | {
-              badge?: T;
-              title?: T;
-              subtitle?: T;
-              meetings?:
-                | T
-                | {
-                    number?: T;
-                    title?: T;
-                    description?: T;
-                    topics?:
-                      | T
-                      | {
-                          text?: T;
-                          id?: T;
-                        };
-                    tools?:
-                      | T
-                      | {
-                          name?: T;
-                          id?: T;
-                        };
-                    icon?: T;
-                    id?: T;
-                  };
-            };
-        whyNow?:
-          | T
-          | {
-              badge?: T;
-              title?: T;
-              cards?:
-                | T
-                | {
-                    icon?: T;
-                    title?: T;
-                    description?: T;
-                    id?: T;
-                  };
             };
       };
   courseSingle?:

@@ -253,19 +253,28 @@ about: { hero, mission, values[], team, cta }
 courses: { hero }
 blog: { hero, filters, emptyState, cta, postCta }
 thankYou: { icon, title, subtitle, description, whatNext, buttons[] }
-aiReady: { hero, trustBadges[], audience, benefits, pricing, testimonials, about, team, cta, form }
+aiReady: { hero, audience, benefits, pricing, testimonials, about, team, cta, form }
+  // NOTE: syllabus, whyNow, trustBadges moved to Course collection!
 courseSingle: { buttons, sections, alerts, cta }
 commonCta: { whatsappNumber, whatsappText }
 ```
 
-## מבנה Courses (שדות עיקריים)
+## מבנה Courses (שדות עיקריים) - SINGLE SOURCE OF TRUTH
 ```
 title, slug, subtitle, excerpt, description
 type: frontal | digital | workshop | coaching
 duration, schedule, location, hasZoom
 maxStudents, instructorRatio
 certificate, certificateDescription
-highlights[], syllabus[], faq[], gallery[]
+
+# Course Content (Single Source of Truth!)
+syllabus[]: { number, title, description, topics[], tools[], icon }
+whyNow[]: { icon, title, description }
+trustBadges[]: { icon, text }
+pricingTracks[]: { name, schedule, price, originalPrice, priceNote, features[] }
+nextCohortDate
+
+highlights[], faq[], gallery[]
 instructors → Instructors
 testimonials → Testimonials
 ctaText, ctaType, ctaLink
@@ -273,6 +282,19 @@ status: draft | published
 order, featured
 seo: { metaTitle, metaDescription, ogImage }
 ```
+
+## Data Architecture - Single Source of Truth
+
+**CRITICAL:** Course collection is the ONLY source for course content:
+- `syllabus` - תכנית לימודים (meetings with tools, topics, descriptions)
+- `whyNow` - כרטיסי "למה עכשיו"
+- `trustBadges` - תגי אמון
+- `pricingTracks` - מסלולי מחיר
+
+**DO NOT** duplicate this data in Pages global!
+
+**Migration endpoint:** `/api/migrate-ai-ready` - migrates data from Pages to Course
+**Seed endpoint:** `/api/seed-ai-ready` - seeds AI Ready course with full content
 
 ## קשרים בין Collections
 ```
@@ -295,10 +317,10 @@ Courses → Instructors + Testimonials
 | `/` | `page.tsx` | דף הבית | homepage global + sections |
 | `/about` | `about/page.tsx` | דף אודות | pages.about |
 | `/courses` | `courses/page.tsx` | רשימת קורסים | pages.courses |
-| `/courses/[slug]` | `courses/[slug]/page.tsx` | דף קורס בודד | pages.courseSingle |
+| `/courses/[slug]` | `courses/[slug]/page.tsx` | דף קורס בודד | Course collection |
 | `/blog` | `blog/page.tsx` | רשימת מאמרים | pages.blog |
 | `/blog/[slug]` | `blog/[slug]/page.tsx` | מאמר בודד | pages.blog.postCta |
-| `/ai-ready` | `ai-ready/page.tsx` | דף נחיתה AI Ready | pages.aiReady |
+| `/ai-ready` | `ai-ready/page.tsx` | דף נחיתה AI Ready | **Course** (slug: ai-ready-course) |
 | `/thank-you` | `thank-you/page.tsx` | דף תודה | pages.thankYou |
 
 ## Redirects (next.config.mjs)

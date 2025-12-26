@@ -1,26 +1,18 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import AIReadyClient from './AIReadyClient'
+import type { Course } from '@/payload-types'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60 // Revalidate every minute for quick CMS updates
 
-// Transform CMS data to component format
+// Transform Course syllabus to component format
 function transformSyllabusData(
-  cmsSyllabus: {
-    meetings?: Array<{
-      number: number
-      title: string
-      description: string
-      topics?: Array<{ text?: string }>
-      tools?: Array<{ name?: string }>
-      icon?: string
-    }>
-  } | null
+  courseSyllabus: Course['syllabus']
 ) {
-  if (!cmsSyllabus?.meetings?.length) return undefined
+  if (!courseSyllabus?.length) return undefined
 
-  return cmsSyllabus.meetings.map((meeting) => ({
+  return courseSyllabus.map((meeting) => ({
     number: meeting.number,
     title: meeting.title,
     description: meeting.description,
@@ -29,19 +21,14 @@ function transformSyllabusData(
   }))
 }
 
+// Transform Course whyNow to component format
 function transformWhyNowData(
-  cmsWhyNow: {
-    cards?: Array<{
-      icon?: string
-      title: string
-      description: string
-    }>
-  } | null
+  courseWhyNow: Course['whyNow']
 ) {
-  if (!cmsWhyNow?.cards?.length) return undefined
+  if (!courseWhyNow?.length) return undefined
 
   const colors = ['red', 'green', 'blue', 'purple'] // Cycle through colors
-  return cmsWhyNow.cards.map((card, index) => ({
+  return courseWhyNow.map((card, index) => ({
     title: card.title,
     description: card.description,
     color: colors[index % colors.length],
@@ -54,36 +41,27 @@ export default async function AIReadyPage() {
 
   try {
     const payload = await getPayload({ config })
-    const pagesGlobal = await payload.findGlobal({
-      slug: 'pages',
-      depth: 0,
+
+    // Fetch the AI Ready COURSE (Single Source of Truth!)
+    const { docs: courses } = await payload.find({
+      collection: 'courses',
+      where: {
+        slug: {
+          equals: 'ai-ready-course',
+        },
+      },
+      depth: 2, // Get instructors, testimonials relationships
     })
 
-    // Extract and transform syllabus data
-    const aiReady = pagesGlobal?.aiReady as {
-      syllabus?: {
-        meetings?: Array<{
-          number: number
-          title: string
-          description: string
-          topics?: Array<{ text?: string }>
-          tools?: Array<{ name?: string }>
-          icon?: string
-        }>
-      }
-      whyNow?: {
-        cards?: Array<{
-          icon?: string
-          title: string
-          description: string
-        }>
-      }
-    } | undefined
+    const course = courses[0] as Course | undefined
 
-    syllabusData = transformSyllabusData(aiReady?.syllabus || null)
-    whyNowData = transformWhyNowData(aiReady?.whyNow || null)
+    if (course) {
+      // Transform course data for the client component
+      syllabusData = transformSyllabusData(course.syllabus)
+      whyNowData = transformWhyNowData(course.whyNow)
+    }
   } catch (error) {
-    console.error('Error fetching AI Ready page data:', error)
+    console.error('Error fetching AI Ready course data:', error)
     // Continue with fallback data (handled in AIReadyClient)
   }
 

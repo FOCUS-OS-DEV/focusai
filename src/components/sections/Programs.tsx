@@ -117,6 +117,11 @@ function courseToProgram(course: Course, index: number): Program {
     })
   }
 
+  // AI Ready has a special landing page at /ai-ready
+  const courseLink = course.slug === 'ai-ready-course'
+    ? '/ai-ready'
+    : `/courses/${course.slug}`
+
   return {
     id: course.id,
     title: course.title,
@@ -124,7 +129,7 @@ function courseToProgram(course: Course, index: number): Program {
     image: featuredImage?.url || fallbackPrograms[index % fallbackPrograms.length].image,
     description: course.excerpt || '',
     tags: tags.length > 0 ? tags : ['מותאם אישית'],
-    link: `/courses/${course.slug}`,
+    link: courseLink,
     linkText: course.ctaText || undefined,
     highlight: course.featured ? 'מומלץ' : null,
     ...theme,
