@@ -84,6 +84,28 @@
 ## אם יש שגיאת סכמה
 המשתמש צריך לעשות Redeploy ב-Railway
 
+## Schema Sync Issues - Important!
+
+**Problem:** `push: true` in payload.config.ts only syncs schema on INITIAL database setup.
+Adding new Globals (like Pages) after initial setup won't create their tables automatically.
+
+**Solution:**
+1. Use the `/api/run-migration` endpoint to manually create missing tables
+2. Or create a migration file with `npx payload migrate:create`
+
+**Key Endpoints for Debugging:**
+- `/api/check-tables` - Lists all tables in database
+- `/api/sync-schema` - Tests access to all globals
+- `/api/run-migration` - Runs manual table creation for Pages global
+- `/api/debug-pages` - Shows what data is stored in Pages global
+
+**Important:** When adding new Globals:
+1. Add the Global to payload.config.ts
+2. Run `npm run generate:types`
+3. Deploy to Railway
+4. Call `/api/run-migration` to create tables
+5. Seed data via appropriate endpoint (e.g., `/api/seed-ai-ready`)
+
 ## קבצי Startup (קריטי!)
 ```
 start.sh       ← רץ בכל deploy
