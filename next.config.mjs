@@ -23,6 +23,16 @@ const nextConfig = {
         destination: '/ai-ready',
         permanent: true,
       },
+      {
+        source: '/courses/ai-ready-course',
+        destination: '/ai-ready',
+        permanent: true,
+      },
+      {
+        source: '/courses/ai-ready-course/:path*',
+        destination: '/ai-ready',
+        permanent: true,
+      },
     ]
   },
   images: {

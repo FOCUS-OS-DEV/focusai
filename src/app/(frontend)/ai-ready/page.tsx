@@ -3,7 +3,7 @@ import config from '@payload-config'
 import AIReadyClient from './AIReadyClient'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 3600 // Revalidate every hour
+export const revalidate = 60 // Revalidate every minute for quick CMS updates
 
 // Transform CMS data to component format
 function transformSyllabusData(

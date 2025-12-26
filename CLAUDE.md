@@ -98,6 +98,8 @@ Adding new Globals (like Pages) after initial setup won't create their tables au
 - `/api/sync-schema` - Tests access to all globals
 - `/api/run-migration` - Runs manual table creation for Pages global
 - `/api/debug-pages` - Shows what data is stored in Pages global
+- `/api/revalidate` - On-demand cache revalidation (see Caching section)
+- `/api/update-navigation` - Add AI Ready link to Navigation global
 
 **Important:** When adding new Globals:
 1. Add the Global to payload.config.ts
@@ -299,6 +301,16 @@ Courses → Instructors + Testimonials
 | `/ai-ready` | `ai-ready/page.tsx` | דף נחיתה AI Ready | pages.aiReady |
 | `/thank-you` | `thank-you/page.tsx` | דף תודה | pages.thankYou |
 
+## Redirects (next.config.mjs)
+
+| Source | Destination | Type |
+|--------|-------------|------|
+| `/courses/ai-ready` | `/ai-ready` | 301 |
+| `/courses/AI-Ready` | `/ai-ready` | 301 |
+| `/courses/ai-ready/*` | `/ai-ready` | 301 |
+| `/courses/ai-ready-course` | `/ai-ready` | 301 |
+| `/courses/ai-ready-course/*` | `/ai-ready` | 301 |
+
 ---
 
 ## Cloudinary Storage
@@ -328,13 +340,27 @@ CLOUDINARY_API_SECRET=your-api-secret
 - Cache tags: `globals`, `homepage`, `pages`, `site-settings`
 
 ### Revalidation:
-כל הדפים יש להם `export const revalidate = 3600`:
+רוב הדפים יש להם `export const revalidate = 3600` (שעה):
 - `/` (homepage)
 - `/about`
 - `/courses` + `/courses/[slug]`
 - `/blog` + `/blog/[slug]`
-- `/ai-ready`
 - `/thank-you`
+
+**דף AI Ready:** `revalidate = 60` (דקה) - לעדכונים מהירים מה-CMS
+
+**On-Demand Revalidation:**
+קריאה ל-`/api/revalidate` מאפסת את הקאש מיידית:
+```bash
+# אפס קאש לכל הדפים
+curl https://your-domain.com/api/revalidate
+
+# אפס קאש לדף ספציפי
+curl https://your-domain.com/api/revalidate?path=/ai-ready
+
+# אפס קאש לפי tag
+curl https://your-domain.com/api/revalidate?tag=pages
+```
 
 ### Error Handling:
 | קובץ | תפקיד |
