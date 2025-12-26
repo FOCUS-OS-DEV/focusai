@@ -28,7 +28,7 @@ const trainings = [
     sessions: 8,
     day: 'ימי שישי',
     hours: '09:00 - 12:00',
-    link: 'https://focusai.co.il/ai-ready/',
+    link: '/ai-ready',
     badge: 'מחזור חדש',
     accentColor: 'from-blue-500 to-cyan-400',
   },

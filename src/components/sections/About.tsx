@@ -84,7 +84,7 @@ const About = ({ about }: AboutProps) => {
     { type: 'user', text: 'נשמע מדהים! איך אני לומד לעשות את זה?' },
     { type: 'ai', text: 'יש לנו כמה אפשרויות, תלוי מה המטרה שלך:' },
     { type: 'ai', text: '🤖 Bot-Camp - ללמוד לפתח סוכני AI ואוטומציות ולעסוק בזה כמקצוע', link: 'https://focusai.co.il/bot-camp/', linkText: 'Bot-Camp' },
-    { type: 'ai', text: '🚀 AI Ready - ללמוד מאפס שימוש נכון בכלי AI לייעול העבודה והחיים האישיים', link: 'https://focusai.co.il/ai-ready/', linkText: 'AI Ready' },
+    { type: 'ai', text: '🚀 AI Ready - ללמוד מאפס שימוש נכון בכלי AI לייעול העבודה והחיים האישיים', link: '/ai-ready', linkText: 'AI Ready' },
     { type: 'ai', text: '🎯 סדנאות והרצאות AI - הרצאות וסדנאות מותאמות לארגונים וצוותים', link: 'https://focusai.co.il/ai-workshop/', linkText: 'סדנאות והרצאות AI' },
     { type: 'user', text: 'מעולה! איך ממשיכים?' },
     { type: 'ai', text: 'השאירו פרטים ונתאם שיחה קצרה 📞\n🎓 נתראה באקדמיה!', link: '#contact', linkText: 'השאירו פרטים' },

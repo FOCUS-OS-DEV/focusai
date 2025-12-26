@@ -390,7 +390,7 @@ async function seed() {
     },
     {
       title: 'AI Ready',
-      slug: 'ai-ready',
+      slug: 'ai-ready-course',
       subtitle: 'הכשרה יישומית לכלי AI מתקדמים',
       excerpt: '8 מפגשים מעשיים שישנו את הדרך שבה אתם עובדים עם בינה מלאכותית',
       type: 'frontal' as const,

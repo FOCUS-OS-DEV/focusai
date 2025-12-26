@@ -50,7 +50,7 @@ const fallbackPrograms = [
     image: 'https://res.cloudinary.com/dfudxxzlj/image/upload/v1764513071/WhatsApp_Image_2025-11-30_at_16.29.04_1_qfl4j2.jpg',
     description: 'מ"מה זה בכלל AI?" לבניית דפי נחיתה, מצגות, דשבורדים וסוכני AI - בעצמכם!',
     tags: ['8 מפגשים', '30 שעות', '10+ כלים'],
-    link: 'https://focusai.co.il/ai-ready/',
+    link: '/ai-ready',
     highlight: 'המחזור הקרוב נפתח',
     accentColor: 'from-blue-500 to-cyan-400',
     glowColor: 'rgba(59, 130, 246, 0.4)',

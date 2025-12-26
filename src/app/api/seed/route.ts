@@ -46,7 +46,7 @@ export async function GET() {
       },
       {
         title: 'AI Ready',
-        slug: 'ai-ready',
+        slug: 'ai-ready-course',
         subtitle: '8 מפגשים מעשיים לשליטה בכלי AI',
         excerpt: 'קורס מעשי לשליטה בכלי AI מתקדמים',
         type: 'frontal' as const,

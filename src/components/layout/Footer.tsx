@@ -14,7 +14,7 @@ export default async function Footer() {
 
   const courses = [
     { name: 'Bot-Camp', href: '/courses/bot-camp' },
-    { name: 'AI Ready', href: '/courses/ai-ready' },
+    { name: 'AI Ready', href: '/ai-ready' },
     { name: 'סדנאות לארגונים', href: '/courses' },
     { name: 'ליווי אישי', href: '/courses' },
   ]
