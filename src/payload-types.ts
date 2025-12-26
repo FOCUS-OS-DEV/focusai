@@ -1915,13 +1915,6 @@ export interface Page {
       primaryCta?: string | null;
       secondaryCta?: string | null;
     };
-    trustBadges?:
-      | {
-          icon?: string | null;
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
     audience?: {
       title?: string | null;
       subtitle?: string | null;
@@ -1930,24 +1923,12 @@ export interface Page {
       title?: string | null;
       subtitle?: string | null;
     };
+    /**
+     * כותרות בלבד - מחירים ומסלולים בקורס עצמו
+     */
     pricing?: {
       title?: string | null;
       subtitle?: string | null;
-      nextCohortDate?: string | null;
-      frontalTrack?: {
-        title?: string | null;
-        schedule?: string | null;
-        originalPrice?: string | null;
-        price?: string | null;
-        priceNote?: string | null;
-      };
-      zoomTrack?: {
-        title?: string | null;
-        schedule?: string | null;
-        originalPrice?: string | null;
-        price?: string | null;
-        priceNote?: string | null;
-      };
     };
     testimonials?: {
       badge?: string | null;
@@ -2445,13 +2426,6 @@ export interface PagesSelect<T extends boolean = true> {
               primaryCta?: T;
               secondaryCta?: T;
             };
-        trustBadges?:
-          | T
-          | {
-              icon?: T;
-              text?: T;
-              id?: T;
-            };
         audience?:
           | T
           | {
@@ -2469,25 +2443,6 @@ export interface PagesSelect<T extends boolean = true> {
           | {
               title?: T;
               subtitle?: T;
-              nextCohortDate?: T;
-              frontalTrack?:
-                | T
-                | {
-                    title?: T;
-                    schedule?: T;
-                    originalPrice?: T;
-                    price?: T;
-                    priceNote?: T;
-                  };
-              zoomTrack?:
-                | T
-                | {
-                    title?: T;
-                    schedule?: T;
-                    originalPrice?: T;
-                    price?: T;
-                    priceNote?: T;
-                  };
             };
         testimonials?:
           | T

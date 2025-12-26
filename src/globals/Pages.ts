@@ -532,16 +532,8 @@ export const Pages: GlobalConfig = {
             },
           ],
         },
-        {
-          name: 'trustBadges',
-          type: 'array',
-          label: 'תגי אמון',
-          maxRows: 4,
-          fields: [
-            { name: 'icon', type: 'text', label: 'אייקון', defaultValue: '🎓' },
-            { name: 'text', type: 'text', label: 'טקסט', required: true },
-          ],
-        },
+        // NOTE: trustBadges moved to Course collection (Single Source of Truth!)
+        // See: Collections → Courses → AI Ready course → trustBadges
         {
           name: 'audience',
           type: 'group',
@@ -564,34 +556,14 @@ export const Pages: GlobalConfig = {
           name: 'pricing',
           type: 'group',
           label: 'מחירים',
+          admin: {
+            description: 'כותרות בלבד - מחירים ומסלולים בקורס עצמו',
+          },
           fields: [
             { name: 'title', type: 'text', label: 'כותרת', defaultValue: 'מסלולי הכשרה' },
             { name: 'subtitle', type: 'textarea', label: 'תת-כותרת' },
-            { name: 'nextCohortDate', type: 'text', label: 'תאריך מחזור קרוב', defaultValue: '27.02.2026' },
-            {
-              name: 'frontalTrack',
-              type: 'group',
-              label: 'מסלול פרונטלי',
-              fields: [
-                { name: 'title', type: 'text', label: 'שם', defaultValue: 'מסלול פרונטלי' },
-                { name: 'schedule', type: 'text', label: 'לו"ז', defaultValue: 'הרצליה פיתוח | ימי שישי | 9:00-12:00' },
-                { name: 'originalPrice', type: 'text', label: 'מחיר מקורי', defaultValue: '7,900 ₪' },
-                { name: 'price', type: 'text', label: 'מחיר', defaultValue: '4,900' },
-                { name: 'priceNote', type: 'text', label: 'הערה למחיר', defaultValue: 'מחיר השקה מוקדם' },
-              ],
-            },
-            {
-              name: 'zoomTrack',
-              type: 'group',
-              label: 'מסלול Zoom',
-              fields: [
-                { name: 'title', type: 'text', label: 'שם', defaultValue: 'מסלול Zoom' },
-                { name: 'schedule', type: 'text', label: 'לו"ז', defaultValue: 'אונליין | ימי שישי | 9:00-12:00' },
-                { name: 'originalPrice', type: 'text', label: 'מחיר מקורי', defaultValue: '3,900 ₪' },
-                { name: 'price', type: 'text', label: 'מחיר', defaultValue: '2,490' },
-                { name: 'priceNote', type: 'text', label: 'הערה למחיר', defaultValue: 'מחיר השקה מוקדם' },
-              ],
-            },
+            // NOTE: pricingTracks, nextCohortDate moved to Course collection (Single Source of Truth!)
+            // See: Collections → Courses → AI Ready course → pricingTracks, nextCohortDate
           ],
         },
         {
@@ -640,8 +612,16 @@ export const Pages: GlobalConfig = {
             { name: 'buttonText', type: 'text', label: 'טקסט כפתור', defaultValue: 'שלחו פרטים' },
           ],
         },
-        // NOTE: syllabus and whyNow are now in Course collection (Single Source of Truth!)
-        // See: Collections → Courses → AI Ready course
+        // ═══════════════════════════════════════════════════════════════════
+        // SINGLE SOURCE OF TRUTH: The following fields are in Course collection
+        // See: Collections → Courses → AI Ready course (slug: ai-ready-course)
+        // ───────────────────────────────────────────────────────────────────
+        // • syllabus[] - תכנית לימודים (8 מפגשים)
+        // • whyNow[] - כרטיסי "למה עכשיו"
+        // • trustBadges[] - תגי אמון
+        // • pricingTracks[] - מסלולי מחיר (פרונטלי/זום)
+        // • nextCohortDate - תאריך מחזור קרוב
+        // ═══════════════════════════════════════════════════════════════════
       ],
     },
 

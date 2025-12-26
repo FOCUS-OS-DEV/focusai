@@ -254,7 +254,9 @@ courses: { hero }
 blog: { hero, filters, emptyState, cta, postCta }
 thankYou: { icon, title, subtitle, description, whatNext, buttons[] }
 aiReady: { hero, audience, benefits, pricing, testimonials, about, team, cta, form }
-  // NOTE: syllabus, whyNow, trustBadges moved to Course collection!
+  // NOTE: These are in Course collection (Single Source of Truth!):
+  //   syllabus[], whyNow[], trustBadges[], pricingTracks[], nextCohortDate
+  // Pages.aiReady only contains section headers (title, subtitle)
 courseSingle: { buttons, sections, alerts, cta }
 commonCta: { whatsappNumber, whatsappText }
 ```
