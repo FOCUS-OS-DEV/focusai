@@ -38,7 +38,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       allTablesCount: allTables.rows.length,
-      allTables: allTables.rows.map((r: { table_name: string }) => r.table_name),
+      allTables: allTables.rows.map((r) => (r as { table_name: string }).table_name),
       pagesTablesCount: result.rows.length,
       pagesTables: result.rows,
       aiReadyTablesCount: aiReadyTables.rows.length,
