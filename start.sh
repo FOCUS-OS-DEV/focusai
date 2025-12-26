@@ -4,7 +4,8 @@ set -e
 echo "==> Initializing database extensions..."
 node init-db.cjs
 
+echo "==> Running database migrations..."
+npm run migrate
+
 echo "==> Starting Next.js with Payload..."
-# Payload with push: true handles schema automatically
-# No need for migrations - schema syncs on startup
 exec npm start
