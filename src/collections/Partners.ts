@@ -22,7 +22,15 @@ export const Partners: CollectionConfig = {
       type: 'upload',
       relationTo: 'media',
       label: 'לוגו',
-      required: true,
+    },
+    {
+      name: 'externalLogoUrl',
+      type: 'text',
+      label: 'URL לוגו חיצוני',
+      admin: {
+        description: 'ישמש רק אם לא הועלה לוגו',
+        condition: (data) => !data?.logo,
+      },
     },
     {
       name: 'website',

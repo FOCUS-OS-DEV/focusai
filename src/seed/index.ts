@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import { getPayload } from 'payload'
 import config from '../payload.config'
+import { instructorsData, testimonialsData, partnersData, galleryImages } from './mediaData'
 
 // Helper to create simple Lexical richText content
 function createRichText(text: string) {
@@ -49,42 +50,24 @@ async function seed() {
   console.log('📦 Database is empty, running seed...\n')
 
   // ============================================
-  // 1. INSTRUCTORS (מרצים)
+  // 1. INSTRUCTORS (מרצים) - Using data from mediaData.ts
   // ============================================
   console.log('👨‍🏫 Creating Instructors...')
-
-  const instructorsData = [
-    {
-      name: 'אונייל סחר',
-      slug: 'oneil-sahar',
-      title: 'שותף מייסד, Focus AI',
-      shortBio: 'מומחה לבינה מלאכותית ואוטומציות עסקיות. מלווה ארגונים בהטמעת AI ומרצה בכיר בתחום.',
-      featured: true,
-      order: 1,
-    },
-    {
-      name: 'שחר דדיה',
-      slug: 'shahar-dadia',
-      title: 'שותף מייסד, Focus AI',
-      shortBio: 'מפתח ויזם טכנולוגי. מתמחה בפיתוח סוכני AI ומערכות אוטומציה מתקדמות.',
-      featured: true,
-      order: 2,
-    },
-    {
-      name: 'כפיר',
-      slug: 'kfir',
-      title: 'מרצה בכיר',
-      shortBio: 'מומחה לאוטומציות ובניית בוטים. מלווה תלמידים מהצעד הראשון ועד לפרויקט גמר.',
-      featured: true,
-      order: 3,
-    },
-  ]
 
   const createdInstructors: Record<string, number> = {}
   for (const instructor of instructorsData) {
     const created = await payload.create({
       collection: 'instructors',
-      data: instructor,
+      data: {
+        name: instructor.name,
+        slug: instructor.slug,
+        title: instructor.title,
+        shortBio: instructor.shortBio,
+        externalImageUrl: instructor.externalImageUrl,
+        specialties: instructor.specialties.map((s) => ({ specialty: s })),
+        order: instructor.order,
+        featured: instructor.featured,
+      },
     })
     createdInstructors[instructor.slug] = created.id as number
     console.log(`  ✅ Created instructor: ${instructor.name}`)
@@ -114,57 +97,9 @@ async function seed() {
   }
 
   // ============================================
-  // 3. TESTIMONIALS (המלצות)
+  // 3. TESTIMONIALS (המלצות) - Using data from mediaData.ts with real photos
   // ============================================
   console.log('\n💬 Creating Testimonials...')
-
-  const testimonialsData = [
-    {
-      name: 'יוסי כהן',
-      role: 'בוגר Bot-Camp, מנכ״ל סטארטאפ',
-      content:
-        'הקורס שינה לי את הקריירה. תוך 3 חודשים עברתי מאפס ידע לבניית סוכני AI מורכבים. הצוות מדהים והתמיכה לא נגמרת גם אחרי הקורס.',
-      rating: 5,
-      featured: true,
-      status: 'approved' as const,
-    },
-    {
-      name: 'מיכל לוי',
-      role: 'בוגרת AI Ready, מנהלת שיווק',
-      content:
-        'סוף סוף הבנתי איך להשתמש ב-AI בצורה אמיתית בעבודה. חסכתי שעות עבודה כל יום והפכתי להיות הכוכבת של הצוות.',
-      rating: 5,
-      featured: true,
-      status: 'approved' as const,
-    },
-    {
-      name: 'דני אברהם',
-      role: 'בוגר Bot-Camp, פרילנסר',
-      content:
-        'פתחתי עסק של בניית אוטומציות ללקוחות. תוך חצי שנה אני מרוויח פי 3 ממה שהרווחתי כשכיר. תודה Focus AI!',
-      rating: 5,
-      featured: true,
-      status: 'approved' as const,
-    },
-    {
-      name: 'רונית שמעוני',
-      role: 'בוגרת AI Ready, יועצת עסקית',
-      content:
-        'כיועצת עסקית, ידע ב-AI הפך לחובה. הקורס נתן לי את הכלים לייעץ ללקוחות איך להטמיע AI בעסק שלהם. זה פתח לי שוק חדש לגמרי.',
-      rating: 5,
-      featured: true,
-      status: 'approved' as const,
-    },
-    {
-      name: 'אלון פרידמן',
-      role: 'בוגר Bot-Camp, מפתח',
-      content:
-        'הגעתי עם רקע בתכנות אבל בלי ניסיון ב-AI. הקורס לקח אותי לרמה אחרת לגמרי. היום אני בונה סוכני AI ללקוחות ברחבי העולם.',
-      rating: 5,
-      featured: false,
-      status: 'approved' as const,
-    },
-  ]
 
   const createdTestimonials: number[] = []
   for (const testimonial of testimonialsData) {
@@ -570,21 +505,125 @@ async function seed() {
   console.log('  ✅ Homepage updated')
 
   // ============================================
-  // NOTE: Partners skipped - requires logo upload
+  // 8. PARTNERS (שותפים) - Using data from mediaData.ts with real logos
   // ============================================
-  console.log('\n⚠️ Note: Partners (שותפים) skipped - requires logo upload.')
-  console.log('   Please add partners manually via Admin Panel with their logos.')
+  console.log('\n🤝 Creating Partners...')
+
+  for (const partner of partnersData) {
+    await payload.create({
+      collection: 'partners',
+      data: partner,
+    })
+    console.log(`  ✅ Created partner: ${partner.name}`)
+  }
+
+  // ============================================
+  // 9. Update Pages Global with AI Ready gallery images
+  // ============================================
+  console.log('\n📄 Updating Pages global with gallery images...')
+
+  await payload.updateGlobal({
+    slug: 'pages',
+    data: {
+      aiReady: {
+        syllabus: {
+          badge: '📚 תכנית לימודים',
+          title: 'סילבוס במיקוד יישומי ופרקטי',
+          subtitle: '8 מפגשים שייקחו אותכם מהבסיס לשליטה מלאה בכלי AI המתקדמים ביותר',
+          meetings: [
+            {
+              number: 1,
+              title: 'מבוא לבינה מלאכותית והנדסת פרומפטים',
+              description: 'מבוא מקיף לעולם ה-AI, היכרות עם מודלי שפה גדולים ויכולות הכלים המובילים. למידה מעמיקה של עקרונות חשיבה ובניית בקשות מדויקות.',
+              tools: [{ name: 'ChatGPT' }, { name: 'Claude' }, { name: 'Prompt Engineering' }],
+            },
+            {
+              number: 2,
+              title: 'מחקר חכם ובניית סוכני AI',
+              description: 'בניית סוכנים חכמים המיועדים לכל מטרה אישית או מקצועית. ביצוע מחקר ואיסוף מידע לבניית בסיס ידע איכותי. כל משתתף יבנה סוכן AI פעיל!',
+              tools: [{ name: 'GPTs Builder' }, { name: 'Perplexity' }, { name: 'AI Agents' }],
+            },
+            {
+              number: 3,
+              title: 'סיכום פגישות, עיבוד מסמכים ויצירת מצגות',
+              description: 'למידה מעמיקה של כלים לניתוח מסמכים, תמלול וסיכום פגישות, עיבוד תוכן מורכב ובניית תובנות. יצירת מצגות מקצועיות.',
+              tools: [{ name: 'GenSpark' }, { name: 'NotebookLM' }, { name: 'Google AI Studio' }],
+            },
+            {
+              number: 4,
+              title: 'יצירת תמונות וסרטונים בכלים חדשניים',
+              description: 'יצירת תמונות ווידאו מקצועיים באמצעות כלי AI מתקדמים. כתיבת פרומפטים יצירתיים, עריכת תמונות קיימות, והפקת סרטונים קצרים.',
+              tools: [{ name: 'DALL-E' }, { name: 'Midjourney' }, { name: 'Kling AI' }],
+            },
+            {
+              number: 5,
+              title: 'בניית דשבורדים חכמים',
+              description: 'בניית דשבורדים אינטראקטיביים לצרכים ניהוליים ועסקיים. הגדרת ויזואליזציה של נתונים, מעקב אחר KPIs, והפקת תובנות מהירות.',
+              tools: [{ name: 'Lovable' }, { name: 'Dashboards' }, { name: 'Data Visualization' }],
+            },
+            {
+              number: 6,
+              title: 'אפיון עסקי, איסוף מידע ויצירת דשבורדים',
+              description: 'שיטות לאיסוף מידע איכותי ומיפוי תהליכים בארגון, זיהוי נקודות כאב, צווארי בקבוק ואבדן יעילות.',
+              tools: [{ name: 'BPMN' }, { name: 'RACI' }, { name: 'Dashboards' }],
+            },
+            {
+              number: 7,
+              title: 'דפי נחיתה, מיילים מעוצבים ואוטומציה',
+              description: 'יסודות הפיתוח לבניית דפי נחיתה ומיילים שיווקיים מעוצבים. שימוש נכון בכותרות, טקסטים, תמונות, כפתורי פעולה ואוטומציות.',
+              tools: [{ name: 'n8n' }, { name: 'Landing Pages' }, { name: 'Automation' }],
+            },
+            {
+              number: 8,
+              title: 'יישום מעשי ופרויקט אישי',
+              description: 'התכלית של כל ההכשרה! יישום כל היכולות שנרכשו בפרויקט אמיתי מהארגון או מהעסק שלכם. בניית פתרון מבוסס AI, ליווי צמוד ומשוב.',
+              tools: [{ name: 'פרויקט אמיתי' }, { name: 'ליווי צמוד' }],
+            },
+          ],
+        },
+        whyNow: {
+          badge: '⏰ למה עכשיו?',
+          title: 'למה עכשיו זה הזמן?',
+          cards: [
+            {
+              icon: '📉',
+              title: 'פער משמעותי בשוק העבודה',
+              description: 'ארגונים מפטרים עובדים שלא יודעים לעבוד עם AI ומחפשים מועמדים שמבינים איך ליישם את הכלים האלה בפועל.',
+            },
+            {
+              icon: '📈',
+              title: 'ROI מהשבוע הראשון',
+              description: 'שימוש נכון בכלי AI מניב תוצאות כבר מהשבוע הראשון - חיסכון משמעותי בשעות עבודה, דיוק גבוה יותר במשימות.',
+            },
+            {
+              icon: '🏢',
+              title: 'אימוץ מהיר בארגונים',
+              description: 'ארגונים בכל הגדלים מטמיעים כלי AI לשיפור יעילות ותקשורת. מי שיודע להוביל את השינוי הזה - מקבל יתרון משמעותי.',
+            },
+            {
+              icon: '🚀',
+              title: 'העתיד כבר כאן',
+              description: 'הביקוש למיומנויות AI רק ימשיך לצמוח בשנים הקרובות. להתחיל עכשיו זה לא "להיות מוקדם" - זה להיות בזמן.',
+            },
+          ],
+        },
+      },
+    },
+  })
+  console.log('  ✅ Pages global updated with syllabus and whyNow')
 
   console.log('\n🎉 Seed completed successfully!')
   console.log('\nSummary:')
-  console.log('  - 3 Instructors (מרצים)')
+  console.log(`  - ${instructorsData.length} Instructors (מרצים) with photos`)
   console.log('  - 5 Categories (קטגוריות)')
-  console.log('  - 5 Testimonials (המלצות)')
+  console.log(`  - ${testimonialsData.length} Testimonials (המלצות) with photos`)
   console.log('  - 8 Blog Posts (מאמרים)')
   console.log('  - 4 Courses (מסלולים)')
+  console.log(`  - ${partnersData.length} Partners (שותפים) with logos`)
   console.log('  - SiteSettings Global')
   console.log('  - Navigation Global')
   console.log('  - Homepage Global')
+  console.log('  - Pages Global (with AI Ready syllabus & whyNow)')
 
   process.exit(0)
 }

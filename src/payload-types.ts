@@ -192,6 +192,11 @@ export interface Media {
   id: number;
   alt?: string | null;
   caption?: string | null;
+  category?: ('instructor' | 'testimonial' | 'gallery' | 'partner' | 'logo' | 'hero' | 'other') | null;
+  /**
+   * לתמונות שמאוחסנות ב-Cloudinary או שרת חיצוני
+   */
+  externalUrl?: string | null;
   /**
    * Cloudinary Media Information
    */
@@ -430,6 +435,10 @@ export interface Instructor {
   } | null;
   shortBio?: string | null;
   image?: (number | null) | Media;
+  /**
+   * ישמש רק אם לא הועלתה תמונה
+   */
+  externalImageUrl?: string | null;
   email?: string | null;
   linkedin?: string | null;
   specialties?:
@@ -452,6 +461,10 @@ export interface Testimonial {
   name: string;
   role?: string | null;
   image?: (number | null) | Media;
+  /**
+   * ישמש רק אם לא הועלתה תמונה
+   */
+  externalImageUrl?: string | null;
   content: string;
   rating?: number | null;
   course?: (number | null) | Course;
@@ -755,7 +768,11 @@ export interface Contact {
 export interface Partner {
   id: number;
   name: string;
-  logo: number | Media;
+  logo?: (number | null) | Media;
+  /**
+   * ישמש רק אם לא הועלה לוגו
+   */
+  externalLogoUrl?: string | null;
   website?: string | null;
   type: 'academic' | 'corporate' | 'media';
   featured?: boolean | null;
@@ -930,6 +947,8 @@ export interface UsersSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  category?: T;
+  externalUrl?: T;
   cloudinary?:
     | T
     | {
@@ -1281,6 +1300,7 @@ export interface TestimonialsSelect<T extends boolean = true> {
   name?: T;
   role?: T;
   image?: T;
+  externalImageUrl?: T;
   content?: T;
   rating?: T;
   course?: T;
@@ -1301,6 +1321,7 @@ export interface InstructorsSelect<T extends boolean = true> {
   bio?: T;
   shortBio?: T;
   image?: T;
+  externalImageUrl?: T;
   email?: T;
   linkedin?: T;
   specialties?:
@@ -1336,6 +1357,7 @@ export interface ContactsSelect<T extends boolean = true> {
 export interface PartnersSelect<T extends boolean = true> {
   name?: T;
   logo?: T;
+  externalLogoUrl?: T;
   website?: T;
   type?: T;
   featured?: T;
@@ -1837,6 +1859,68 @@ export interface Page {
       title?: string | null;
       subtitle?: string | null;
       buttonText?: string | null;
+    };
+    /**
+     * תכנית הלימודים - 8 מפגשים
+     */
+    syllabus?: {
+      badge?: string | null;
+      title?: string | null;
+      subtitle?: string | null;
+      /**
+       * הוסף מפגשים עם כותרות, תיאורים וכלים
+       */
+      meetings?:
+        | {
+            /**
+             * מספר המפגש (1-12)
+             */
+            number: number;
+            title: string;
+            /**
+             * מה ילמדו במפגש זה
+             */
+            description: string;
+            /**
+             * נקודות מפתח או נושאים
+             */
+            topics?:
+              | {
+                  text?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * תגיות לכלים (ChatGPT, Claude, וכו')
+             */
+            tools?:
+              | {
+                  name?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * אמוג'י או אייקון למפגש
+             */
+            icon?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    /**
+     * סקשן "למה עכשיו זה הזמן"
+     */
+    whyNow?: {
+      badge?: string | null;
+      title?: string | null;
+      cards?:
+        | {
+            icon?: string | null;
+            title: string;
+            description: string;
+            id?: string | null;
+          }[]
+        | null;
     };
   };
   /**
@@ -2387,6 +2471,48 @@ export interface PagesSelect<T extends boolean = true> {
               title?: T;
               subtitle?: T;
               buttonText?: T;
+            };
+        syllabus?:
+          | T
+          | {
+              badge?: T;
+              title?: T;
+              subtitle?: T;
+              meetings?:
+                | T
+                | {
+                    number?: T;
+                    title?: T;
+                    description?: T;
+                    topics?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                        };
+                    tools?:
+                      | T
+                      | {
+                          name?: T;
+                          id?: T;
+                        };
+                    icon?: T;
+                    id?: T;
+                  };
+            };
+        whyNow?:
+          | T
+          | {
+              badge?: T;
+              title?: T;
+              cards?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    description?: T;
+                    id?: T;
+                  };
             };
       };
   courseSingle?:

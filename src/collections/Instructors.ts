@@ -46,6 +46,15 @@ export const Instructors: CollectionConfig = {
       label: 'תמונה',
     },
     {
+      name: 'externalImageUrl',
+      type: 'text',
+      label: 'URL תמונה חיצונית',
+      admin: {
+        description: 'ישמש רק אם לא הועלתה תמונה',
+        condition: (data) => !data?.image,
+      },
+    },
+    {
       name: 'email',
       type: 'email',
       label: 'אימייל',

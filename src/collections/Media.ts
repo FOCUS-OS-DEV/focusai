@@ -29,5 +29,31 @@ export const Media: CollectionConfig = {
       type: 'text',
       label: 'כיתוב',
     },
+    {
+      name: 'category',
+      type: 'select',
+      label: 'קטגוריה',
+      options: [
+        { label: 'מרצים', value: 'instructor' },
+        { label: 'המלצות', value: 'testimonial' },
+        { label: 'גלריה', value: 'gallery' },
+        { label: 'שותפים', value: 'partner' },
+        { label: 'לוגו', value: 'logo' },
+        { label: 'Hero', value: 'hero' },
+        { label: 'אחר', value: 'other' },
+      ],
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'externalUrl',
+      type: 'text',
+      label: 'URL חיצוני',
+      admin: {
+        description: 'לתמונות שמאוחסנות ב-Cloudinary או שרת חיצוני',
+        condition: (data) => !data?.filename,
+      },
+    },
   ],
 }
