@@ -58,12 +58,25 @@ interface DisplayTestimonial {
   text: string
 }
 
+// Helper to get image URL from either Media object or external URL
+function getImageUrl(image: Media | number | null | undefined, externalImageUrl: string | null | undefined): string | null {
+  // First try Media object
+  if (image && typeof image === 'object' && 'url' in image && image.url) {
+    return image.url
+  }
+  // Then try external URL
+  if (externalImageUrl) {
+    return externalImageUrl
+  }
+  return null
+}
+
 function testimonialToDisplay(t: TestimonialType, index: number): DisplayTestimonial {
-  const image = t.image as Media | null
+  const imageUrl = getImageUrl(t.image as Media | null, t.externalImageUrl)
   return {
     name: t.name,
     role: t.role || 'בוגר/ת הכשרה',
-    image: image?.url || fallbackTestimonials[index % fallbackTestimonials.length].image,
+    image: imageUrl || fallbackTestimonials[index % fallbackTestimonials.length].image,
     text: t.content,
   }
 }

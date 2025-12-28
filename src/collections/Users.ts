@@ -11,6 +11,24 @@ export const Users: CollectionConfig = {
     defaultColumns: ['name', 'email', 'role', 'createdAt'],
   },
   auth: true,
+  access: {
+    // כולם יכולים ליצור חשבון (הרשמה)
+    create: () => true,
+    // קריאה: עצמי או אדמין
+    read: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return { id: { equals: user.id } }
+    },
+    // עדכון: עצמי או אדמין
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      return { id: { equals: user.id } }
+    },
+    // מחיקה: אדמין בלבד
+    delete: ({ req: { user } }) => user?.role === 'admin',
+  },
   fields: [
     {
       name: 'name',
@@ -41,6 +59,17 @@ export const Users: CollectionConfig = {
       saveToJWT: true,
       access: {
         update: ({ req: { user } }) => user?.role === 'admin',
+      },
+    },
+    // קורסים שהמשתמש רשום אליהם
+    {
+      name: 'enrolledCourses',
+      type: 'relationship',
+      relationTo: 'courses',
+      hasMany: true,
+      label: 'קורסים רשומים',
+      admin: {
+        description: 'הקורסים שהמשתמש רשום אליהם',
       },
     },
   ],

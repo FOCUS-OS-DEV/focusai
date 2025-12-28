@@ -274,7 +274,19 @@ syllabus[]: { number, title, description, topics[], tools[], icon }
 whyNow[]: { icon, title, description }
 trustBadges[]: { icon, text }
 pricingTracks[]: { name, schedule, price, originalPrice, priceNote, features[] }
-nextCohortDate
+nextCohortDate (deprecated - use cohorts[])
+
+# Structured Cohorts (NEW - Primary schedule/pricing data!)
+cohorts[]: {
+  startDate, endDate,
+  format: 'in-person' | 'online' | 'hybrid',
+  dayOfWeek: 'sunday' | 'monday' | ... | 'saturday',
+  startTime, endTime,
+  location,
+  price, originalPrice, priceNote,
+  maxStudents, availableSeats,
+  registrationOpen
+}
 
 highlights[], faq[], gallery[]
 instructors → Instructors
@@ -291,7 +303,8 @@ seo: { metaTitle, metaDescription, ogImage }
 - `syllabus` - תכנית לימודים (meetings with tools, topics, descriptions)
 - `whyNow` - כרטיסי "למה עכשיו"
 - `trustBadges` - תגי אמון
-- `pricingTracks` - מסלולי מחיר
+- `pricingTracks` - מסלולי מחיר (legacy - use cohorts for new data)
+- `cohorts` - מחזורים עם תאריכים, שעות ומחירים מלאים **(PRIMARY!)**
 
 **DO NOT** duplicate this data in Pages global!
 
@@ -322,8 +335,22 @@ Courses → Instructors + Testimonials
 | `/courses/[slug]` | `courses/[slug]/page.tsx` | דף קורס בודד | Course collection |
 | `/blog` | `blog/page.tsx` | רשימת מאמרים | pages.blog |
 | `/blog/[slug]` | `blog/[slug]/page.tsx` | מאמר בודד | pages.blog.postCta |
-| `/ai-ready` | `ai-ready/page.tsx` | דף נחיתה AI Ready | **Course** (slug: ai-ready-course) |
+| `/ai-ready` | `ai-ready/page.tsx` | דף נחיתה AI Ready | **Course** (slug: ai-ready-course) + cohorts[] |
 | `/thank-you` | `thank-you/page.tsx` | דף תודה | pages.thankYou |
+| `/login` | `login/page.tsx` | דף התחברות | - |
+| `/register` | `register/page.tsx` | דף הרשמה | - |
+| `/dashboard` | `dashboard/page.tsx` | אזור אישי (מוגן) | User enrolledCourses |
+
+## Auth & Navigation
+
+**Header Component:** `src/components/layout/Header.tsx`
+- Checks auth state via `/api/users/me`
+- Shows "אזור אישי" link for logged-in users
+- Shows "התחברות" link for guests
+- Mobile menu also includes auth links
+
+**Protected Routes:**
+- `/dashboard` - Requires authentication, redirects to `/login` if not logged in
 
 ## Redirects (next.config.mjs)
 

@@ -183,14 +183,128 @@ export const Courses: CollectionConfig = {
         },
       ],
     },
-    // תאריך מחזור קרוב
+    // תאריך מחזור קרוב (deprecated - use cohorts array)
     {
       name: 'nextCohortDate',
       type: 'text',
-      label: 'תאריך מחזור קרוב',
+      label: 'תאריך מחזור קרוב (ישן)',
       admin: {
-        description: 'לדוגמה: 27.02.2026',
+        description: 'לדוגמה: 27.02.2026 - מומלץ להשתמש ב-cohorts במקום',
       },
+    },
+    // מחזורים עם מבנה מלא
+    {
+      name: 'cohorts',
+      type: 'array',
+      label: 'מחזורים קרובים',
+      admin: {
+        description: 'מחזורים עם תאריכים, שעות ומחירים מלאים',
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: 'startDate',
+          type: 'date',
+          required: true,
+          label: 'תאריך התחלה',
+        },
+        {
+          name: 'endDate',
+          type: 'date',
+          label: 'תאריך סיום',
+        },
+        {
+          name: 'format',
+          type: 'select',
+          required: true,
+          label: 'פורמט',
+          options: [
+            { label: 'פרונטלי - In-Person', value: 'in-person' },
+            { label: 'אונליין - Online', value: 'online' },
+            { label: 'היברידי - Hybrid', value: 'hybrid' },
+          ],
+        },
+        {
+          name: 'dayOfWeek',
+          type: 'select',
+          label: 'יום בשבוע',
+          required: true,
+          options: [
+            { label: 'ראשון - Sunday', value: 'sunday' },
+            { label: 'שני - Monday', value: 'monday' },
+            { label: 'שלישי - Tuesday', value: 'tuesday' },
+            { label: 'רביעי - Wednesday', value: 'wednesday' },
+            { label: 'חמישי - Thursday', value: 'thursday' },
+            { label: 'שישי - Friday', value: 'friday' },
+            { label: 'שבת - Saturday', value: 'saturday' },
+          ],
+        },
+        {
+          name: 'startTime',
+          type: 'text',
+          required: true,
+          label: 'שעת התחלה (24 שעות)',
+          admin: {
+            placeholder: '18:00',
+            description: 'פורמט: HH:MM (לדוגמה: 18:00)',
+          },
+        },
+        {
+          name: 'endTime',
+          type: 'text',
+          required: true,
+          label: 'שעת סיום (24 שעות)',
+          admin: {
+            placeholder: '21:00',
+          },
+        },
+        {
+          name: 'location',
+          type: 'text',
+          label: 'מיקום',
+          admin: {
+            description: 'לפרונטלי: "הרצליה פיתוח - Nolton House". לאונליין: "Zoom"',
+          },
+        },
+        {
+          name: 'price',
+          type: 'number',
+          required: true,
+          label: 'מחיר (₪)',
+        },
+        {
+          name: 'originalPrice',
+          type: 'number',
+          label: 'מחיר מקורי (₪)',
+          admin: {
+            description: 'להצגת הנחה / early bird',
+          },
+        },
+        {
+          name: 'priceNote',
+          type: 'text',
+          label: 'הערת מחיר',
+          admin: {
+            placeholder: 'מחיר early bird',
+          },
+        },
+        {
+          name: 'maxStudents',
+          type: 'number',
+          label: 'מקסימום תלמידים',
+        },
+        {
+          name: 'availableSeats',
+          type: 'number',
+          label: 'מקומות פנויים',
+        },
+        {
+          name: 'registrationOpen',
+          type: 'checkbox',
+          label: 'הרשמה פתוחה',
+          defaultValue: true,
+        },
+      ],
     },
     // למה עכשיו - כרטיסי שיווק
     {

@@ -35,9 +35,33 @@ function transformWhyNowData(
   }))
 }
 
+// Transform Course cohorts to component format
+function transformCohortsData(
+  courseCohorts: Course['cohorts']
+) {
+  if (!courseCohorts?.length) return undefined
+
+  return courseCohorts.map((cohort) => ({
+    startDate: cohort.startDate,
+    endDate: cohort.endDate,
+    format: cohort.format,
+    dayOfWeek: cohort.dayOfWeek,
+    startTime: cohort.startTime,
+    endTime: cohort.endTime,
+    location: cohort.location,
+    price: cohort.price,
+    originalPrice: cohort.originalPrice,
+    priceNote: cohort.priceNote,
+    maxStudents: cohort.maxStudents,
+    availableSeats: cohort.availableSeats,
+    registrationOpen: cohort.registrationOpen,
+  }))
+}
+
 export default async function AIReadyPage() {
   let syllabusData
   let whyNowData
+  let cohortsData
 
   try {
     const payload = await getPayload({ config })
@@ -59,11 +83,12 @@ export default async function AIReadyPage() {
       // Transform course data for the client component
       syllabusData = transformSyllabusData(course.syllabus)
       whyNowData = transformWhyNowData(course.whyNow)
+      cohortsData = transformCohortsData(course.cohorts)
     }
   } catch (error) {
     console.error('Error fetching AI Ready course data:', error)
     // Continue with fallback data (handled in AIReadyClient)
   }
 
-  return <AIReadyClient syllabusData={syllabusData} whyNowData={whyNowData} />
+  return <AIReadyClient syllabusData={syllabusData} whyNowData={whyNowData} cohortsData={cohortsData} />
 }

@@ -166,6 +166,10 @@ export interface User {
   phone?: string | null;
   avatar?: (number | null) | Media;
   role?: ('admin' | 'instructor' | 'student') | null;
+  /**
+   * הקורסים שהמשתמש רשום אליהם
+   */
+  enrolledCourses?: (number | Course)[] | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -371,9 +375,39 @@ export interface Course {
       }[]
     | null;
   /**
-   * לדוגמה: 27.02.2026
+   * לדוגמה: 27.02.2026 - מומלץ להשתמש ב-cohorts במקום
    */
   nextCohortDate?: string | null;
+  /**
+   * מחזורים עם תאריכים, שעות ומחירים מלאים
+   */
+  cohorts?:
+    | {
+        startDate: string;
+        endDate?: string | null;
+        format: 'in-person' | 'online' | 'hybrid';
+        dayOfWeek: 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday';
+        /**
+         * פורמט: HH:MM (לדוגמה: 18:00)
+         */
+        startTime: string;
+        endTime: string;
+        /**
+         * לפרונטלי: "הרצליה פיתוח - Nolton House". לאונליין: "Zoom"
+         */
+        location?: string | null;
+        price: number;
+        /**
+         * להצגת הנחה / early bird
+         */
+        originalPrice?: number | null;
+        priceNote?: string | null;
+        maxStudents?: number | null;
+        availableSeats?: number | null;
+        registrationOpen?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * כרטיסי שיווק שמסבירים למה עכשיו זה הזמן להצטרף
    */
@@ -993,6 +1027,7 @@ export interface UsersSelect<T extends boolean = true> {
   phone?: T;
   avatar?: T;
   role?: T;
+  enrolledCourses?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1122,6 +1157,24 @@ export interface CoursesSelect<T extends boolean = true> {
         id?: T;
       };
   nextCohortDate?: T;
+  cohorts?:
+    | T
+    | {
+        startDate?: T;
+        endDate?: T;
+        format?: T;
+        dayOfWeek?: T;
+        startTime?: T;
+        endTime?: T;
+        location?: T;
+        price?: T;
+        originalPrice?: T;
+        priceNote?: T;
+        maxStudents?: T;
+        availableSeats?: T;
+        registrationOpen?: T;
+        id?: T;
+      };
   whyNow?:
     | T
     | {

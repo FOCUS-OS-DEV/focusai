@@ -9,7 +9,35 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userName, setUserName] = useState<string | null>(null)
   const pathname = usePathname()
+
+  // Check auth state on mount and when pathname changes
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/users/me', { credentials: 'include' })
+        if (res.ok) {
+          const data = await res.json()
+          if (data?.user) {
+            setIsLoggedIn(true)
+            setUserName(data.user.name || data.user.email?.split('@')[0] || null)
+          } else {
+            setIsLoggedIn(false)
+            setUserName(null)
+          }
+        } else {
+          setIsLoggedIn(false)
+          setUserName(null)
+        }
+      } catch {
+        setIsLoggedIn(false)
+        setUserName(null)
+      }
+    }
+    checkAuth()
+  }, [pathname])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -107,19 +135,39 @@ const Header = () => {
               ))}
             </nav>
 
-            {/* Desktop CTA */}
-            <Link
-              href="/courses"
-              className="hidden lg:inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white transition-all hover:shadow-lg hover:shadow-purple-300/50 hover:-translate-y-0.5"
-              style={{
-                background: 'linear-gradient(135deg, #a855f7, #ec4899)',
-              }}
-            >
-              <span>הצטרפו עכשיו</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </Link>
+            {/* Desktop Auth & CTA */}
+            <div className="hidden lg:flex items-center gap-3">
+              {isLoggedIn ? (
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span>{userName ? `היי, ${userName}` : 'אזור אישי'}</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-purple-600 hover:bg-gray-50 transition-all"
+                >
+                  התחברות
+                </Link>
+              )}
+              <Link
+                href="/courses"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white transition-all hover:shadow-lg hover:shadow-purple-300/50 hover:-translate-y-0.5"
+                style={{
+                  background: 'linear-gradient(135deg, #a855f7, #ec4899)',
+                }}
+              >
+                <span>הצטרפו עכשיו</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Link>
+            </div>
 
             {/* Mobile Menu Button */}
             <button
@@ -162,6 +210,35 @@ const Header = () => {
                     {item.name}
                   </Link>
                 ))}
+
+                {/* Mobile Auth Links */}
+                {isLoggedIn ? (
+                  <Link
+                    href="/dashboard"
+                    className={`px-4 py-3 rounded-xl text-lg font-medium transition-all flex items-center gap-2 ${
+                      isActive('/dashboard')
+                        ? 'text-purple-600 bg-purple-50'
+                        : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>{userName ? `היי, ${userName}` : 'אזור אישי'}</span>
+                  </Link>
+                ) : (
+                  <Link
+                    href="/login"
+                    className={`px-4 py-3 rounded-xl text-lg font-medium transition-all ${
+                      isActive('/login')
+                        ? 'text-purple-600 bg-purple-50'
+                        : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    התחברות
+                  </Link>
+                )}
+
                 <Link
                   href="/courses"
                   className="mt-4 w-full py-4 rounded-xl text-white font-bold text-lg text-center shadow-lg shadow-purple-300/30"

@@ -19,9 +19,43 @@ interface WhyNowCard {
   color?: string
 }
 
+interface CohortItem {
+  startDate: string
+  endDate?: string | null
+  format: 'in-person' | 'online' | 'hybrid'
+  dayOfWeek: 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday'
+  startTime: string
+  endTime: string
+  location?: string | null
+  price: number
+  originalPrice?: number | null
+  priceNote?: string | null
+  maxStudents?: number | null
+  availableSeats?: number | null
+  registrationOpen?: boolean | null
+}
+
 interface AIReadyClientProps {
   syllabusData?: SyllabusItem[]
   whyNowData?: WhyNowCard[]
+  cohortsData?: CohortItem[]
+}
+
+// Hebrew translations for cohorts
+const DAYS_HE: Record<string, string> = {
+  sunday: 'ראשון',
+  monday: 'שני',
+  tuesday: 'שלישי',
+  wednesday: 'רביעי',
+  thursday: 'חמישי',
+  friday: 'שישי',
+  saturday: 'שבת',
+}
+
+const FORMAT_HE: Record<string, string> = {
+  'in-person': 'פרונטלי',
+  'online': 'אונליין',
+  'hybrid': 'היברידי',
 }
 
 // n8n Webhook URL
@@ -202,6 +236,36 @@ const defaultWhyNowCards: WhyNowCard[] = [
     title: 'העתיד כבר כאן',
     description: 'הביקוש למיומנויות AI רק ימשיך לצמוח בשנים הקרובות. להתחיל עכשיו זה לא "להיות מוקדם" - זה להיות בזמן.',
     color: 'purple',
+  },
+]
+
+// Default Cohorts (fallback)
+const defaultCohorts: CohortItem[] = [
+  {
+    startDate: '2026-02-27',
+    format: 'in-person',
+    dayOfWeek: 'friday',
+    startTime: '09:00',
+    endTime: '12:00',
+    location: 'הרצליה פיתוח - Nolton House',
+    price: 4900,
+    originalPrice: 7900,
+    priceNote: 'מחיר השקה מוקדם',
+    maxStudents: 20,
+    availableSeats: 15,
+    registrationOpen: true,
+  },
+  {
+    startDate: '2026-02-27',
+    format: 'online',
+    dayOfWeek: 'friday',
+    startTime: '09:00',
+    endTime: '12:00',
+    location: 'Zoom',
+    price: 2490,
+    originalPrice: 3900,
+    priceNote: 'מחיר השקה מוקדם',
+    registrationOpen: true,
   },
 ]
 
@@ -449,10 +513,17 @@ function RotatingHeadline() {
   )
 }
 
-export default function AIReadyClient({ syllabusData, whyNowData }: AIReadyClientProps) {
+export default function AIReadyClient({ syllabusData, whyNowData, cohortsData }: AIReadyClientProps) {
   // Use provided data or fallback to defaults
   const syllabus = syllabusData && syllabusData.length > 0 ? syllabusData : defaultSyllabus
   const whyNowCards = whyNowData && whyNowData.length > 0 ? whyNowData : defaultWhyNowCards
+  const cohorts = cohortsData && cohortsData.length > 0 ? cohortsData : defaultCohorts
+
+  // Get the next cohort for the badge
+  const nextCohort = cohorts[0]
+  const nextCohortDateFormatted = nextCohort
+    ? new Date(nextCohort.startDate).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : '27.02.2026'
 
   return (
     <>
@@ -555,7 +626,7 @@ export default function AIReadyClient({ syllabusData, whyNowData }: AIReadyClien
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
                 </span>
                 <span className="text-gray-700">
-                  המחזור הקרוב נפתח ב-<span className="text-gray-900 font-bold">27.02.2026</span> | הרצליה פיתוח / היברידי
+                  המחזור הקרוב נפתח ב-<span className="text-gray-900 font-bold">{nextCohortDateFormatted}</span> | {nextCohort?.location || 'הרצליה פיתוח'}
                 </span>
               </div>
             </div>
@@ -788,113 +859,94 @@ export default function AIReadyClient({ syllabusData, whyNowData }: AIReadyClien
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              {/* Frontal Track */}
-              <article className="relative bg-gradient-to-br from-[#a855f7]/20 to-[#ec4899]/10 rounded-3xl p-8 border border-[#a855f7]/30 overflow-hidden flex flex-col">
-                <div className="absolute top-0 left-0 w-32 h-32 bg-[#a855f7]/20 blur-[60px] rounded-full pointer-events-none" />
+              {cohorts.map((cohort, index) => {
+                const isRecommended = index === 0 || cohort.format === 'in-person'
+                const formatLabel = FORMAT_HE[cohort.format] || cohort.format
+                const dayLabel = DAYS_HE[cohort.dayOfWeek] || cohort.dayOfWeek
+                const cohortStartDate = new Date(cohort.startDate).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
-                <div className="absolute top-4 left-4">
-                  <span className="inline-flex items-center gap-1.5 bg-[#a855f7] text-white text-xs font-bold px-3 py-1 rounded-full">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <polygon points="10 1 12.5 7.5 19 8 14 13 15.5 19.5 10 16 4.5 19.5 6 13 1 8 7.5 7.5" />
-                    </svg>
-                    מומלץ
-                  </span>
-                </div>
+                const features = cohort.format === 'in-person'
+                  ? ['8 מפגשים פרונטליים', 'ליווי צמוד של צוות המרצים', 'אפשרות להצטרף גם ב-Zoom', 'גישה להקלטות המפגשים', 'קהילת בוגרים מקצועית', 'תעודה מטעם Focus AI']
+                  : ['8 מפגשים ב-Zoom', 'גישה מלאה להקלטות', 'חומרי לימוד מלאים', 'קהילת בוגרים מקצועית', 'תעודה מטעם Focus AI', 'גמישות מכל מקום']
 
-                <div className="relative z-10 pt-6 flex flex-col flex-grow">
-                  <div className="text-center mb-6">
-                    <h3 className="text-2xl font-black text-gray-900 mb-2">מסלול פרונטלי</h3>
-                    <p className="text-gray-600 text-sm">הרצליה פיתוח | ימי שישי | 9:00-12:00</p>
-                  </div>
-
-                  <div className="text-center mb-6">
-                    <div className="text-gray-600 text-sm line-through mb-1">7,900 ₪</div>
-                    <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-5xl font-black text-gray-900">4,900</span>
-                      <span className="text-xl text-gray-600">₪</span>
-                    </div>
-                    <p className="text-[#a855f7] text-sm font-bold mt-2">מחיר השקה מוקדם</p>
-                  </div>
-
-                  <div className="space-y-3 mb-8">
-                    {[
-                      '8 מפגשים פרונטליים',
-                      'ליווי צמוד של צוות המרצים',
-                      'אפשרות להצטרף גם ב-Zoom',
-                      'גישה להקלטות המפגשים',
-                      'קהילת בוגרים מקצועית',
-                      'תעודה מטעם Focus AI',
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <svg className="w-5 h-5 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="text-gray-600 text-sm">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <a
-                    href="#contact"
-                    className="mt-auto group relative overflow-hidden w-full inline-flex items-center justify-center px-8 py-3.5 text-base font-bold rounded-full bg-gradient-to-r from-[#a855f7] to-[#ec4899] text-white shadow-[0_10px_25px_rgba(168,85,247,0.4)] hover:shadow-[0_20px_40px_rgba(168,85,247,0.5)] transition-all duration-300 transform hover:-translate-y-1"
+                return (
+                  <article
+                    key={index}
+                    className={`relative rounded-3xl p-8 border overflow-hidden flex flex-col ${
+                      isRecommended
+                        ? 'bg-gradient-to-br from-[#a855f7]/20 to-[#ec4899]/10 border-[#a855f7]/30'
+                        : 'bg-purple-50/50 border-purple-100 hover:border-[#a855f7]/40'
+                    } transition-all duration-300`}
                   >
-                    <span className="absolute top-0 -left-[100%] w-[50%] h-full bg-gradient-to-r from-transparent via-white/25 to-transparent transform -skew-x-12 transition-all duration-700 ease-out group-hover:left-[200%]" />
-                    <span className="relative">הרשמה למסלול פרונטלי</span>
-                  </a>
-                </div>
-              </article>
+                    {isRecommended && (
+                      <>
+                        <div className="absolute top-0 left-0 w-32 h-32 bg-[#a855f7]/20 blur-[60px] rounded-full pointer-events-none" />
+                        <div className="absolute top-4 left-4">
+                          <span className="inline-flex items-center gap-1.5 bg-[#a855f7] text-white text-xs font-bold px-3 py-1 rounded-full">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                              <polygon points="10 1 12.5 7.5 19 8 14 13 15.5 19.5 10 16 4.5 19.5 6 13 1 8 7.5 7.5" />
+                            </svg>
+                            מומלץ
+                          </span>
+                        </div>
+                      </>
+                    )}
 
-              {/* Zoom Track */}
-              <article className="relative bg-purple-50/50 rounded-3xl p-8 border border-purple-100 hover:border-[#a855f7]/40 transition-all duration-300 overflow-hidden flex flex-col">
-                <div className="relative z-10 flex flex-col flex-grow pt-6">
-                  <div className="text-center mb-6">
-                    <h3 className="text-2xl font-black text-gray-900 mb-2">מסלול Zoom</h3>
-                    <p className="text-gray-600 text-sm">אונליין | ימי שישי | 9:00-12:00</p>
-                  </div>
-
-                  <div className="text-center mb-6">
-                    <div className="text-gray-600 text-sm line-through mb-1">3,900 ₪</div>
-                    <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-5xl font-black text-gray-900">2,490</span>
-                      <span className="text-xl text-gray-600">₪</span>
-                    </div>
-                    <p className="text-[#a855f7] text-sm font-bold mt-2">מחיר השקה מוקדם</p>
-                  </div>
-
-                  <div className="space-y-3 mb-8">
-                    {[
-                      '8 מפגשים ב-Zoom',
-                      'גישה מלאה להקלטות',
-                      'חומרי לימוד מלאים',
-                      'קהילת בוגרים מקצועית',
-                      'תעודה מטעם Focus AI',
-                      'גמישות מכל מקום',
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <svg className="w-5 h-5 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="text-gray-600 text-sm">{item}</span>
+                    <div className="relative z-10 pt-6 flex flex-col flex-grow">
+                      <div className="text-center mb-6">
+                        <h3 className="text-2xl font-black text-gray-900 mb-2">מסלול {formatLabel}</h3>
+                        <p className="text-gray-600 text-sm">{cohort.location || 'אונליין'} | ימי {dayLabel} | {cohort.startTime}-{cohort.endTime}</p>
+                        <p className="text-[#a855f7] text-xs mt-1">התחלה: {cohortStartDate}</p>
                       </div>
-                    ))}
-                  </div>
 
-                  <a
-                    href="#contact"
-                    className="mt-auto w-full inline-flex items-center justify-center px-8 py-3.5 text-base font-bold rounded-full border-2 border-[#a855f7] text-gray-900 hover:bg-[#a855f7]/10 transition-all duration-300 transform hover:-translate-y-1"
-                  >
-                    הרשמה למסלול Zoom
-                  </a>
-                </div>
-              </article>
+                      <div className="text-center mb-6">
+                        {cohort.originalPrice && (
+                          <div className="text-gray-600 text-sm line-through mb-1">{cohort.originalPrice.toLocaleString()} ₪</div>
+                        )}
+                        <div className="flex items-baseline justify-center gap-1">
+                          <span className="text-5xl font-black text-gray-900">{cohort.price.toLocaleString()}</span>
+                          <span className="text-xl text-gray-600">₪</span>
+                        </div>
+                        {cohort.priceNote && (
+                          <p className="text-[#a855f7] text-sm font-bold mt-2">{cohort.priceNote}</p>
+                        )}
+                        {cohort.availableSeats && (
+                          <p className="text-orange-500 text-xs mt-2 font-medium">נותרו {cohort.availableSeats} מקומות</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-3 mb-8">
+                        {features.map((item, i) => (
+                          <div key={i} className="flex items-center gap-3">
+                            <svg className="w-5 h-5 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <span className="text-gray-600 text-sm">{item}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <a
+                        href="#contact"
+                        className={`mt-auto w-full inline-flex items-center justify-center px-8 py-3.5 text-base font-bold rounded-full transition-all duration-300 transform hover:-translate-y-1 ${
+                          isRecommended
+                            ? 'group relative overflow-hidden bg-gradient-to-r from-[#a855f7] to-[#ec4899] text-white shadow-[0_10px_25px_rgba(168,85,247,0.4)] hover:shadow-[0_20px_40px_rgba(168,85,247,0.5)]'
+                            : 'border-2 border-[#a855f7] text-gray-900 hover:bg-[#a855f7]/10'
+                        }`}
+                      >
+                        {isRecommended && (
+                          <span className="absolute top-0 -left-[100%] w-[50%] h-full bg-gradient-to-r from-transparent via-white/25 to-transparent transform -skew-x-12 transition-all duration-700 ease-out group-hover:left-[200%]" />
+                        )}
+                        <span className="relative">הרשמה למסלול {formatLabel}</span>
+                      </a>
+                    </div>
+                  </article>
+                )
+              })}
             </div>
 
             {/* Next Cohort */}
@@ -905,7 +957,7 @@ export default function AIReadyClient({ syllabusData, whyNowData }: AIReadyClien
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
                 </span>
                 <span className="text-gray-700 font-medium">
-                  המחזור הקרוב נפתח ב-<span className="text-gray-900 font-bold">27.02.2026</span>
+                  המחזור הקרוב נפתח ב-<span className="text-gray-900 font-bold">{nextCohortDateFormatted}</span>
                 </span>
               </div>
             </div>

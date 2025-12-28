@@ -43,12 +43,25 @@ interface DisplayMember {
   highlight: string
 }
 
+// Helper to get image URL from either Media object or external URL
+function getImageUrl(image: Media | number | null | undefined, externalImageUrl: string | null | undefined): string | null {
+  // First try Media object
+  if (image && typeof image === 'object' && 'url' in image && image.url) {
+    return image.url
+  }
+  // Then try external URL
+  if (externalImageUrl) {
+    return externalImageUrl
+  }
+  return null
+}
+
 function instructorToMember(i: Instructor, index: number): DisplayMember {
-  const image = i.image as Media | null
+  const imageUrl = getImageUrl(i.image as Media | null, i.externalImageUrl)
   return {
     name: i.name,
     role: i.title || 'מרצה',
-    image: image?.url || fallbackTeamMembers[index % fallbackTeamMembers.length].image,
+    image: imageUrl || fallbackTeamMembers[index % fallbackTeamMembers.length].image,
     bio: i.shortBio || '',
     highlight: i.specialties?.map(s => s.specialty).filter(Boolean).join(', ') || '',
   }
