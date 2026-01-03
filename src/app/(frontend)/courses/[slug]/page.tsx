@@ -2,13 +2,26 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { headers } from 'next/headers'
 import type { Metadata } from 'next'
-import type { Course, Instructor, Testimonial, Media } from '@/payload-types'
+import type { Course, Instructor, Testimonial, Media, Cohort, User, Enrollment, Lesson } from '@/payload-types'
 import { getSharedContent } from '@/lib/getSharedContent'
 import { CourseSchema } from '@/lib/schema'
 import Breadcrumbs from '@/components/Breadcrumbs'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://focusai.co.il'
+
+interface EnrollmentInfo {
+  isEnrolled: boolean
+  enrollment?: Enrollment
+  cohort?: Cohort
+  progress?: {
+    totalLessons: number
+    completedLessons: number
+    progressPercentage: number
+    nextLesson?: Lesson
+  }
+}
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 3600 // Revalidate every hour
@@ -97,7 +110,98 @@ export default async function CoursePage({ params }: PageProps) {
   const course = coursesResult.docs[0] as Course
   const instructors = (course.instructors as Instructor[]) || []
   const testimonials = (course.testimonials as Testimonial[]) || []
-  const featuredImage = course.featuredImage as Media | null
+  const _featuredImage = course.featuredImage as Media | null
+
+  // Check if user is enrolled in this course
+  let enrollmentInfo: EnrollmentInfo = { isEnrolled: false }
+  let currentUser: User | null = null
+
+  try {
+    const authResult = await payload.auth({ headers: await headers() })
+    currentUser = authResult.user as User | null
+  } catch {
+    // User not logged in - continue as guest
+  }
+
+  if (currentUser) {
+    try {
+      // Find enrollment for this course
+      const enrollmentsResult = await payload.find({
+        collection: 'enrollments',
+        where: {
+          and: [
+            { student: { equals: currentUser.id } },
+            { status: { equals: 'active' } },
+          ],
+        },
+        depth: 2,
+      })
+
+      // Check if any enrollment is for this course
+      for (const enrollment of enrollmentsResult.docs) {
+        const cohort = enrollment.cohort as Cohort
+        if (!cohort) continue
+
+        const cohortCourse = cohort.course as Course | number
+        const courseId = typeof cohortCourse === 'number' ? cohortCourse : cohortCourse?.id
+
+        if (courseId === course.id) {
+          // User is enrolled! Get progress info
+          const lessonsResult = await payload.find({
+            collection: 'lessons',
+            where: {
+              and: [
+                { cohort: { equals: cohort.id } },
+                { status: { equals: 'published' } },
+              ],
+            },
+            sort: 'order',
+            depth: 0,
+          })
+
+          const lessons = lessonsResult.docs
+
+          // Get progress
+          const progressResult = await payload.find({
+            collection: 'progress',
+            where: {
+              and: [
+                { student: { equals: currentUser.id } },
+                { lesson: { in: lessons.map(l => l.id) } },
+              ],
+            },
+            depth: 0,
+          })
+
+          const completedLessons = progressResult.docs.filter(p => p.completed).length
+          const progressPercentage = lessons.length > 0
+            ? Math.round((completedLessons / lessons.length) * 100)
+            : 0
+
+          // Find next lesson to watch
+          const completedLessonIds = new Set(progressResult.docs.filter(p => p.completed).map(p => {
+            return typeof p.lesson === 'number' ? p.lesson : (p.lesson as Lesson)?.id
+          }))
+          const nextLesson = lessons.find(l => !completedLessonIds.has(l.id))
+
+          enrollmentInfo = {
+            isEnrolled: true,
+            enrollment,
+            cohort,
+            progress: {
+              totalLessons: lessons.length,
+              completedLessons,
+              progressPercentage,
+              nextLesson,
+            },
+          }
+          break
+        }
+      }
+    } catch (error) {
+      console.error('Error checking enrollment:', error)
+    }
+  }
 
   // Get dynamic content from CMS
   const cs = pages?.courseSingle
@@ -142,6 +246,56 @@ export default async function CoursePage({ params }: PageProps) {
     <>
       <CourseSchema course={course} />
       <main className="min-h-screen" dir="rtl" style={{ fontFamily: '"Rubik", system-ui, sans-serif' }}>
+
+        {/* Enrolled User Banner */}
+        {enrollmentInfo.isEnrolled && enrollmentInfo.progress && (
+          <div className="sticky top-0 z-50 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 text-white shadow-lg">
+            <div className="container mx-auto px-4 py-3">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="hidden sm:flex w-10 h-10 rounded-full bg-white/20 items-center justify-center">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm sm:text-base">את/ה רשום/ה לקורס הזה!</p>
+                    <p className="text-xs sm:text-sm text-white/80">
+                      {enrollmentInfo.progress.completedLessons} / {enrollmentInfo.progress.totalLessons} שיעורים הושלמו
+                      ({enrollmentInfo.progress.progressPercentage}%)
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {/* Progress bar */}
+                  <div className="hidden md:block w-32 h-2 bg-white/30 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-white transition-all"
+                      style={{ width: `${enrollmentInfo.progress.progressPercentage}%` }}
+                    />
+                  </div>
+                  <Link
+                    href={`/courses/${slug}/learn${enrollmentInfo.progress.nextLesson ? `?lesson=${enrollmentInfo.progress.nextLesson.slug || enrollmentInfo.progress.nextLesson.id}` : ''}`}
+                    className="flex items-center gap-2 px-5 py-2 rounded-full bg-white text-purple-600 font-bold text-sm hover:bg-white/90 transition-all shadow-md"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                    </svg>
+                    <span>
+                      {enrollmentInfo.progress.progressPercentage >= 100
+                        ? 'צפה שוב'
+                        : enrollmentInfo.progress.progressPercentage > 0
+                        ? 'המשך ללמוד'
+                        : 'התחל ללמוד'
+                      }
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Hero Section */}
       <section
         className="relative min-h-screen flex items-center justify-center py-20 overflow-hidden"

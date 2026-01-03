@@ -66,6 +66,14 @@
 - Types: npm run generate:types
 - Importmap: npm run generate:importmap
 - TypeCheck: npx tsc --noEmit
+- Seed: npm run seed
+
+## Migrations
+- Create: npm run payload:migrate:create -- migration-name
+- Run: npm run payload:migrate
+- Status: npm run payload:migrate:status
+
+**Note:** `push: true` is enabled only in development. In production, migrations are used.
 
 ## לפני כל push
 1. npm run generate:types
@@ -84,14 +92,36 @@
 ## אם יש שגיאת סכמה
 המשתמש צריך לעשות Redeploy ב-Railway
 
+## Railway Deployment
+
+**Production URL:** https://focusai-production-c963.up.railway.app
+
+**Configuration:**
+- `railway.json` - Build and deploy commands
+- `start.sh` - Runs init-db.cjs before starting Next.js
+- `push: true` only in development, migrations in production
+
+**Environment Variables (Railway Dashboard):**
+```
+DATABASE_URI=postgresql://... (auto-set by Railway)
+PAYLOAD_SECRET=your-random-secret-here
+CLOUDINARY_CLOUD_NAME=dfudxxzlj
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+NEXT_PUBLIC_SERVER_URL=https://focusai-production-c963.up.railway.app
+NEXT_PUBLIC_SITE_URL=https://focusai.co.il
+NODE_ENV=production
+```
+
 ## Schema Sync Issues - Important!
 
-**Problem:** `push: true` in payload.config.ts only syncs schema on INITIAL database setup.
-Adding new Globals (like Pages) after initial setup won't create their tables automatically.
+**Note:** With the new configuration, `push: true` is enabled only in development.
+In production, use migrations for schema changes.
 
 **Solution:**
-1. Use the `/api/run-migration` endpoint to manually create missing tables
-2. Or create a migration file with `npx payload migrate:create`
+1. Create a migration: `npm run payload:migrate:create -- migration-name`
+2. Push to main branch (Railway auto-deploys)
+3. Migrations run automatically on deploy
 
 **Key Endpoints for Debugging:**
 - `/api/check-tables` - Lists all tables in database
@@ -333,13 +363,35 @@ Courses → Instructors + Testimonials
 | `/about` | `about/page.tsx` | דף אודות | pages.about |
 | `/courses` | `courses/page.tsx` | רשימת קורסים | pages.courses |
 | `/courses/[slug]` | `courses/[slug]/page.tsx` | דף קורס בודד | Course collection |
+| `/courses/[slug]/learn` | `courses/[slug]/learn/page.tsx` | דף למידה (מוגן) | Lessons + Progress |
 | `/blog` | `blog/page.tsx` | רשימת מאמרים | pages.blog |
 | `/blog/[slug]` | `blog/[slug]/page.tsx` | מאמר בודד | pages.blog.postCta |
 | `/ai-ready` | `ai-ready/page.tsx` | דף נחיתה AI Ready | **Course** (slug: ai-ready-course) + cohorts[] |
 | `/thank-you` | `thank-you/page.tsx` | דף תודה | pages.thankYou |
 | `/login` | `login/page.tsx` | דף התחברות | - |
 | `/register` | `register/page.tsx` | דף הרשמה | - |
-| `/dashboard` | `dashboard/page.tsx` | אזור אישי (מוגן) | User enrolledCourses |
+| `/dashboard` | `dashboard/page.tsx` | אזור אישי (מוגן) | Enrollments + Progress |
+
+## API Routes
+
+| Route | Method | תיאור |
+|-------|--------|--------|
+| `/api/progress` | GET | שליפת התקדמות למשתמש (lessonId/cohortId) |
+| `/api/progress` | POST | שמירת/עדכון התקדמות (watchTime, completed) |
+
+## Course Player Components
+
+| קומפוננט | קובץ | תיאור |
+|----------|------|--------|
+| CoursePlayer | `src/components/course/CoursePlayer.tsx` | נגן וידאו (Cloudinary/YouTube/Vimeo) |
+| LessonList | `src/components/course/LessonList.tsx` | רשימת שיעורים בסיידבר |
+
+**CoursePlayer Features:**
+- תמיכה ב-Cloudinary (native), YouTube (iframe), Vimeo (iframe)
+- Controls: Play/Pause, Skip ±10s, Volume, Fullscreen
+- Keyboard shortcuts: Space (play), J/K/L (skip), M (mute), F (fullscreen)
+- שמירת התקדמות כל 10 שניות
+- סימון השלמה אוטומטי ב-90% צפייה
 
 ## Auth & Navigation
 
@@ -351,6 +403,7 @@ Courses → Instructors + Testimonials
 
 **Protected Routes:**
 - `/dashboard` - Requires authentication, redirects to `/login` if not logged in
+- `/courses/[slug]/learn` - Requires authentication + enrollment in course cohort
 
 ## Redirects (next.config.mjs)
 

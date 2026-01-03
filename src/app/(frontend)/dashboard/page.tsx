@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
-import type { Course, Media } from '@/payload-types'
+import type { Course, Media, Cohort, Enrollment, Lesson } from '@/payload-types'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,11 +14,26 @@ export const metadata: Metadata = {
   description: 'ניהול הקורסים והלמידה שלך',
 }
 
+interface EnrolledCourseWithProgress {
+  course: Course
+  cohort: Cohort
+  enrollment: Enrollment
+  progress: {
+    totalLessons: number
+    completedLessons: number
+    progressPercentage: number
+    totalWatchTime: number
+    lastLesson?: Lesson
+  }
+}
+
 export default async function DashboardPage() {
   const payload = await getPayload({ config })
 
   let user = null
-  let enrolledCourses: Course[] = []
+  const enrolledCoursesWithProgress: EnrolledCourseWithProgress[] = []
+  let completedCoursesCount = 0
+  let totalWatchTimeMinutes = 0
 
   try {
     const authResult = await payload.auth({
@@ -33,23 +48,94 @@ export default async function DashboardPage() {
     redirect('/login?redirect=/dashboard')
   }
 
-  // Fetch enrolled courses
-  if (user.enrolledCourses && user.enrolledCourses.length > 0) {
-    try {
-      const courseIds = user.enrolledCourses.map((c) =>
-        typeof c === 'number' ? c : c.id
-      )
-      const { docs } = await payload.find({
-        collection: 'courses',
+  // Fetch enrollments with progress data
+  try {
+    const enrollmentsResult = await payload.find({
+      collection: 'enrollments',
+      where: {
+        and: [
+          { student: { equals: user.id } },
+          { status: { in: ['active', 'completed'] } },
+        ],
+      },
+      depth: 2,
+    })
+
+    for (const enrollment of enrollmentsResult.docs) {
+      const cohort = enrollment.cohort as Cohort
+      if (!cohort) continue
+
+      const course = cohort.course as Course
+      if (!course) continue
+
+      // Fetch lessons for this cohort
+      const lessonsResult = await payload.find({
+        collection: 'lessons',
         where: {
-          id: { in: courseIds },
+          and: [
+            { cohort: { equals: cohort.id } },
+            { status: { equals: 'published' } },
+          ],
+        },
+        sort: 'order',
+        depth: 0,
+      })
+
+      const lessons = lessonsResult.docs
+
+      // Fetch progress for these lessons
+      const progressResult = await payload.find({
+        collection: 'progress',
+        where: {
+          and: [
+            { student: { equals: user.id } },
+            { lesson: { in: lessons.map(l => l.id) } },
+          ],
         },
         depth: 1,
       })
-      enrolledCourses = docs as Course[]
-    } catch (error) {
-      console.error('Error fetching enrolled courses:', error)
+
+      const completedLessons = progressResult.docs.filter(p => p.completed).length
+      const watchTime = progressResult.docs.reduce((acc, p) => acc + (p.watchTime || 0), 0)
+      const progressPercentage = lessons.length > 0
+        ? Math.round((completedLessons / lessons.length) * 100)
+        : 0
+
+      // Find the last watched lesson
+      let lastLesson: Lesson | undefined
+      if (progressResult.docs.length > 0) {
+        const sortedProgress = [...progressResult.docs].sort((a, b) => {
+          const dateA = a.watchedAt ? new Date(a.watchedAt).getTime() : 0
+          const dateB = b.watchedAt ? new Date(b.watchedAt).getTime() : 0
+          return dateB - dateA
+        })
+        const lastProgress = sortedProgress[0]
+        lastLesson = typeof lastProgress.lesson === 'number'
+          ? lessons.find(l => l.id === lastProgress.lesson)
+          : lastProgress.lesson as Lesson
+      }
+
+      enrolledCoursesWithProgress.push({
+        course,
+        cohort,
+        enrollment,
+        progress: {
+          totalLessons: lessons.length,
+          completedLessons,
+          progressPercentage,
+          totalWatchTime: watchTime,
+          lastLesson,
+        },
+      })
+
+      totalWatchTimeMinutes += Math.round(watchTime / 60)
+
+      if (enrollment.status === 'completed' || progressPercentage >= 100) {
+        completedCoursesCount++
+      }
     }
+  } catch (error) {
+    console.error('Error fetching enrollments:', error)
   }
 
   return (
@@ -71,7 +157,7 @@ export default async function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
-            <div className="text-3xl font-black text-gray-900 mb-1">{enrolledCourses.length}</div>
+            <div className="text-3xl font-black text-gray-900 mb-1">{enrolledCoursesWithProgress.length}</div>
             <div className="text-gray-600">קורסים רשומים</div>
           </div>
 
@@ -81,7 +167,7 @@ export default async function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div className="text-3xl font-black text-gray-900 mb-1">0</div>
+            <div className="text-3xl font-black text-gray-900 mb-1">{completedCoursesCount}</div>
             <div className="text-gray-600">קורסים שהושלמו</div>
           </div>
 
@@ -91,16 +177,79 @@ export default async function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <div className="text-3xl font-black text-gray-900 mb-1">-</div>
-            <div className="text-gray-600">שעות למידה</div>
+            <div className="text-3xl font-black text-gray-900 mb-1">{totalWatchTimeMinutes > 0 ? totalWatchTimeMinutes : '-'}</div>
+            <div className="text-gray-600">דקות למידה</div>
           </div>
         </div>
+
+        {/* Continue Learning - Most Recent */}
+        {enrolledCoursesWithProgress.length > 0 && enrolledCoursesWithProgress.some(e => e.progress.lastLesson) && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">המשך מאיפה שהפסקת</h2>
+            {(() => {
+              const recentCourse = enrolledCoursesWithProgress.find(e => e.progress.lastLesson)
+              if (!recentCourse) return null
+              const image = recentCourse.course.featuredImage as Media | null
+              return (
+                <Link
+                  href={`/courses/${recentCourse.course.slug}/learn?lesson=${recentCourse.progress.lastLesson?.slug || recentCourse.progress.lastLesson?.id}`}
+                  className="block bg-white/80 backdrop-blur rounded-2xl overflow-hidden border border-purple-100 hover:border-[#a855f7]/50 transition-all hover:shadow-lg"
+                >
+                  <div className="flex flex-col md:flex-row">
+                    <div className="relative w-full md:w-64 h-48 md:h-auto flex-shrink-0 overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100">
+                      {image?.url ? (
+                        <Image
+                          src={image.url}
+                          alt={recentCourse.course.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-5xl">🎓</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 p-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-600">
+                          {recentCourse.progress.progressPercentage}% הושלם
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {recentCourse.progress.completedLessons} / {recentCourse.progress.totalLessons} שיעורים
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">
+                        {recentCourse.course.title}
+                      </h3>
+                      <p className="text-gray-600 mb-4">
+                        שיעור הבא: <span className="font-medium">{recentCourse.progress.lastLesson?.title}</span>
+                      </p>
+                      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-4">
+                        <div
+                          className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all"
+                          style={{ width: `${recentCourse.progress.progressPercentage}%` }}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 text-[#a855f7] font-semibold">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                        </svg>
+                        <span>המשך צפייה</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })()}
+          </section>
+        )}
 
         {/* Enrolled Courses */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">הקורסים שלי</h2>
 
-          {enrolledCourses.length === 0 ? (
+          {enrolledCoursesWithProgress.length === 0 ? (
             <div className="bg-white/80 backdrop-blur rounded-3xl p-12 border border-purple-100 text-center">
               <div className="w-20 h-20 mx-auto mb-6 bg-purple-100 rounded-full flex items-center justify-center">
                 <span className="text-4xl">📚</span>
@@ -119,12 +268,11 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {enrolledCourses.map((course) => {
+              {enrolledCoursesWithProgress.map(({ course, progress }) => {
                 const image = course.featuredImage as Media | null
                 return (
-                  <Link
+                  <div
                     key={course.id}
-                    href={`/courses/${course.slug}`}
                     className="group bg-white/80 backdrop-blur rounded-2xl overflow-hidden border border-purple-100 hover:border-[#a855f7]/50 transition-all hover:shadow-lg"
                   >
                     <div className="relative h-40 overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100">
@@ -140,22 +288,73 @@ export default async function DashboardPage() {
                           <span className="text-5xl">🎓</span>
                         </div>
                       )}
+                      {/* Progress badge */}
+                      <div className="absolute top-3 left-3">
+                        {progress.progressPercentage >= 100 ? (
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-500 text-white flex items-center gap-1">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            הושלם
+                          </span>
+                        ) : progress.progressPercentage > 0 ? (
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500 text-white">
+                            {progress.progressPercentage}%
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                     <div className="p-5">
                       <h3 className="font-bold text-gray-900 mb-2 group-hover:text-[#a855f7] transition-colors">
                         {course.title}
                       </h3>
                       {course.subtitle && (
-                        <p className="text-sm text-gray-600 mb-3">{course.subtitle}</p>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-1">{course.subtitle}</p>
                       )}
-                      <div className="flex items-center gap-2 text-sm text-[#a855f7]">
-                        <span>המשך ללמוד</span>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
+
+                      {/* Progress bar */}
+                      <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mb-3">
+                        <div
+                          className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all"
+                          style={{ width: `${progress.progressPercentage}%` }}
+                        />
                       </div>
+
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-xs text-gray-500">
+                          {progress.completedLessons} / {progress.totalLessons} שיעורים
+                        </span>
+                      </div>
+
+                      <Link
+                        href={`/courses/${course.slug}/learn`}
+                        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full font-semibold text-white bg-gradient-to-r from-[#a855f7] to-[#ec4899] hover:shadow-lg transition-all text-sm"
+                      >
+                        {progress.progressPercentage >= 100 ? (
+                          <>
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                            </svg>
+                            <span>צפה שוב</span>
+                          </>
+                        ) : progress.progressPercentage > 0 ? (
+                          <>
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                            </svg>
+                            <span>המשך ללמוד</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                            </svg>
+                            <span>התחל ללמוד</span>
+                          </>
+                        )}
+                      </Link>
                     </div>
-                  </Link>
+                  </div>
                 )
               })}
             </div>

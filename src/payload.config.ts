@@ -74,8 +74,16 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || process.env.DATABASE_URL || '',
     },
-    push: true,
+    push: process.env.NODE_ENV !== 'production', // Use migrations in production
+    migrationDir: path.resolve(dirname, 'migrations'),
   }),
+  // CSRF protection for production
+  csrf: [
+    'https://focusai-production-c963.up.railway.app',
+    'https://focusai.co.il',
+    'https://www.focusai.co.il',
+    'http://localhost:3000',
+  ],
   sharp,
   plugins: [
     cloudinaryStorage({

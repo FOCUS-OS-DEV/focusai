@@ -4,6 +4,104 @@
 
 ---
 
+## [2026-01-03] - Phase A: Infrastructure Stabilization
+
+### קבצים שנוצרו:
+- `railway.json` - Railway deployment configuration
+
+### קבצים שהשתנו:
+- `package.json` - הוספת scripts למיגרציות
+- `src/payload.config.ts` - הוספת migrationDir, CSRF protection
+- `.env.example` - עדכון משתני סביבה
+- `next.config.mjs` - הוספת Cloudinary לתמונות
+
+### מה נעשה:
+
+**Migrations Support:**
+- הוספת `payload:migrate` - הרצת מיגרציות
+- הוספת `payload:migrate:create` - יצירת מיגרציה חדשה
+- הוספת `payload:migrate:status` - בדיקת סטטוס מיגרציות
+- `push: true` רק ב-development, מיגרציות ב-production
+
+**Production Configuration:**
+- CSRF protection לדומיינים מאושרים
+- Cloudinary remote patterns ל-next/image
+- Railway.json עם build/deploy commands
+
+**Environment Variables:**
+- `DATABASE_URI` + `DATABASE_URL` לתאימות
+- `NEXT_PUBLIC_SERVER_URL` ו-`NEXT_PUBLIC_SITE_URL`
+- Cloudinary credentials template
+
+### טכני:
+- TypeScript check עובר
+- Build עובר ללא שגיאות
+- Ready for Railway deployment
+
+---
+
+## [2026-01-03] - Phase 1: Course Player & Progress Tracking MVP
+
+### קבצים שנוצרו:
+- `src/app/(frontend)/courses/[slug]/learn/page.tsx` - דף למידה למשתמשים רשומים
+- `src/components/course/CoursePlayer.tsx` - נגן וידאו עם תמיכה ב-Cloudinary/YouTube/Vimeo
+- `src/components/course/LessonList.tsx` - רשימת שיעורים בסיידבר
+- `src/app/api/progress/route.ts` - API למעקב התקדמות (GET/POST)
+
+### קבצים שהשתנו:
+- `src/app/(frontend)/dashboard/page.tsx` - דשבורד תלמיד עם התקדמות אמיתית
+- `src/app/(frontend)/courses/[slug]/page.tsx` - באנר "המשך ללמוד" למשתמשים רשומים
+
+### מה נעשה:
+
+**Course Player:**
+- נגן וידאו מלא עם controls מותאמים אישית
+- תמיכה ב-Cloudinary (נגן מקורי), YouTube (iframe), Vimeo (iframe)
+- Play/Pause, Skip 10s, Volume, Fullscreen
+- Keyboard shortcuts (Space, J/K/L, M, F)
+- שמירת התקדמות אוטומטית כל 10 שניות
+- סימון השלמה ב-90% צפייה
+
+**Lesson List Sidebar:**
+- רשימת כל השיעורים עם סטטוס התקדמות
+- אייקונים: ✓ הושלם, ● בתהליך, ○ לא התחיל
+- Progress bar לכל שיעור
+- ניווט בין שיעורים
+
+**Progress API (`/api/progress`):**
+- POST - שמירת/עדכון התקדמות (watchTime, completed)
+- GET - שליפת התקדמות למשתמש (לפי lessonId או cohortId)
+- אימות משתמש עם Payload Auth
+
+**Student Dashboard:**
+- הצגת קורסים רשומים עם התקדמות אמיתית
+- Progress bars לכל קורס
+- אחוז השלמה מחושב מ-Progress collection
+- כפתור "המשך ללמוד" לשיעור האחרון
+- סטטיסטיקות כלליות
+
+**Learning Page (`/courses/[slug]/learn`):**
+- דף מוגן (דורש התחברות)
+- בדיקת הרשמה למחזור
+- Header עם התקדמות כללית בקורס
+- נגן וידאו + רשימת שיעורים בסיידבר
+- תיאור שיעור וחומרים להורדה
+- ניווט בין שיעורים (הקודם/הבא)
+- RTL עברית מלא
+
+**Enrolled User Banner (Course Page):**
+- באנר sticky למשתמשים רשומים בראש דף הקורס
+- אחוז התקדמות ומספר שיעורים שהושלמו
+- כפתור "המשך ללמוד" / "צפה שוב"
+
+### טכני:
+- TypeScript מלא עם payload-types
+- `force-dynamic` לכל הדפים עם Payload API
+- Error handling עם redirects מתאימים
+- Responsive design (mobile/desktop)
+
+---
+
 ## [2025-12-24] - Marketing Site Complete with Full Content
 
 ### קבצים שהשתנו:
