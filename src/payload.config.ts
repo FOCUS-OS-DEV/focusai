@@ -74,7 +74,8 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URI || process.env.DATABASE_URL || '',
     },
-    push: process.env.NODE_ENV !== 'production', // Use migrations in production
+    // push: true syncs schema automatically - safe for now, use migrations when you have real user data
+    push: true,
     migrationDir: path.resolve(dirname, 'migrations'),
   }),
   // CSRF protection for production
